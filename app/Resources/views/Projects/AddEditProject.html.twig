@@ -1,0 +1,59 @@
+{% extends 'layout.html.twig' %}
+
+{% block breadcrumb %}
+	<div class="row">
+		<ol class="breadcrumb">
+			<li><a href="#">Environments</a></li>
+			<li class="active">NPE Details</li>
+		</ol>
+	</div>
+{% endblock %}
+
+{% block content %}
+	<h1 class="page-header">NPE Environment Details - {{ env }}</h1>
+	
+	<div class="row">
+		<div class="col-md-2">
+			<div class="table-responsive">
+				<table class="table table-bordered table-hover">
+					<thead>
+						<tr>
+							<th>Environment</th>
+						</tr>
+					</thead>
+					<tbody style="text-align: center">
+						{% for row in envList %}
+							<tr>
+								<td><a href="{{ path('NPEEnvironmentDetails', { env: row }, true) }}">{{ row }}</a></td>
+							</tr>
+						{% endfor %}
+					</tbody>
+			 	</table>
+			</div>
+		</div>		
+		<div class="col-md-10">
+			<div class="table-responsive">
+				<table class="table table-bordered table-hover">
+					<thead>
+						<tr>
+							<th>Application</th>
+							<th>URL</th>
+							<th>Username</th>
+							<th>Password</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for row in envDetails %}
+							<tr>
+								<td>{{ row.APPLICATION_NAME }}</td>
+								<td><a href={{ row.URL }}>{{ row.URL }}</a></td>
+								<td>{{ row.USERNAME }}</td>
+								<td>{{ row.PASSWORD }}</td>
+							</tr>
+		            	{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+{% endblock %}

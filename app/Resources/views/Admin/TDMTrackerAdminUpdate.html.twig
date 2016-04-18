@@ -1,0 +1,109 @@
+{% extends 'layout.html.twig' %}
+{% block breadcrumb %}
+	<div class="row">
+		<ol class="breadcrumb">
+			<li>Admin</li>
+			<li class="active"><a href=" {{ path ('TDMTrackerAdmin') }} ">TDM Tracker Admin</a></li>
+			<li class="active">Details for Request - {{ requestList.REFERENCE_NUMBER }} </li>
+		</ol>
+	</div>
+{% endblock %}
+
+{% block content %}
+	<h1 class="page-header">TDM Tracker Admin</h1>
+
+	 <form class="form-horizontal" role="form">
+	  <div class="form-group">
+	    <label class="control-label col-sm-2">Reference No:</label>
+	    <div class="col-sm-2">
+	      <input type="text" class="form-control" id="refereneno" value="{{ requestList.REFERENCE_NUMBER }}" readonly>
+	    </div>
+	  </div>
+	  <div class="form-group">
+	    <label class="control-label col-sm-2">Project:</label>
+	    <div class="col-sm-2">
+	      <input type="text" class="form-control" id="project" value="{{ requestList.PROJECT }}" readonly>
+	    </div>
+	  </div>
+	  <div class="form-group">
+	    <label class="control-label col-sm-2">Release:</label>
+	    <div class="col-sm-6">
+	      <input type="text" class="form-control" id="release" value="{{ requestList.RELEASE }}" readonly>
+	    </div>
+	  </div>
+	  <div class="form-group">
+	    <label class="control-label col-sm-2">Environment:</label>
+	    <div class="col-sm-2">
+	      <input type="text" class="form-control" id="environment" value="{{ requestList.ENVIRONMENT }}" readonly>
+	    </div>
+	  </div>
+	  <div class="form-group">
+	    <label class="control-label col-sm-2">Comments:</label>
+	    <div class="col-sm-4">
+	      <textarea rows="5" class="form-control" id="comments" placeholder="Enter comments">{{ requestList.COMMENTS }}</textarea>
+	    </div>
+	  </div>
+	   <div class="form-group">
+	    <label class="control-label col-sm-2">Status:</label>
+	    <div class="col-sm-2">
+	      <select id="status" class="form-control">
+	      <option value="NEW" {% if requestList.STATUS == "NEW" %} selected = "selected" {% endif %}>NEW</option>
+	      <option value="DELAYED" {% if requestList.STATUS == "DELAYED" %} selected = "selected" {% endif %}>DELAYED</option>
+	      <option value="IN-PROGRESS" {% if requestList.STATUS == "IN-PROGRESS" %} selected = "selected" {% endif %}>IN-PROGRESS</option>
+	      <option value="COMPLETE" {% if requestList.STATUS == "COMPLETE" %} selected = "selected" {% endif %}>COMPLETE</option>
+	      </select>
+	    </div>
+	  </div>
+	  <div class="form-group">
+	    <label class="control-label col-sm-2">Connects:</label>
+	    <div class="col-sm-1">{{ requestList.NUM_CONNECTS }}
+	     &nbsp;<a href='{{ asset('template/SIM_DETAILS.xlsx') }}'><img src='{{ asset('images/download.PNG') }} '/></a>
+	    </div>
+	  </div>
+	  <div class="form-group">
+	    <label class="control-label col-sm-2">Date Requested:</label>
+	    <div class="col-sm-2">
+	      <input type="text" class="form-control" id="daterequested" value="{{ requestList.DATE_REQUESTED }}" readonly>
+	    </div>
+	  </div>
+	  <div class="form-group">
+	    <label class="control-label col-sm-2">Date Needed:</label>
+	    <div class="col-sm-2">
+	      <input type="text" class="form-control" id="dateneeded" value="{{ requestList.DATE_NEEDED }}" readonly>
+	    </div>
+	  </div>
+	  <div class="form-group">
+	    <label class="control-label col-sm-2">Name:</label>
+	    <div class="col-md-4">
+	      <input type="text" class="form-control" id="dateneeded" value="{{ requestList.NAME }}" readonly>
+	    </div>
+	  </div>
+	  <div class="form-group">
+	    <label class="control-label col-sm-2">Employee ID:</label>
+	     <div class="col-sm-2">
+	      <input type="text" class="form-control" id="employeeid" value="{{ requestList.EMPLOYEE_ID }}" readonly>
+	    </div>
+	  </div>
+	  <div class="form-group">
+	    <label class="control-label col-sm-2">Email:</label>
+	    <div class="col-sm-10 form-label"><a href="mailto:{{ requestList.EMAIL }}" alt="Send an Email to requestList.EMAIL" title="Send an Email to requestList.EMAIL">{{ requestList.EMAIL }}</a>	      
+	    </div>
+	  </div>
+	   <div class="form-group">
+	    <label class="control-label col-sm-2">Mobile:</label>
+	    <div class="col-md-2 form-label"><input type="text" class="form-control" id="mobile" value="{{ requestList.MOBILE }}" readonly> </div>
+	  </div>
+	 
+	  <div class="form-group">
+	    <div class="col-sm-offset-2 col-sm-10">
+	      <button type="button" name="tdmtrackeradmin_update" id="tdmtrackeradmin_update" class="btn btn-primary">Update</button>
+	    </div>
+	  </div>
+	  <div id="dialog" title="Result Action" class="modal_dialog"></div>	              
+	</form>	
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	<script src="{{ asset('js/Admin/TDMAdminUpdate.js') }}"></script>
+{% endblock %}

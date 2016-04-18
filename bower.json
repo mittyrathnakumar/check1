@@ -1,0 +1,21 @@
+{
+  "name": "ART",
+  "description": "",
+  "main": "",
+  "moduleType": [],
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "web/assets/vendor/",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "normalize-css": "normalize.css#~3.0.3",
+    "jquery-ui": "~1.11.4",
+    "bootstrap": "~3.3.6"
+  }
+}

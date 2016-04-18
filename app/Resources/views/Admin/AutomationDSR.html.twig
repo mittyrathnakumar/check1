@@ -1,0 +1,123 @@
+{% extends 'layout.html.twig' %}
+
+{% block breadcrumb %}
+	<div class="row">
+		<ol class="breadcrumb">
+			<li><a href="#">Admin</a></li>
+			<li class="active">Automation Daily Status Report</li>
+		</ol>
+	</div>
+{% endblock %}
+
+{% block content %}
+	<h1 class="page-header">
+		<!-- Single button -->
+		<div class="btn-group">
+			{% if project is defined %}
+				<button type="button" class="btn btn-default">{{ project }}_{{ release }}</button>
+			{% else %}
+				<button type="button" class="btn btn-default">--Select Project/Release--</button>
+			{% endif%}
+			
+			<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+			    <span class="caret"></span>
+			    <span class="sr-only">Toggle Dropdown</span>
+			</button>
+			<ul class="dropdown-menu">
+				{% for pr in prlist %}
+					<li>
+						<a href="{{ path('AutomationDSRProjectSelect', { project : pr.getProject(), release : pr.getRelease() }, true) }}">{{ pr.getProject() }}_{{ pr.getRelease() }}</a>
+					</li>
+				{% endfor %}
+			</ul>
+		</div>
+	</h1>
+	{% if project is defined %}
+	<div class="row col-md-6 panel">
+		<div class="col-md-5 text-primary">Overall Project Status
+			<div id="project_totals"></div>
+		</div>		
+	</div>
+	</br>
+	<div class="col-md-9"><p class="text-primary">Project Testcase Totals</p>	
+		<table class="table table-bordered table-condensed">
+			<thead>
+				<tr>
+					<th>Descoped</th>
+					<th>Not Started</th>
+					<th>Blocked</th>
+					<th>In Progress</th>
+					<th>In Review</th>
+					<th>Completed</th>
+					<th>Total</th>
+				</tr>
+			</thead>
+			<tbody>				
+				<tr>
+					<td>{{ totals.descoped }}</td>
+					<td>{{ totals.notstarted }}</td>
+					<td>{{ totals.blocked }}</td>
+					<td>{{ totals.inprogress }}</td>
+					<td>{{ totals.inreview }}</td>
+					<td>{{ totals.completed }}</td>
+					<td>{{ totals.total }}</td>
+				</tr>            		            	 
+			</tbody>
+		</table>				
+	</div>
+	</br></br></hr>
+	<div class="col-md-8 panel"><p class="text-primary">Daily test case completion rate</p>
+		<div id="project_barchart"></div>
+	</div>
+	</br></hr>
+	<table id="dataTable" class="table table-bordered table-hover">
+		<thead>
+			<th>S.No.</th>
+			<th>Test Case Name</th>
+			<th>Execution Type</th>
+			<th>Environment</th>
+			<th>Channel</th>
+			<th>Assigned To</th>
+			<th>Assigned Date</th>
+			<th>Status</th>
+			<th>Comments</th>
+		</thead>
+		<tbody>			
+		{% for testCaseDetail in testCaseDetails %}
+			<tr>
+				<td>{{ loop.index }}</td>
+				<td>{{ testCaseDetail.getTestCaseName() }}</td>
+				<td>{{ testCaseDetail.getExecutionType() }}</td>
+				<td>{{ testCaseDetail.getEnvironment() }}</td>
+				<td>{{ testCaseDetail.getChannel() }}</td>
+				<td>{{ testCaseDetail.getAssignedTo() }}</td>
+				<td>{{ testCaseDetail.getAssignedDate() }}</td>
+				<td class="{{ testCaseDetail.getExecutionStatusClass()}}">{{ testCaseDetail.getExecutionStatus() }}</td>
+				<td>{{ testCaseDetail.getComments() }}</td>
+			</tr>
+		{% endfor %}			
+		</tbody>
+	</table>
+	{% endif %}
+{% endblock %}
+
+{% block documentready %}
+	<script>
+		$(document).ready(function() {
+	    	$("#dataTable").DataTable({
+	    		"order": [[ 0, "asc" ]],
+	    		"pageLength" : 25
+	    	});
+		});
+		{% if project is defined %}
+			init();
+		{% endif %}
+	</script>
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	<script src="{{ asset('js/Admin/AutomationDSR.js') }}"></script>	
+{% endblock %}
+

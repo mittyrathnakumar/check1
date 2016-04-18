@@ -1,0 +1,119 @@
+{% extends 'layout.html.twig' %}
+
+{% block breadcrumb %}
+	<div class="row">
+		<ol class="breadcrumb">
+			<li>Automation Suite</li>
+			<li class="active">Safe Comparison</li>
+		</ol>
+	</div>
+{% endblock %}
+
+{% block content %}
+	<h1 class="text-heading">XML Request/Response Comaprison</h1>
+	<form name="frmSafeComparison" id="frmSafeComparison" method="post" action="{{ path('SafeComparisonFetch') }}">	
+		<div class="container col-sm-12">
+				
+			{# BASE LINE CONTAINER #}
+			<div class="col-sm-5 div-round-border">
+				<div>
+					<p class="text-primary-bold">(Baseline) Release - Iteration</p>
+					<select name="baseline_dropdown" id="baseline_dropdown" class="form-control">	
+						<option value="">--Release_Iteration--</option>		
+						{% for detail in details %}
+							<option value="{{ detail.getRelease() }}-{{ detail.getIteration() }}" {% if release is defined and release == detail.getRelease() %} selected {% endif %} >{{ detail.getRelease() }}-{{ detail.getIteration() }}</option>
+						{% endfor %}
+					</select>
+				</div></br>
+				{% if release is defined %}	
+					<div class="text-small-bold panel-body">Release - <span class="text-small-grey">{{ release }}</span>, Iteration - <span class="text-small-grey">{{ iteration }}</span></div>
+					<div class="text-small-bold panel-body">Services - <span class="text-small-grey">{{ servicecount }}</span>, Test Cases -  <span class="text-small-grey">{{ testcasecount }}</span></div></br>
+					<div class="panel-body">
+						<table class="table table-bordered table-hover">
+							<thead>
+								<th>No</th>
+								<th><input type="checkbox" id="selectallcheckbox" name="selectallcheckbox" class="selectallcheckbox"></th>
+								<th>Service Name</th>
+								<th># of cases</th>
+							</thead>						
+							<tbody>	
+							{% for servicedetail in servicedetails %}		
+								<tr>
+								<td>{{ loop.index }}</td>
+								<td><input type="checkbox" class="selectcheckbox" id="servicenamebaseline_{{ loop.index }}" name="selectall" value="servicenamebaseline_{{ loop.index }}"></td>								
+								<td>{{ servicedetail.getServiceName() }}</td>			
+								<td>{{ servicedetail.getTestCount() }}</td>			
+								</tr>	
+							{% endfor %}	
+							</tbody>
+						</table>
+					</div>
+				{% endif %}
+			</div>
+			</hr>
+			
+			{# MIDDLE BUTTONS CONTAINER #}
+			<div class="col-sm-2">
+				<div class="col-sm-2 div-center"><button type="submit" id="fetchservice" class="btn btn-primary" disabled="disabled">Fetch Services</button></div>
+				</br></br>
+				<div class="col-sm-2 div-center"><button type="button" id="compare" class="btn btn-primary">Compare</button></div>
+			</div>
+			</hr>
+			
+			{# EXPECTED CONTAINER #}
+			<div class="col-sm-5 div-round-border">
+				<div>
+					<p class="text-primary-bold">(Baseline) Release - Iteration</p>
+					<select name="expected_dropdown" id="expected_dropdown" class="form-control">	
+						<option value="">--Release_Iteration--</option>		
+						{% for detail in details %}
+							<option value="{{ detail.getRelease() }}-{{ detail.getIteration() }}" {% if release is defined and release == detail.getRelease() %} selected {% endif %} >{{ detail.getRelease() }}-{{ detail.getIteration() }}</option>
+						{% endfor %}
+					</select>
+				</div></br>
+				{% if release is defined %}	
+					<div class="text-small-bold panel-body">Release - <span class="text-small-grey">{{ release }}</span>, <span class="text-small-grey">Iteration - {{ iteration }}</span></div>
+					<div class="text-small-bold panel-body">Services - <span class="text-small-grey">{{ servicecount }}</span>, Test Cases -  <span class="text-small-grey">{{ testcasecount }}</span></div></br>
+					<div class="panel-body">
+						<table class="table table-bordered table-hover">
+							<thead>
+								<th>No</th>
+								<th></th>
+								<th>Service Name</th>
+								<th># of cases</th>
+							</thead>						
+							<tbody>	
+							{% for servicedetail in servicedetails %}		
+								<tr>
+								<td>{{ loop.index }}</td>
+								<td><input type="checkbox" class="selectcheckbox" id="servicenameexpected_{{ loop.index }}" name="selectall" value="servicenameexpected_{{ loop.index }}"></td>
+								<input type="hidden" id="servicename_{{ loop.index }}" value="{{ servicedetail.getServiceName() }}">
+								<td>{{ servicedetail.getServiceName() }}</td>			
+								<td>{{ servicedetail.getTestCount() }}</td>			
+								</tr>	
+							{% endfor %}	
+							</tbody>
+						</table>
+					</div>
+					<input type="hidden" id="release" value="{{ release }}">
+					<input type="hidden" id="iteration" value="{{ iteration }}">
+					
+				{% endif %}
+			</div>
+		</div>		
+	</form>
+	
+	<div id="dialog" title="Select action" class="modal-dialog"></div>
+	
+{% endblock %}
+
+{% block documentready %}
+	<script>
+		SafeComparisonCheckboxEvents();		
+	</script>
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	<script src="{{ asset('js/AutomationSuite/Automation_Common.js') }}"></script>
+{% endblock %}

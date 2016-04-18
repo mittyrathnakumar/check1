@@ -1,0 +1,57 @@
+{% extends 'layout.html.twig' %}
+
+{% block breadcrumb %}
+	<div class="row">
+		<ol class="breadcrumb">
+			<li><a href="#">Admin</a></li>
+			<li class="active">Automation Matrices</li>
+		</ol>
+	</div>
+{% endblock %}
+
+{% block content %}	
+	<h1 class="page-header">Environment : 	
+		<!-- Single button -->		
+		<div class="btn-group">
+			<button type="button" class="btn btn-default">{{ env }}</button>
+			<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+			    <span class="caret"></span>
+			    <span class="sr-only">Toggle Dropdown</span>
+			</button>
+			<ul class="dropdown-menu">
+				<li><a href="{{ path('AutomationMatricesChart', { env : 'Oracle'}, true) }}">Oracle</a></li>	
+				<li><a href="{{ path('AutomationMatricesChart', { env : 'Siebel'}, true) }}">Siebel</a></li>	
+				<li><a href="{{ path('AutomationMatricesChart', { env : 'Fusion'}, true) }}">Fusion</a></li>																			
+			</ul>
+		</div>		
+	</h1>	
+	<div class="col-md-6 panel div-round-border pull-left"><p class="text-primary">Overall Execution Breakdown</p>
+		<div id="env_totals" class="col-md-8 pull-left"></div>
+	</div>
+	<div class="col-md-8 panel"><p class="text-primary">Chose the range to display Test Automation Execution Statistics</p>
+		<div class="col-md-3">From : <input type="text" class="form-control" name="from" id="from" required></div>		
+		<div class="col-md-3">To : <input type="text" class="form-control" name="to" id="to" required></div>
+		<div class="col-md-3 pull-down">
+			<button type="button" name="showchart" id="showchart" class="btn btn-primary pull-down">Show Chart</button>
+		</div>
+	</div>	
+	</br>
+	<div class="col-md-11 panel">
+		<div id="env_barchartdata"></div>
+	</div>
+{% endblock %}
+
+{% block documentready %}
+	<script>
+		init();
+	</script>
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	<script src="{{ asset('js/Admin/AutomationMatrices.js') }}"></script>
+	<script>
+		calendarEvents();	
+	</script>	
+{% endblock %}

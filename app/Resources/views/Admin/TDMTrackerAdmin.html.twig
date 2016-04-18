@@ -1,0 +1,58 @@
+{% extends 'layout.html.twig' %}
+
+{% block breadcrumb %}
+	<div class="row">
+		<ol class="breadcrumb">
+			<li><a href="#">Admin</a></li>
+			<li class="active">TDM Tracker Admin</li>
+		</ol>
+	</div>
+{% endblock %}
+
+{% block content %}
+	<h1 class="page-header">TDM Tracker Admin</h1>	
+	<div class="row">
+		<table id="dataTable" class="table table-bordered table-hover">
+			<thead>
+				<th>Reference No</th>
+				<th>Project</th>
+				<th>Release</th>
+				<th>Enviornment</th>
+				<th>Requested By</th>
+				<th>Comments</th>
+				<th>Attachment</th>
+				<th>Date Requested</th>
+				<th>Date Needed</th>
+				<th>Status</th>
+			</thead>
+			<tbody>				
+				{% for request in requestList %}
+				{% set uploadedFile = 'uploads/' ~ request.UPLOAD_URL %}
+					<tr>
+						<td><a href='{{ path('TDMTrackerAdminUpdate', { refNum: request.REFERENCE_NUMBER }, true) }}'>{{ request.REFERENCE_NUMBER }}</a></td>
+						<td>{{ request.PROJECT }}</td>
+						<td>{{ request.RELEASE }}</td>
+						<td>{{ request.ENVIRONMENT }}</td>
+						<td>{{ request.NAME }}</td>
+						<td>{{ request.COMMENTS }}</td>
+						{# <td><a href='{{ asset( '~ uploadedFile ~' ) }}'><img src='{{ asset('images/download.PNG') }}'/></a></td> #}
+						<td><a href='#'><img src='{{ asset('images/download.PNG') }}'/></a></td>						
+						<td>{{ request.DATE_REQUESTED }}</td>
+						<td>{{ request.DATE_NEEDED }}</td>
+						<td class="{{ request.STATUS }}">{{ request.STATUS }}</td>		
+					</tr>
+				{% endfor %}
+			</tboday>
+		</table>
+	</div>
+{% endblock %}
+
+{% block documentready %}
+	<script>	
+		$(document).ready(function() {
+		    $('#dataTable').DataTable( {
+		        "order": [[ 0, "desc" ]]
+		    });	   	    
+		});
+	</script>
+{% endblock %}
