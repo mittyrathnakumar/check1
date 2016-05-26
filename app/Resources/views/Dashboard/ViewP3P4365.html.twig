@@ -1,0 +1,31 @@
+<div class="row col-md-10">		
+	<table class="table-bordered table-condensed" id="dataTable">
+		<thead>
+			<tr>					
+				<th>No.</th>
+				<th>Projectname</th>
+				<th>Defect Density (P3 and P4) - Production + 61 days to 365 days</th>				
+			</tr>
+		</thead>
+		<tbody>			
+			{% if KPIResults|length > 0 %}
+				{% for month, resultArr in KPIResults %}
+					<tr><td class="text-primary" colspan="8"><strong>{{ month }}</strong></td></tr>
+					{% if resultArr|length > 0 %}
+						{% for row in resultArr %}
+							<tr>
+							<td>{{ loop.index }}</td>	
+							<td>{{ row['PROJECTNAME'] }}</td>
+							<td>{# {{ row['P3_P4_365'] }} #}</td>
+							</tr>
+						{% endfor %}						
+					{% else %}
+						<tr><td class="text-primary div-center" colspan="8">N/A</td></tr>
+					{% endif %}
+		    	{% endfor %}
+		    {% else %}
+		    	<tr><td class="text-primary div-center" colspan="8">No data available !!!</td></tr>
+		    {% endif %}
+		</tbody>
+	</table>			
+</div>

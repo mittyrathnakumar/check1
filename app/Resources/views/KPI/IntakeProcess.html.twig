@@ -1,0 +1,98 @@
+{% extends 'layout.html.twig' %}
+{% block content %}
+
+<h1 class="page-header">Intake Process</h1>
+ <ol class="breadcrumb">
+    <li><a href="">KPI</a></li>
+    <li class="active">Intake Process</li>  
+</ol>
+{#
+<div class="row col-md-8">
+	<form class="form-inline" role="form" id="frmMonthSearch" method="Post" action="">
+    <div class="col-md-4">
+     <label for="Month">Month/Year : </label>	    
+	    <select name="Month" id="Month" class="form-control">
+	       	<option value="">--Select--</option>
+	       	{% if postData.Month is defined %}
+	       		{% set Month = postData.Month %}
+	       	{% else %}
+	       		{% set Month = ("now"|date("F/y")| upper) %}
+	       	{% endif %}
+	       		       	
+	       	{% for row in monthYearArray %}
+	       		<option value="{{ row }}" {% if Month is defined and Month == row %} selected {% endif %}>{{ row }}</option>
+	       	{% endfor %}
+		 </select>
+    </div>
+    <div class="col-md-6">
+      <button type="submit" name="Search" valuw="1" class="btn btn-primary">Search</button> 
+	  <button type="submit" name="ShowAll" value="1" class="btn btn-primary">Refresh</button>
+    </div>
+    </form>
+</div>
+<br><br>
+#}
+<div class="col-md-8 pull-left"><a href="{{ path('AddIntakeProcess') }}"><strong>Add Data</strong></a></div></br>
+<br>
+<div class="col-md-12">		
+	<table class="table-bordered compact-table" id="dataTable">
+		<thead>
+			<tr>					
+				<th>No.</th>
+				<th>Programme</th>
+				<th>Projectname</th>
+				<th>Proposal Type</th>
+				<th>Solution Component</th>
+				<th>Project/Program Manager</th>
+				<th>WP/PO Status</th>
+				<th>Status</th>
+				<th>Request Date</th>
+				<th>Submission Date</th>
+				<th>Value</th>
+				<th>Delete</th>
+			</tr>
+		</thead>
+		<tbody>
+			{# <tr><td class="text-primary" colspan="8"><strong>{{ Month }}</strong></td></tr> #}
+			{% if ProcessDetails|length > 0 %}
+				{% for row in ProcessDetails %}
+					<tr>
+					<td>{{ loop.index }}</td>	
+					<td>{{ row['PROGRAMME'] }}</td>
+					<td><a title="Edit details" href="{{ path('EditIntakeProcess', { IntakeID : row['INTAKEID'] } ) }}">{{ row['PROJECT_NAME'] }}</a></td>
+					<td>{{ row['PROPOSAL_TYPE'] }}</td>
+					<td>{{ row['SOLUTION_COMPONENT'] }}</td>
+					<td>{{ row['PROJ_PROG_MGR'] }}</td>
+					<td>{{ row['WP_PO_STATUS'] }}</td>
+					<td>{{ row['STATUS'] }}</td>
+					<td>{{ row['REQUEST_DATE'] }}</td>
+					<td>{{ row['SUBMISSION_DATE'] }}</td>
+					<td>{{ row['VALUE'] }}</td>					
+					<td align="center"><input type="image" onclick="deleteIntakeProcess(this.id);" class="delete" src="{{ asset('images/delete.png') }}" id="{{ row['INTAKEID'] }}" title="Delete these details" /></td>
+					</tr>
+		    	{% endfor %}
+		    {% else %}
+		    	<tr><td class="text-primary div-center" colspan="8">No data available !!!</td></tr>
+		    {% endif %}
+		</tbody>
+	</table>			
+</div>
+<div id="dialog" title="Choose Action" class="modal_dialog"></div>
+
+{% endblock %}
+
+{% block documentready %}
+	<script>			
+		$.fn.editable.defaults.mode = 'popup';
+	</script>	
+{% endblock %}
+
+
+{% block javascripts %}
+	{{ parent() }}
+	<script src="{{ asset('js/KPI/KPI_common.js') }}"></script>		
+	<script>		
+		loadDataTable_Export('IntakeProcess');
+		IntakeProcessFunction();						
+	</script>
+{% endblock %}

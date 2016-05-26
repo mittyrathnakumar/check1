@@ -1,119 +1,110 @@
 {% extends 'layout.html.twig' %}
-
-{% block breadcrumb %}
-	<div class="row">
-		<ol class="breadcrumb">
-			<li>Automation Suite</li>
-			<li class="active">Safe Comparison</li>
-		</ol>
-	</div>
-{% endblock %}
-
 {% block content %}
-	<h1 class="text-heading">XML Request/Response Comaprison</h1>
-	<form name="frmSafeComparison" id="frmSafeComparison" method="post" action="{{ path('SafeComparisonFetch') }}">	
-		<div class="container col-sm-12">
-				
-			{# BASE LINE CONTAINER #}
-			<div class="col-sm-5 div-round-border">
-				<div>
-					<p class="text-primary-bold">(Baseline) Release - Iteration</p>
-					<select name="baseline_dropdown" id="baseline_dropdown" class="form-control">	
-						<option value="">--Release_Iteration--</option>		
-						{% for detail in details %}
-							<option value="{{ detail.getRelease() }}-{{ detail.getIteration() }}" {% if release is defined and release == detail.getRelease() %} selected {% endif %} >{{ detail.getRelease() }}-{{ detail.getIteration() }}</option>
-						{% endfor %}
-					</select>
-				</div></br>
-				{% if release is defined %}	
-					<div class="text-small-bold panel-body">Release - <span class="text-small-grey">{{ release }}</span>, Iteration - <span class="text-small-grey">{{ iteration }}</span></div>
-					<div class="text-small-bold panel-body">Services - <span class="text-small-grey">{{ servicecount }}</span>, Test Cases -  <span class="text-small-grey">{{ testcasecount }}</span></div></br>
-					<div class="panel-body">
-						<table class="table table-bordered table-hover">
-							<thead>
-								<th>No</th>
-								<th><input type="checkbox" id="selectallcheckbox" name="selectallcheckbox" class="selectallcheckbox"></th>
-								<th>Service Name</th>
-								<th># of cases</th>
-							</thead>						
-							<tbody>	
-							{% for servicedetail in servicedetails %}		
-								<tr>
-								<td>{{ loop.index }}</td>
-								<td><input type="checkbox" class="selectcheckbox" id="servicenamebaseline_{{ loop.index }}" name="selectall" value="servicenamebaseline_{{ loop.index }}"></td>								
-								<td>{{ servicedetail.getServiceName() }}</td>			
-								<td>{{ servicedetail.getTestCount() }}</td>			
-								</tr>	
-							{% endfor %}	
-							</tbody>
-						</table>
-					</div>
-				{% endif %}
-			</div>
-			</hr>
-			
-			{# MIDDLE BUTTONS CONTAINER #}
-			<div class="col-sm-2">
-				<div class="col-sm-2 div-center"><button type="submit" id="fetchservice" class="btn btn-primary" disabled="disabled">Fetch Services</button></div>
-				</br></br>
-				<div class="col-sm-2 div-center"><button type="button" id="compare" class="btn btn-primary">Compare</button></div>
-			</div>
-			</hr>
-			
-			{# EXPECTED CONTAINER #}
-			<div class="col-sm-5 div-round-border">
-				<div>
-					<p class="text-primary-bold">(Baseline) Release - Iteration</p>
-					<select name="expected_dropdown" id="expected_dropdown" class="form-control">	
-						<option value="">--Release_Iteration--</option>		
-						{% for detail in details %}
-							<option value="{{ detail.getRelease() }}-{{ detail.getIteration() }}" {% if release is defined and release == detail.getRelease() %} selected {% endif %} >{{ detail.getRelease() }}-{{ detail.getIteration() }}</option>
-						{% endfor %}
-					</select>
-				</div></br>
-				{% if release is defined %}	
-					<div class="text-small-bold panel-body">Release - <span class="text-small-grey">{{ release }}</span>, <span class="text-small-grey">Iteration - {{ iteration }}</span></div>
-					<div class="text-small-bold panel-body">Services - <span class="text-small-grey">{{ servicecount }}</span>, Test Cases -  <span class="text-small-grey">{{ testcasecount }}</span></div></br>
-					<div class="panel-body">
-						<table class="table table-bordered table-hover">
-							<thead>
-								<th>No</th>
-								<th></th>
-								<th>Service Name</th>
-								<th># of cases</th>
-							</thead>						
-							<tbody>	
-							{% for servicedetail in servicedetails %}		
-								<tr>
-								<td>{{ loop.index }}</td>
-								<td><input type="checkbox" class="selectcheckbox" id="servicenameexpected_{{ loop.index }}" name="selectall" value="servicenameexpected_{{ loop.index }}"></td>
-								<input type="hidden" id="servicename_{{ loop.index }}" value="{{ servicedetail.getServiceName() }}">
-								<td>{{ servicedetail.getServiceName() }}</td>			
-								<td>{{ servicedetail.getTestCount() }}</td>			
-								</tr>	
-							{% endfor %}	
-							</tbody>
-						</table>
-					</div>
-					<input type="hidden" id="release" value="{{ release }}">
-					<input type="hidden" id="iteration" value="{{ iteration }}">
-					
-				{% endif %}
-			</div>
-		</div>		
-	</form>
-	
-	<div id="dialog" title="Select action" class="modal-dialog"></div>
-	
-{% endblock %}
 
-{% block documentready %}
-	<script>
-		SafeComparisonCheckboxEvents();		
-	</script>
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Monthly Report</h1>
+        <ol class="breadcrumb">
+            <li><a href="#">Dashboard</a></li>
+            <li class="active">Monthly Report</li>
+        </ol>
+    </div>
+</div>
+
+<div class="row">
+	<form class="form-inline" role="form" id="frmSearch" method="Post" action="">
+	 <div class="form-group">
+	    <label for="KPI">KPI : </label>
+	      <select name="KPI" id="KPI" class="form-control">
+	       	<option value="">--Select--</option>
+	       	{% for row in SLAs %}
+	       		<option value="{{ row.getKPIName() }}" {% if postData.KPI is defined and postData.KPI == row.getKPIName() %} selected {% endif %}>{{ row.getKPIName() }}</option>
+	       	{% endfor %}
+		  </select>
+	  </div> 
+	  <div class="form-group">
+	    <label for="Project">Project : </label>
+	    <select name="Project" id="Project" class="form-control">
+		       	<option value="">--Select--</option>
+		       	{% for row in ProjectNames %}
+		       		<option value="{{ row.getProjectID() }}" {% if postData.Project is defined and postData.Project == row.getProjectID() %} selected {% endif %}>{{ row.getProjectName() }}</option>
+		       	{% endfor %}
+		</select>
+	  </div>
+	  <div class="form-group">
+	    <label for="Month">Month/Year : </label>	    
+	    <select name="Month" id="Month" class="form-control">
+	       	<option value="">--Select--</option>
+	       	{% for row in monthYearArray %}
+	       		<option value="{{ row }}" {% if postData.Month is defined and postData.Month == row %} selected {% endif %}>{{ row }}</option>
+	       	{% endfor %}
+		  </select>
+	   {# <input type="text" name="Month" id="Month" class="form-control" value="{% if postData.Month is defined %} {{ postData.Month }} {% endif %}"> #}
+	  </div>
+	  <button type="button" name="Search" valuw="1" class="btn btn-primary">Search</button> 
+	  <button type="button" name="ShowAll" value="1" class="btn btn-primary">Show All</button>
+	</form>
+</div>
+</br><div class="text-primary">(Default list shows projects from current and next month. Pls make a search to find out other projects.)</div>
+</br>
+<div class="row">
+	<div class="col-sm-4">
+		<table id="dataTable" class="table table-bordered table-hover table-sm">
+			<thead class="thead-inverse">
+				<tr>
+					<th class="bg_grey"></th>
+					<th class="bg_grey">KPI</th>
+					<th class="bg_grey">Target</th>
+					<th class="bg_grey">Actual</th>					
+				</tr>
+			</thead>
+			<tbody>
+			{# {% for KPI, SLA in SLAs %} #}
+			{% for row in SLAs %}
+				<tr {% if postData.KPI is defined and postData.KPI == row.getKPIName() %} class="strong" {% endif %} >
+					<td><input type="radio" name="KPISelect" id="KPISelect" value=""></td>
+					<td>{{ row.getKPIName() }}</td>
+					<td>{{ row.getOperator() }}{{ row.getSLAValue() }}</td>
+					{# {{ KPITotals[loop.index-1]~row.getOperator()~row.getSLAValue() }} #}
+					{% if KPITotals is defined %}
+						{# {% if KPITotals[loop.index-1]~row.getOperator()~row.getSLAValue() == true %} #}
+						{% if KPITotals[loop.index-1] <= row.getSLAValue() %}
+							<td class="bg-success">{{ KPITotals[loop.index-1] }}%</td>						
+						{% else %}
+							<td class="bg-danger">{{ KPITotals[loop.index-1] }}%</td>
+						{% endif %}
+					{% endif %}					
+				</tr>
+			{% endfor %}		
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-5 div-round-border"><p class="text-primary">Monthly Details</p>
+		<div id="monthly_kpi_result"></div>
+	</div>
+	<div class="col-md-1"></div>
+	<div class="col-sm-5 div-round-border"><p class="text-primary">Target v/s Actual</p>
+		<div id="percentage_kpi_result">sas</div>
+	</div>
+</div>
 {% endblock %}
 
 {% block javascripts %}
-	{{ parent() }}
-	<script src="{{ asset('js/AutomationSuite/Automation_Common.js') }}"></script>
+	{{ parent() }}	
+	<script src="{{ asset('js/Dashboard/Dashboard_common.js') }}"></script>	
+	<script>
+		FormGeneralActions();
+	</script>
+{% endblock %}
+
+{% block documentready %}	
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	<script>
+		$(document).ready(function() {
+			init();	
+		});		
+	</script>	
 {% endblock %}

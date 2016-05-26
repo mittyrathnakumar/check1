@@ -6,6 +6,8 @@
 /* Move down content because we have a fixed navbar that is 50px tall */
 body {
   padding-top: 50px;
+  font-family: calibri;
+  font-size: 15px;
 }
 
 /*
@@ -156,6 +158,8 @@ body {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
+
+
 .COMPLETE{
 	color : green;
 	font-weight: bold;	
@@ -278,6 +282,9 @@ body.loading .modal {
 	font-weight : bold;	 
 	color: #337ab7;	
 }
+.text-primary{
+	font-family: inherit;
+}
 .text-primary-bold{
 	font-family: inherit;
 	font-size : 15px;	
@@ -297,7 +304,7 @@ body.loading .modal {
     padding: 10px;
 }
 .div-center{
-	align-content: center;
+	align: center;	
 }
 
 .bg-info{
@@ -323,4 +330,47 @@ body.loading .modal {
 	font-size : 12px;	
 	height: 280px;
 	width : 980px;
+}
+.bg_grey{
+	background-color: #c9dae8;
+}
+.strong{
+	font-weight: bold;
+}
+.datepicker {
+  text-transform: uppercase;
+}
+.ui-datepicker { font-size: 10pt !important; }
+.ui-autocomplete-loading {
+	background: white url("images/ui-loading.gif") right center no-repeat;
+}
+.medium-textbox{
+	width: 5px;
+}
+.table_hidden{
+	display: none;
+}
+.tooltip-inner {
+    white-space: pre-wrap;
+    min-width: 100px;
+}
+.tooltip_name{
+	font-weight: bold;
+}
+.margin-left{
+	margin-left: 5px;
+}
+
+.compact-table, tr, th, td {
+	padding : 2px;			
+}
+.compact-table > thead > tr > th {
+	background-color: #c9dae8;				
+}
+.div-jquery-popup{
+  font-family: calibri;
+  font-size: 16px;	
+}
+.table-condensed > thead > tr > th {
+	background-color: #c9dae8;				
 }

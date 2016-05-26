@@ -1,59 +1,124 @@
 {% extends 'layout.html.twig' %}
 
-{% block breadcrumb %}
-	<div class="row">
-		<ol class="breadcrumb">
-			<li><a href="#">Environments</a></li>
-			<li class="active">NPE Details</li>
-		</ol>
-	</div>
+{% block content %}
+
+<h1 class="page-header">Project Details</h1>
+<ol class="breadcrumb">
+    <li><a href="{{ path('ViewProjects') }}">Projects</a></li>    
+    {% if ProjectID is defined %}
+    	<li class="active">Edit Project</li>
+    {% else %}
+    	<li class="active">Add Project</li>
+    {% endif %}
+    
+</ol>
+<form class="form-horizontal" role="form" id="frmAddEditProject" method="post" action="{% if ProjectID is defined %} {{ path('EditProjectPost') }} {% else %} {{ path('AddProjectPost') }} {% endif %}">
+ 
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="ProjectName">Project :</label>
+    <div class="col-sm-4">      
+       <input type="text" name="ProjectName" id="ProjectName" placeholder="ProjectName" class="form-control" value="{% if ProjectDetails is defined %}{{ProjectDetails.getProjectName|trim}}{% endif %}" required>   
+    </div>
+  </div>
+   <div class="form-group">
+    <label class="control-label col-sm-2" for="QCProjectName">QC Project name :</label>
+    <div class="col-sm-4">
+    	<input type="text" name="QCProjectName" id="QCProjectName" placeholder="QCProjectName" value="{% if ProjectDetails is defined %}{{ ProjectDetails.getQCProjectName|trim }}{% endif %}" class="form-control">       
+    </div>
+  </div>		 
+   <div class="form-group">
+    <label class="control-label col-sm-2" for="POC">POC:</label>
+    <div class="col-sm-3">
+       <input type="text" name="POC" id="POC" class="form-control" placeholder="POC" value="{% if ProjectDetails is defined %}{{ ProjectDetails.getPOC|trim }}{% endif %}" required autofocus>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="Domain">Domain:</label>
+    <div class="col-sm-2">
+      <input type="text" name="Domain" class="form-control" id="Domain" placeholder="Domain" value="{% if ProjectDetails is defined %}{{ ProjectDetails.getDomain|trim }}{% endif %}" required>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="CycleID">Cycle ID:</label>
+    <div class="col-sm-3">
+      <input type="text" name="CycleID" class="form-control" id="CycleID" placeholder="CycleID" value="{% if ProjectDetails is defined %}{{ ProjectDetails.getCycleID|trim }}{% endif %}"> (Separated by comma)
+    </div>
+  </div>
+   <div class="form-group">
+    <label class="control-label col-sm-2" for="WP">WP:</label>
+    <div class="col-sm-3">
+      <input type="text" name="WP" class="form-control" id="WP" placeholder="WP" value="{% if ProjectDetails is defined %}{{ ProjectDetails.getWP|trim }}{% endif %}" required>
+    </div>
+  </div>  
+   <div class="form-group">
+    <label class="control-label col-sm-2" for="Scope">Scope:</label>
+    <div class="col-sm-2">
+      <select name="Scope" id="Scope" class="form-control" placeholder="Scope" required>
+	      <option value="">--Select--</option>
+	      <option value="Dev" {% if ProjectDetails is defined and ProjectDetails.getScope == 'Dev' %} selected {% endif %} >Dev</option>
+	      <option value="Testing" {% if ProjectDetails is defined and ProjectDetails.getScope == 'Testing' %} selected {% endif %}>Testing</option>
+	      <option value="Both" {% if ProjectDetails is defined and ProjectDetails.getScope == 'Both' %} selected {% endif %}>Both</option>
+      </select>
+    </div>
+  </div>  
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="EstimatedProdLiveDate">Estimated Prod Live Date:</label>
+    <div class="col-sm-2">
+      <input readonly type="text" name="EstimatedProdLiveDate" class="form-control datepicker" id="EstimatedProdLiveDate" placeholder="Estimated Prod Live Date" value="{% if ProjectDetails is defined %}{{ ProjectDetails.getEstimatedProdLiveDate|trim }}{% endif %}" >
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="ActualProdLiveDate">Actual Prod Live Date:</label>
+    <div class="col-sm-2">
+      <input readonly type="text" name="ActualProdLiveDate" class="form-control datepicker" id="ActualProdLiveDate" placeholder="Actual Prod Live Date" value="{% if ProjectDetails is defined %}{{ ProjectDetails.getActualProdLiveDate|trim }}{% endif %}" >
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="Reusability">Reusability(%):</label>
+    <div class="col-sm-2">
+      <input type="number" name="Reusability" class="form-control" id="Reusability" placeholder="Reusability" value="{% if ProjectDetails is defined %}{{ ProjectDetails.getReusability|trim }}{% endif %}" >
+    </div>
+  </div>
+  
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="uatApplicable">UAT Applicable:</label>
+    <div class="col-sm-2">
+      <select name="uatApplicable" id="uatApplicable" class="form-control" placeholder="uatApplicable" required>
+	      <option value="">--Select--</option>
+	      <option value="Yes" {% if ProjectDetails is defined and ProjectDetails.getUatApplicable == 'Yes' %} selected {% endif %}>Yes</option>
+	      <option value="No" {% if ProjectDetails is defined and ProjectDetails.getUatApplicable == 'No' %} selected {% endif %}>No</option>
+	     </select>
+    </div>
+  </div> 
+    
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="stAutomatedTestCases">No of Automated Test cases in ST :</label>
+    <div class="col-sm-3">
+      <input type="text" name="stAutomatedTestCases" class="form-control" id="stAutomatedTestCases" placeholder="No of Automated Test cases in ST" value="{% if ProjectDetails is defined %}{{ ProjectDetails.getSTAutomatedTestCases|trim }}{% endif %}" required>
+    </div>
+  </div>
+  <div class="form-group">
+     <label class="control-label col-sm-2" for="stTotalTestCases">Total No. of Test Cases in ST :</label>
+    <div class="col-sm-3">
+      <input type="text" name="stTotalTestCases" class="form-control" id="stTotalTestCases" placeholder="Total No. of Test Cases in ST" value="{% if ProjectDetails is defined %}{{ ProjectDetails.getSTTotalTestCases|trim }}{% endif %}" required>
+    </div>
+  </div>
+   <div class="form-group">
+	    <div class="col-sm-offset-2 col-sm-10">
+	      <button type="submit" name="submit" id="submit" class="btn btn-primary">Submit</button>
+	      <button type="reset" name="reset" id="reset" class="btn btn-primary">Reset</button>
+	    </div>
+	  </div>	 
+  <div id="dialog" title="Result Action" class="modal-dialog"></div>
+   <input type="hidden" name="ProjectID" value="{% if ProjectID is defined %}{{ ProjectID }}{% endif %}" >
+</form>
+
 {% endblock %}
 
-{% block content %}
-	<h1 class="page-header">NPE Environment Details - {{ env }}</h1>
-	
-	<div class="row">
-		<div class="col-md-2">
-			<div class="table-responsive">
-				<table class="table table-bordered table-hover">
-					<thead>
-						<tr>
-							<th>Environment</th>
-						</tr>
-					</thead>
-					<tbody style="text-align: center">
-						{% for row in envList %}
-							<tr>
-								<td><a href="{{ path('NPEEnvironmentDetails', { env: row }, true) }}">{{ row }}</a></td>
-							</tr>
-						{% endfor %}
-					</tbody>
-			 	</table>
-			</div>
-		</div>		
-		<div class="col-md-10">
-			<div class="table-responsive">
-				<table class="table table-bordered table-hover">
-					<thead>
-						<tr>
-							<th>Application</th>
-							<th>URL</th>
-							<th>Username</th>
-							<th>Password</th>
-						</tr>
-					</thead>
-					<tbody>
-						{% for row in envDetails %}
-							<tr>
-								<td>{{ row.APPLICATION_NAME }}</td>
-								<td><a href={{ row.URL }}>{{ row.URL }}</a></td>
-								<td>{{ row.USERNAME }}</td>
-								<td>{{ row.PASSWORD }}</td>
-							</tr>
-		            	{% endfor %}
-					</tbody>
-				</table>
-			</div>
-		</div>
-	</div>
+{% block javascripts %}
+	{{ parent() }}
+	<script src="{{ asset('js/Projects/Projects_common.js') }}"></script>
+	<script>
+		formGeneralFunctions();
+	</script>
 {% endblock %}

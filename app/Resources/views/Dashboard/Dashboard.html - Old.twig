@@ -1,0 +1,93 @@
+{% extends 'layout.html.twig' %}
+{% block content %}
+
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Dashboard</h1>
+    </div>
+</div>
+
+<div>
+	<form class="form-inline" role="form" id="frmSearch" method="Post" action="">
+	  <div class="form-group">
+	    <label for="Month">Month/Year : </label>	    
+	    <select name="Month" id="Month" class="form-control">
+	       	<option value="">--Select--</option>
+	       	{% for row in monthYearArray %}
+	       		<option value="{{ row }}" {% if postData.Month is defined and postData.Month == row %} selected {% endif %}>{{ row }}</option>
+	       	{% endfor %}
+		  </select>
+	  </div>
+	  <button type="submit" name="Search" valuw="1" class="btn btn-primary">Search</button> 
+	  <button type="submit" name="ShowAll" value="1" class="btn btn-primary">Refresh</button>
+	</form>
+</div>
+</br>
+
+<div class="text-primary">(Default list shows results from current month. Pls make a search to find out other projects.)</div>
+</br>
+
+<div class="col-sm-8">
+	<table id="dataTable" class="table table-bordered table-hover table-sm">
+		<thead class="thead-inverse">
+			<tr>				
+				<th class="bg_grey">KPI</th>
+				<th class="bg_grey">Target</th>
+				<th class="bg_grey">Actual</th>					
+			</tr>
+		</thead>
+		<tbody>		
+		{% for row in KPIResults %}
+			<tr>				
+				<td>
+				{% if postData.Month is defined %}
+					<a href="{{ path('KPIProjectsSearch', { KPIID : row['KPIID'], Month : postData.Month  } ) }}" class="kpi" id="kpi" title="See project details for this KPI" alt=See project details for this KPI" value="{{ row['KPI'] }}">{{ row['KPI'] }}</a>
+				{% else %}
+					<a href="{{ path('KPIProjects', { KPIID : row['KPIID'] } ) }}" class="kpi" id="kpi" title="See project details for this KPI" alt=See project details for this KPI" value="{{ row['KPI'] }}">{{ row['KPI'] }}</a>
+				{% endif %}
+				</td>				
+				<td>
+				{% if row['Operator'] is not empty %}
+					{{ row['Operator'] }}{{ row['Target'] }}%
+				{% else %}
+					{{ row['Target'] }}%
+				{% endif %}
+				</td>								
+				
+				{% if row['Actual'] == 'N/A' %}
+					<td class="bg_grey">N/A</td>
+				{% else %}
+					{% if row['Operator'] == '<=' %}
+						{% if row['Actual'] <= row['Target'] %}
+							<td class="bg-success">{{ row['Actual'] }}%</td>						
+						{% else %}
+							<td class="bg-danger">{{ row['Actual'] }}%</td>
+						{% endif %}						
+					{% elseif row['Operator'] == '>=' %}
+						{% if row['Actual'] >= row['Target'] %}
+							<td class="bg-success">{{ row['Actual'] }}%</td>						
+						{% else %}
+							<td class="bg-danger">{{ row['Actual'] }}%</td>				
+						{% endif %}
+					{% endif %}
+				{% endif %}				
+			</tr>
+		{% endfor %}
+		 {# <div id="dialog" title="KPI Project Details" class="modal_dialog" data-path="{{ path('DashboardPopUp' ) }}"></div> #}		
+		</tbody>
+	</table>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	<script src="{{ asset('js/Dashboard/Dashboard_common.js') }}"></script>		
+	<script>
+		loadDataTable_Export('KPIResults');
+		DashboardGeneralFunctions();
+	</script>	
+{% endblock %}
+
+{% block documentready %}
+{% endblock %}

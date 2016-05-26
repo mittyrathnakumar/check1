@@ -1,41 +1,21 @@
 {% extends 'layout.html.twig' %}
-
-{% block breadcrumb %}
-	<div class="row">
-		<ol class="breadcrumb">
-			<li><a href="#">Automation Suite</a></li>
-			<li><a href="{{ path('FusionEnvAutomationHistoryEnv', { env : environment } )}}">Fusion Automation History</a></li>
-			<li class="active">Test Cases</li>
-		</ol>
-	</div>
-{% endblock %}
-
 {% block content %}
-	<span class="text-heading">{{ servicename }}</span></br></br>
-	<div class="col-sm-10">		
-		<table id="dataTable" class="table table-bordered table-hover">
-			<thead>					
-				<th>No</th>
-				<th>Test Case Name</th>
-				<th>Test Case Type</th>										
-			</thead>
-			<tbody>					
-				{% for tcDetail in tcDetails %} 
-					<tr>							
-						<td>{{ loop.index }}</td>						
-						<td>{{ tcDetail.getTestCaseName() }}</td>
-						<td class="{{ tcDetail.getExecutionStatusClass() }}">{{ tcDetail.getTestCaseType() }}</td>													
-					</tr>
-				{% endfor %}				
-			</tbody>
-		</table>		
-	</div>
-	<div id="dialog" title="Select Option" class="modal-dialog"></div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Ongoing Projects</h1>
+        <ol class="breadcrumb">
+            <li><a href="">Dashboard</a></li>
+            <li class="active">Ongoing Projects</li>
+        </ol>
+    </div>
+</div>
+	
 {% endblock %}
 
 {% block javascripts %}
-	{{ parent() }}  		
-	<script> 			
-  		loadDataTable_Export('FusionTestCases');
-	</script>		 	 
+	{{ parent() }}	
+{% endblock %}
+
+{% block documentready %}
 {% endblock %}

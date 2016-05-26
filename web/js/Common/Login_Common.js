@@ -17,6 +17,7 @@ function checkUserLogin() {
 		    	 
 				if(value != 1) {					
 					$( "#dialog" ).dialog({
+						   modal : true,
 					       autoOpen: false,		
 					       height: 200,
 						   width: 400,
@@ -33,9 +34,9 @@ function checkUserLogin() {
 					$( "#dialog" ).dialog( "open" );
 				}
 				else {	
-					//alert(document.URL);
-					//alert(window.location.pathname);
-					window.location.href = 'http://localhost/ART/web/app_dev.php/About';
+					/* Path is defined in index.html where login page is included */
+					var path = $("#AfterLoginPath").attr("post-url");				 
+					window.location.href = path;
 				}
 								
 	    	});

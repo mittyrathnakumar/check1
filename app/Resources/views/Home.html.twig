@@ -1,0 +1,14 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+
+<h1 class="page-header">About KPI Dashboard</h1>
+<div class="jumbotron">KPI Dashboard is published in regular intervals for internal review of the project performance and also to provide VHA the status of the account heath.<br>
+More details on it can be downloaded by referring <strong>Dashboard->About Dashboard</strong> OR  <a href="{{ asset('templates/KPI Dashboard 1.0.docx') }}">Clicking here</a>. 
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}	
+{% endblock %}

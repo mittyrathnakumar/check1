@@ -10,9 +10,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
 
-//use AppBundle\Repository\TestAssistingToolsRepository;
 use AppBundle\Repository\AdminRepository;
-//use AppBundle\Service\UserAuthentincationService;
+
 
 
 
@@ -22,11 +21,16 @@ use AppBundle\Repository\AdminRepository;
 class AdminController extends Controller 
 {	
 	
-	private $reportRespository;
+	/**
+	 * @var adminRepository
+	 */
 	
-	public function _construct(){
-		$this->reportRespository = new AdminRepository();		
-	}
+	private $adminRespository;
+	
+	public function __construct(){
+		$this->adminRespository = new AdminRepository();		
+	}	
+	
 	
 	/**
 	 * @Route("/Admin/Users", name="Users")
@@ -43,29 +47,130 @@ class AdminController extends Controller
 	
 		}*/
 		
-		$this->reportRespository->getUserDetails();
-		return $this->render('Admin/Users.html.twig');
+		/*if($request->query->all()['status'] != '')
+			$status = $request->query->all()['status'];
+		else 
+			$status = '';
+		*/
+		
+		$UserDetails = $this->adminRespository->getUserDetails();
+		
+		//echo "<pre>";print_r($UserDetails);exit;
+		
+		return $this->render('Admin/Users.html.twig', [
+				"UserDetails" => $UserDetails
+		]);
 	
 	}
 	
 	/**
-	 * @Route("/Admin/CreateUser", name="CreateUser")
+	 * @Route("/Admin/AddUser", name="AddUser")
 	 * @Method({"GET","HEAD"})
 	 */
-	public function renderCreateUserAction(Request $request) {
+	public function renderAddUserAction(Request $request) {
 	
 		// USER AUTHENTICATION
-		$session = new Session();
+		/*$session = new Session();
 		$userID = $session->get('UserID');
 	
 		if(empty($userID)){
 			return $this->redirectToRoute('Login');
 	
-		}
-	
-		return $this->render('Admin/CreateUser.html.twig');
+		}*/
+		
+		return $this->render('Admin/AddEditUser.html.twig');
 	
 	}
+	
+	/**
+	 * @Route("/Admin/AddUser", name="AddUserPost")
+	 * @Method({"POST","HEAD"})
+	 */
+	public function renderAddUserPostAction(Request $request) {
+	
+		// USER AUTHENTICATION
+		/*$session = new Session();
+			$userID = $session->get('UserID');
+	
+			if(empty($userID)){
+			return $this->redirectToRoute('Login');
+	
+			}*/
+		
+		$UserDetails = $this->adminRespository->getUserDetails();
+		$postData = $request->request->all();
+		
+		$status = $this->adminRespository->addEditUser($postData);
+		
+		/*return $this->render('Admin/Users.html.twig', [
+				"UserDetails" => $UserDetails,
+				"status" => $status
+		]);*/
+		
+		return $this->redirectToRoute('Users');
+	
+	}
+	
+	/**
+	 * @Route("/Admin/EditUser/{UserID}", name="EditUser")
+	 * @Method({"GET","HEAD"})
+	 */
+	public function renderEditUserAction(Request $request, $UserID) {
+	
+		// USER AUTHENTICATION
+		/*$session = new Session();
+			$userID = $session->get('UserID');
+	
+			if(empty($userID)){
+			return $this->redirectToRoute('Login');
+	
+			}*/
+	
+		//echo $UserID;exit;
+		$UserDetails = $this->adminRespository->getUserDetails($UserID);
+		//echo "<pre>";print_r($UserDetails);exit;
+		return $this->render('Admin/AddEditUser.html.twig', [
+				"UserDetails" => $UserDetails,
+				"UserID" => $UserID
+		]);
+	
+	}
+	
+	/**
+	 * @Route("/Admin/EditUser", name="EditUserPost")
+	 * @Method({"POST","HEAD"})
+	 */
+	public function renderEditUserPostAction(Request $request) {
+	
+		// USER AUTHENTICATION
+		/*$session = new Session();
+		 $userID = $session->get('UserID');
+	
+		 if(empty($userID)){
+		 return $this->redirectToRoute('Login');
+	
+		 }*/
+	
+		//$UserDetails = $this->adminRespository->getUserDetails();
+		$postData = $request->request->all();
+		
+		//echo "<pre>";print_r($postData);exit;
+		$status = $this->adminRespository->addEditUser($postData);
+	
+		/*return $this->render('Admin/Users.html.twig', [
+				"UserDetails" => $UserDetails,
+				"status" => $status
+		]);*/
+		
+		return $this->redirectToRoute('Users', array("status" => $status));
+	
+	}	
+	
+	
+	
+	
+	
+	
 	
 	/**
 	 * @Route("/Admin/CreateUser", name="CreateUserSubmit")

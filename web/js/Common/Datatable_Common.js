@@ -22,11 +22,11 @@ function loadDataTable_Export(filename){
 	                extend: 'excelHtml5',
 	                title: filename+'_'+dateToday
 	            },
-	            {
+	            /*{
 	                extend: 'pdfHtml5',
 	                title: filename+'_'+dateToday,
 	                pageSize: 'LEGAL'
-	            },
+	            },*/
 	            
 	            	'print'
         	]

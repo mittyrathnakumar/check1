@@ -1,6 +1,7 @@
 {% extends 'layout.html.twig' %}
 
 {% block content %}
+
 	<header>
 		<div class="jumbotron">
 			<div class="row">
@@ -12,12 +13,28 @@
 				</div>
 			</div>
 		</div>
-	</header>	
+	</header>		
+	{{ include('login.html.twig') }}
+		
+	<div id="AfterLoginPath" post-url="{{ path('Home') }}"></div>
+		
 {% endblock %}
 
 {% block documentready %}
+	<script>
+		$("#frmLogin").validate();
+	</script>
 {% endblock %}
 
 
 {% block javascripts %}
+	{{ parent() }}
+	<script src="{{ asset('js/Common/Login_Common.js') }}"></script>
+	<script>	
+		$.validator.setDefaults({
+			submitHandler: function() {
+				checkUserLogin();
+			}
+		});	
+	</script>
 {% endblock %}

@@ -1,0 +1,225 @@
+{% extends 'layout.html.twig' %}
+{% block content %}
+
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Dashboard</h1>
+    </div>
+</div>
+<form class="form-inline" role="form" id="frmMonthSearch" method="Post" action="">
+<div class="row col-md-12">	
+    <div class="col-md-3">
+    {% if postData.Month is defined %}
+		{% set Month = postData.Month %}
+	{% else %}
+		{% set Month = "now"|date("F-y") %}
+	{% endif %}
+     <label for="Month">Month/Year : </label>	    
+	    <select name="Month" id="Month" class="form-control">
+	       	<option value="">--Select--</option>       		       	
+	       	{% for row in monthYearArray %}
+	       		<option value="{{ row }}" {% if Month is defined and Month == row %} selected {% endif %}>{{ row }}</option>
+	       	{% endfor %}
+		 </select>
+    </div>
+    <div class="col-md-2">
+      <button type="submit" name="Search" valuw="1" class="btn btn-primary">Search</button> 
+	  <button type="submit" name="ShowAll" value="1" class="btn btn-primary">Refresh</button>
+    </div>
+     <div class="col-md-1">
+     <button align="left" id="Export" class="btn btn-primary">Export</button>	 
+    </div>    
+</div>
+</form>
+{#
+<div>
+	<form class="form-inline" role="form" id="frmSearch" method="Post" action="">
+	  <div class="form-group">
+	    <label for="Month">Month/Year : </label>	    
+	    <select name="Month" id="Month" class="form-control">
+	       	<option value="">--Select--</option>
+	       	{% if postData.Month is defined %}
+	       		{% set Month = postData.Month %}
+	       	{% endif %}
+	       		       	
+	       	{% for row in monthYearArray %}
+	       		<option value="{{ row }}" {% if Month is defined and Month == row %} selected {% endif %}>{{ row }}</option>
+	       	{% endfor %}
+		  </select>
+	  </div>
+	  <button type="submit" name="Search" valuw="1" class="btn btn-primary">Search</button> 
+	  <button type="submit" name="ShowAll" value="1" class="btn btn-primary">Refresh</button>
+	</form>
+</div>
+#}
+<br><br>
+{% if Month is defined and Month is not empty %}
+	<div class="text-primary pull-left">This result shows data for <strong>{{ Month }}</strong>.</div><br><br>
+{% else %}
+	<div class="text-primary">(Default list shows results from current month. Pls make a search to find out other projects.)</div><br>
+{% endif %}
+<div class="col-sm-10 pull-left">
+	<table id="dataTable" class="table-bordered compact-table">
+		<thead>
+			<tr>				
+				<th>S.No.</th>
+				<th>KPI</th>
+				<th>Target</th>
+				<th>Actual</th>		
+				<th>RAG</th>
+				<th>Cause</th>
+				<th>Action</th>
+			</tr>
+		</thead>
+		<tbody>		
+		{% for row in KPIResults %}
+			{% set RAG = '' %}
+			<tr>				
+				<td>{{ loop.index }}</td>
+				<td>
+				{% if Month is defined and Month is not empty %}					
+					<a style="cursor:pointer" onClick="window.open('{{ path('KPIProjectsSearch', { KPIID : row['KPIID'], Month : Month } ) }}','','width=1800');" data-toggle="tooltip" data-html="true" title="{{ row['Caption']}}"  value="{{ row['KPI'] }}">{{ row['KPI'] }}</a>
+				{% else %}
+					{# <a data-toggle="modal" data-target="#dialog" href="{{ path('KPIProjects', { KPIID : row['KPIID'] } ) }}" data-toggle="tooltip" title="KPI Details to come !!"  title="See project details for this KPI" alt=See project details for this KPI" value="{{ row['KPI'] }}">{{ row['KPI'] }}</a> #}
+				
+					<a style="cursor:pointer" onClick="window.open('{{ path('KPIProjects', { KPIID : row['KPIID'] } ) }}','','width=1800');" data-toggle="tooltip" data-html="true" title="{{ row['Caption']}}"  value="{{ row['KPI'] }}">{{ row['KPI'] }}</a>
+								
+					{# onClick="window.open('{{ path('KPIProjects', { KPIID : row['KPIID'] } ) }}','','width=2000');" #}
+				{% endif %}				
+				</td>	
+							
+				<td align="center">
+				{% if row['Operator'] is not empty %}
+					{{ row['Operator'] }}{{ row['Target'] }}%
+				{% else %}
+					{{ row['Target'] }}%
+				{% endif %}
+				</td>								
+				
+				{% if row['Actual'] == 'N/A' %}
+					{# <td align="center" style="background-color:#f5f5f5">N/A</td> #}
+					<td align="center">N/A</td>
+				{% else %}
+					{% if row['Operator'] == '<=' %}
+						{% if row['Actual'] <= row['Target'] %}
+							{% set RAG = 'green' %}							
+							{# <td align="center" style="background-color:#dff0d8">{{ row['Actual'] }}%</td> #}
+							<td align="center">{{ row['Actual'] }}%</td>							 
+						{% else %}				
+							{% set RAG = 'red' %}
+							{# <td align="center" style="background-color:#f2dede">{{ row['Actual'] }}%</td> #}										
+							<td align="center">{{ row['Actual'] }}%</td>
+						{% endif %}						
+					{% elseif row['Operator'] == '>=' %}
+						{% if row['Actual'] >= row['Target'] %}
+							{% set RAG = 'green' %}							
+							<td align="center">{{ row['Actual'] }}%</td>						
+						{% else %}
+							{% set RAG = 'red' %}							
+							<td align="center">{{ row['Actual'] }}%</td>				
+						{% endif %}
+					{% endif %}
+				{% endif %}		
+				
+				<td align="center">
+				{% if RAG is defined and RAG == 'green' %}
+					<img src="{{ asset("images/green_RAG.png") }}">
+				{% elseif RAG is defined and RAG == 'red' %}
+					<img src="{{ asset("images/red_RAG.png") }}">
+				{% else %}
+					<img src="{{ asset("images/na_RAG.png") }}">
+				{% endif %}
+				</td>	
+				<td><span class="cause" title="View/Enter Cause" style="cursor:pointer" data-type="textarea" id="cause_{{ row['KPIID'] }}_{{ Month }}">View</span></td>
+				<td><span class="action" title="View/Enter Action" style="cursor:pointer" data-type="textarea" id="action_{{ row['KPIID'] }}_{{ Month }}">View</span></td>	
+			</tr>
+		{% endfor %}
+		 <div id="dialog" title="KPI Project Details" class="modal_dialog"></div>		
+		</tbody>
+	</table>
+	
+	{# HIDDEN TABLE FOR EXPORT TO EXCLUDE A(ANCHOR) TAGS #}	
+	<table id="dataTable1" class="table_hidden">
+		<thead class="thead-inverse">
+			<tr>				
+				<th class="bg_grey">KPI</th>
+				<th class="bg_grey">Target</th>
+				<th class="bg_grey">Actual</th>				
+			</tr>
+		</thead>
+		<tbody>		
+		{% for row in KPIResults %}
+			<tr>				
+				<td>{{ row['KPI'] }}</td>				
+				<td>
+				{% if row['Operator'] is not empty %}
+					{{ row['Operator'] }}{{ row['Target'] }}%
+				{% else %}
+					{{ row['Target'] }}%
+				{% endif %}
+				</td>								
+				
+				{% if row['Actual'] == 'N/A' %}
+					<td style="background-color:#f5f5f5">N/A</td>
+				{% else %}
+					{% if row['Operator'] == '<=' %}
+						{% if row['Actual'] <= row['Target'] %}							
+							<td style="background-color:#dff0d8">{{ row['Actual'] }}%</td>							 
+						{% else %}							
+							<td style="background-color:#f2dede">{{ row['Actual'] }}%</td>
+						{% endif %}						
+					{% elseif row['Operator'] == '>=' %}
+						{% if row['Actual'] >= row['Target'] %}							
+							<td style="background-color:#dff0d8">{{ row['Actual'] }}%</td>						
+						{% else %}							
+							<td style="background-color:#f2dede">{{ row['Actual'] }}%</td>				
+						{% endif %}
+					{% endif %}
+				{% endif %}						
+			</tr>
+		{% endfor %}				
+		</tbody>
+	</table>
+	{# #}		
+</div>
+
+{% endblock %}
+
+{% block documentready %}
+	<script>
+		$('[data-toggle="tooltip"]').tooltip({
+			html: true,			
+    		max-width:none;
+		});
+	</script>
+{% endblock %}
+
+
+{% block javascripts %}
+	{{ parent() }}
+	<script src="{{ asset('js/Dashboard/Dashboard_common.js') }}"></script>		
+	<script>	
+		
+		{# loadDataTable_Export('KPIResults'); #}	
+		
+		$.fn.editable.defaults.mode = 'popup';
+				
+		DashboardGeneralFunctions();
+		
+		$("#Export").on('click', function(){
+			tableToExcel('dataTable1', 'Execution Results');			
+		});	
+		
+		 var tableToExcel = (function() {
+			  var uri = 'data:application/vnd.ms-excel;base64,'
+				, template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+				, base64 = function(s) { return window.btoa(unescape(encodeURIComponent(s))) }
+				, format = function(s, c) { return s.replace(/{(\w+)}/g, function(m, p) { return c[p]; }) }
+			  return function(table, name) {
+				if (!table.nodeType) table = document.getElementById(table)
+				var ctx = {worksheet: name || 'Worksheet', table: table.innerHTML}
+				window.location.href = uri + base64(format(template, ctx))
+			  }
+		})();
+	</script>	
+{% endblock %}

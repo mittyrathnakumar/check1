@@ -28,6 +28,11 @@ class Users
 	private $userrole;
 
 	/**
+	 * @var string
+	 */
+	private $userroleid;	
+	
+	/**
 	 * @var int
 	 */
 	private $userid;
@@ -75,6 +80,15 @@ class Users
 	public function getUserRole(){
 		return $this->userrole;
 	}
+	
+	public function setUserRoleID($userroleid){
+		$this->userroleid = $userroleid;
+	}
+	
+	public function getUserRoleID(){
+		return $this->userroleid;
+	}
+	
 	
 	public function setUserID($userid){
 		return $this->userid = $userid;

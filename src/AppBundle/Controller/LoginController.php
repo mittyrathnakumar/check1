@@ -2,9 +2,6 @@
 
 namespace AppBundle\Controller;
 
-use AppBundle\Service\UserAuthentincationService;
-//use AppBundle\Service\OracleDatabaseService;
-
 use Symfony\Component\HttpFoundation\Session\Session;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -18,15 +15,32 @@ use AppBundle\Repository\UserRepository;
  * @author Dhara Sheth
  */
 class LoginController extends Controller 
-{		
-	
+{			
 	
 	/**
 	 * @Route("/Login", name="Login")
 	 * @Method({"GET","HEAD"})
 	 */
-	public function loginAction(Request $request) {		
-		return $this->render('index.html.twig');
+	public function loginAction(Request $request) {	
+		
+		//echo "<pre>";print_r($request);exit;
+		
+		$session = new Session();
+		$userID = $session->get('UserID');
+		
+		if(empty($userID)){			
+			return $this->render('index.html.twig');
+		}
+		
+		/*if(!empty($request->query->all())){
+			echo $request->query->all()[0];exit;
+			return $this->redirectToRoute('Dashboard');
+		}
+		else {
+			return $this->redirectToRoute('Dashboard');
+		}*/
+		return $this->redirectToRoute('Home');
+		
 	}
 	
 	/**
@@ -36,10 +50,7 @@ class LoginController extends Controller
 	
 	// Handles Login form submission
 	
-	public function loginPostAction(Request $request) {
-		
-		//$this->denyAccessUnlessGranted();
-		
+	public function loginPostAction(Request $request) {		
 		
 		// Check in the database for a valid user - Repository / Entity
 		
@@ -59,19 +70,16 @@ class LoginController extends Controller
 			$UserID = $userDetails->getUserID();
 			$UserName = $userDetails->getFirstName();
 			$UserRole = $userDetails->getUserRole();
-			//$authUser = new UserAuthentincationService();
-			//$authUser->authenticateUser();	
 			
 			
 			$session = new Session();
 			//$session->start();
 			
-			// If user is valid - store the data into session and navigate to about us page.
+			// If user is valid - store the data into session and navigate to Dashboard page.
 				
 			$session->set('UserID', $UserID);
 			$session->set('UserName', $UserName);
 			$session->set('UserRole', $UserRole);
-			//$session->set('UserRole', 'ROLE_ADMIN');
 					
 			$response['status'] = 1;			
 		}
@@ -79,8 +87,7 @@ class LoginController extends Controller
 		else 
 			$response['status'] = $invalid;
 		
-		return new JsonResponse($response);
-		 
+		return new JsonResponse($response);	 
 
 		 
 	}	

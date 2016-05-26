@@ -1,0 +1,47 @@
+{% extends 'layout.html.twig' %}
+{% block content %}
+
+<h1 class="page-header">Documentation / Knowledge Management </h1>
+ <div class="col-md-8 pull-left"><a href="{{ path('AddDocumentDetails') }}"><strong>Add Record</strong></a></div></br></br>
+<div class="col-md-10">		
+	<table class="table-condensed table-bordered table-hover" id="dataTable">
+		<thead>
+			<tr class="bg_grey">					
+				<th>No.</th>
+				<th>Deliverable</th>
+				<th>Projectname</th>				
+				<th>Document Name</th>
+				<th>Testing</th>
+				<th>Document Type</th>
+				<th>Delivery Date</th>	
+				<th>Sign Off Date</th>		
+				<th>Repository Link</th>				
+			</tr>
+		</thead>
+		<tbody>
+			{% for row in DocumentDetails %}			
+				<tr>
+				<td>{{ loop.index}}</td>				
+				<td><a href="{{ path('EditDocumentDetails', { ID : row.getProjectID() }) }}" title="Edit Details">{{ row.getDeliverable() }}</a></td>	
+				<td>{{ row.getProjectName() }}</a></td>
+				<td>{{ row.getDocumentName( )}}</a></td>
+				<td>{% if row.getTesting() == 1 %} Yes {% endif %}</a></td>
+				<td>{{ row.getDocumentType() }}</td>
+				<td>{{ row.getDeliveryDate() }}</td>
+				<td>{{ row.getSignOffDate() }}</td>
+				<td>{{ row.getRepositoryLink() }}</td>	
+				
+				</tr>
+	    	{% endfor %}
+		</tbody>
+	</table>			
+</div>
+<div id="dialog" title="Result Action" class="modal_dialog"></div>
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}		
+	<script>
+		loadDataTable_Export('DocumentationDetails');						
+	</script>
+{% endblock %}

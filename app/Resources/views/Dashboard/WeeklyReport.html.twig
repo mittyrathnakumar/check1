@@ -5,16 +5,144 @@
     <div class="col-lg-12">
         <h1 class="page-header">Weekly Report</h1>
         <ol class="breadcrumb">
-            <li><a href="">Dashboard</a></li>
+            <li><a href="#">Dashboard</a></li>
             <li class="active">Weekly Report</li>
         </ol>
     </div>
 </div>
+
+<div class="row">
+	<form class="form-inline" role="form" id="frmSearch" method="Post" action="{{ path('WeeklyReport') }}">
+	 <div class="form-group">
+	    <label for="KPI">KPI : </label>
+	      <select name="KPI" id="KPI" class="form-control">
+	       	<option value="">--Select--</option>
+	       	{% for row in SLAs %}
+	       		<option value="{{ row.getKPIName() }}" {% if postData.KPI is defined and postData.KPI == row.getKPIName() %} selected {% endif %}>{{ row.getKPIName() }}</option>
+	       	{% endfor %}
+		  </select>
+	  </div> 
+	  <div class="form-group">
+	    <label for="Project">Project : </label>
+	    <select name="Project" id="Project" class="form-control">
+		       	<option value="">--Select--</option>
+		       	{% for row in ProjectNames %}
+		       		<option value="{{ row.getProjectID() }}" {% if postData.Project is defined and postData.Project == row.getProjectID() %} selected {% endif %}>{{ row.getProjectName() }}</option>
+		       	{% endfor %}
+		</select>
+	  </div>
+	    <div class="form-group">
+	    <label for="Month">Month/Year : </label>
+	    
+	    <select name="Month" id="Month" class="form-control">
+	       	<option value="">--Select--</option>
+	       	{% for row in monthYearArray %}
+	       		<option value="{{ row }}" {% if postData.Month is defined and postData.Month == row %} selected {% endif %}>{{ row }}</option>
+	       	{% endfor %}
+		  </select>
+	   {# <input type="text" name="Month" id="Month" class="form-control" value="{% if postData.Month is defined %} {{ postData.Month }} {% endif %}"> #}
+	  </div>
+	  <button type="submit" name="Search" valuw="1" class="btn btn-primary">Search</button> 
+	  <button type="submit" name="ShowAll" value="1" class="btn btn-primary">Show All</button>
+	</form>
+</div>
+</br><div class="text-primary">(Default list shows projects from current and next month. Pls make a search to find out other projects.)</div>
+</br>
+
+	<div class="col-sm-4">
+		<table id="dataTable" class="table table-bordered table-hover table-sm">
+			<thead class="thead-inverse">
+				<tr>
+					<th class="bg_grey">KPI</th>
+					<th class="bg_grey">Target</th>
+					<th class="bg_grey">Actual</th>					
+				</tr>
+			</thead>
+			<tbody>
+			{# {% for KPI, SLA in SLAs %} #}
+			{% for row in SLAs %}
+				<tr {% if postData.KPI is defined and postData.KPI == row.getKPIName() %} class="strong" {% endif %} >
+					<td>{{ row.getKPIName() }}</td>
+					<td>{{ row.getOperator() }}{{ row.getSLAValue() }}</td>
+					{# {{ KPITotals[loop.index-1]~row.getOperator()~row.getSLAValue() }} #}
+					{% if KPITotals is defined %}
+						{# {% if KPITotals[loop.index-1]~row.getOperator()~row.getSLAValue() == true %} #}
+						{% if KPITotals[loop.index-1] <= row.getSLAValue() %}
+							<td class="bg-success">{{ KPITotals[loop.index-1] }}%</td>						
+						{% else %}
+							<td class="bg-danger">{{ KPITotals[loop.index-1] }}%</td>
+						{% endif %}
+					{% endif %}					
+				</tr>
+			{% endfor %}		
+			</tbody>
+		</table>
+	</div>
 	
+	<div {% if postData.KPI is defined and postData.KPI != "" %} class="col-sm-3" {% else %} class="col-sm-7" {% endif %}>
+		<table id="dataTable" class="table table-bordered table-hover table-sm">
+			<thead class="thead-inverse">
+				<tr>					
+					<th class="bg_grey">Month</th>
+					<th class="bg_grey">Projects</th>
+					{% if postData.KPI is defined and postData.KPI != "" %}
+							<th class="bg_grey">{{ postData.KPI }}</th>
+					{% else %}
+						{% for row in SLAs %}
+							<th class="bg_grey">{{ row.getKPIName() }}</th>
+						{% endfor %}
+					{% endif %}
+				</tr>					
+			</thead>
+			<tbody>													
+				{% for month, row in ProjectResults %}				
+					<tr>
+						<td colspan="6"><strong class="text-primary">{{ month }}</strong></td>
+					</tr>					
+					{% for rowInner in row %}
+					
+						<tr>
+						<td>{{ loop.index }}</td>						
+						<td>{{ rowInner.getProjectName() }}</td>
+						{% if postData.KPI is defined and postData.KPI != "" %}
+							{% if rowInner.getKPIResults()[0] != 'N/A' %}
+								<td class="bg-success">{{ rowInner.getKPIResults()[0] }}%</td>
+							{% else %}
+								<td class="bg-info">{{ rowInner.getKPIResults()[0] }}%</td>
+							{% endif %}
+							
+						{% else %}
+							{% if rowInner.getKPIResults() | length > 0 %}
+								{% for row in SLAs %}
+									{% set condition = rowInner.getKPIResults()[loop.index-1]~row.getSLAValue() %}																		
+									{% if rowInner.getKPIResults()[loop.index-1] != 'N/A' %}
+										{# {% if rowInner.getKPIResults()[loop.index-1]~row.getOperator()~row.getSLAValue() %} #}
+										{% if rowInner.getKPIResults()[loop.index-1] <= row.getSLAValue() %}
+											<td class="bg-success">{{ rowInner.getKPIResults()[loop.index-1] }}%</td>
+										{% else %}
+											<td class="bg-danger">{{ rowInner.getKPIResults()[loop.index-1] }}%</td>
+										{% endif %}	
+									{% else %}
+										<td class="bg-info">{{ rowInner.getKPIResults()[loop.index-1] }}</td>
+									{% endif %}				
+								{% endfor %}	
+							{% endif %}				
+						{% endif %}	
+						</tr>
+					{% endfor %}
+				{% endfor %}								
+			</tbody>
+		</table>
+	</div>	
+
 {% endblock %}
 
 {% block javascripts %}
-	{{ parent() }}	
+	{{ parent() }}
+	<script src="{{ asset('js/Dashboard/Dashboard_common.js') }}"></script>		
+	<script>
+		{# formGeneralFunctions(); #}
+	</script>	
 {% endblock %}
 
 {% block documentready %}

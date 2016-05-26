@@ -6,48 +6,90 @@
  <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
     <div class="container-fluid">       
         <div class="navbar-header">            
-            <a class="navbar-brand" href="{{ path('homepage') }}">KPI Dashboard</a>
-        </div>       
-        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-            <ul class="nav navbar-nav navbar-right">
-                <li class="dropdown">
-                    <a href="{{ path('homepage') }}" class="dropdown-toggle" data-toggle="dropdown">Home</a>
-                </li>
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Admin <b class="caret"></b></a>
-                    <ul class="dropdown-menu">
-                        <li>
-                            <a href="{# {{ path('Users') }} #}">User Management</a>
-                        </li>                            
-                    </ul>
-                </li>                             
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dashboard <b class="caret"></b></a>
-                    <ul class="dropdown-menu">
-                        <li>
-                            <a href="portfolio-1-col.html">Completed Projects</a>
-                        </li>
-                        <li>
-                            <a href="portfolio-1-col.html">Ongoing Projects</a>
-                        </li>   
-                        <li>
-                             <a href="{{ path('WeeklyReport') }}">Generate Weekly Report</a>
-                        </li>   
-                        <li>
-                            <a href="portfolio-1-col.html">Generate Monthly Report</a>
-                        </li>                               
-                    </ul>
-                </li>
-                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Projects <b class="caret"></b></a>
-                    <ul class="dropdown-menu">
-                        <li>
-                            <a href="{#  {{ path('Projects') }} #} ">View Projects</a>
-                        </li>                                                     
-                    </ul>
-                </li>                          
-            </ul>
-        </div>       
+            <a class="navbar-brand" href="{{ path('Homepage') }}">KPI Dashboard</a>
+        </div>          
+        {% if sessionUID is defined and sessionUID is not empty %}
+	        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+	            <ul class="nav navbar-nav navbar-right">
+	               {#	               
+	                <li class="dropdown">
+	                	{% if sessionUID is defined and sessionUID is not empty %}
+		                	<a href="#" class="dropdown-toggle" data-toggle="dropdown">Home<b class="caret"></b></a>
+		                    <ul class="dropdown-menu">
+		                        <li>
+		                            <a href="{{ path('Logout') }}">Logout</a>
+		                        </li>                            
+		                    </ul>
+	                	{% else %}
+	                    	<a href="{{ path('Homepage') }}">Home</a>
+	                    {% endif %}
+	                </li>
+	                #}
+					
+					<li class="dropdown">
+	                	<a>Welcome {{ username }} !!</a>
+	                </li>
+	                <li class="dropdown">
+	                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">KPI<b class="caret"></b></a>
+	                    <ul class="dropdown-menu">
+	                        <li>
+	                            <a href="{{ path('DeliverySlippages') }}">Delivery Slippage</a>
+	                        </li>                            
+	                        <li>
+	                            <a href="{{ path('STAutomation') }}">ST Automation</a>
+	                        </li>
+	                        <li>
+	                            <a href="{{ path('IntakeProcess') }}">Intake Process</a>
+	                        </li>	                        
+	                        <li>
+	                            <a href="{{ path('QualityEstimation') }}">Quality Estimation</a>
+	                        </li>
+	                        <li>
+	                            <a href="{{ path('Documentation') }}">Documentation/Knowledge Management</a>
+	                        </li>
+	                        <li>
+	                            <a href="">Production test Accounts</a>
+	                        </li>
+	                    </ul>
+	                </li>	                                       
+	                <li class="dropdown">
+	                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dashboard <b class="caret"></b></a>
+	                    <ul class="dropdown-menu">
+	                        <li>
+	                            <a href="{{ path('Dashboard') }}">Dashboard</a>
+	                        </li>
+	                        <li>
+	                            <a href="#">Periodic View</a>
+	                        </li>
+	                        <li>
+	                            <a href="{{ asset('templates/KPI Dashboard 1.0.docx') }}">About Dashboard</a>
+	                        </li>	                        	                                               
+	                    </ul>
+	                </li>
+	                <li class="dropdown">
+	                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Projects <b class="caret"></b></a>
+	                    <ul class="dropdown-menu">
+	                        <li>
+	                            <a href="{{ path('ViewProjects') }}">View Projects</a>
+	                        </li>                                                     
+	                    </ul>
+	                </li>    
+	                <li class="dropdown">
+	                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Admin <b class="caret"></b></a>
+	                    <ul class="dropdown-menu">
+	                        <li>
+	                            <a href="{{ path('Users') }}">User Management</a>
+	                        </li>                            
+	                    </ul>
+	                </li>    
+	                {% if sessionUID is defined and sessionUID is not empty %}
+	                	<li class="dropdown">
+	                		<a href="{{ path('Logout') }}">Logout</a>
+	                	</li>
+	                {% endif %}                      
+	            </ul>
+	        </div>
+	     {% endif %}       
     </div>
 </nav>
 {% endblock %}

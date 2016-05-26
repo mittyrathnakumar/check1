@@ -1,0 +1,90 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+
+<h1 class="page-header">Documentation / Knowledge Management </h1>
+<ol class="breadcrumb">
+    <li><a href="{{ path('Documentation') }}">All Documentation</a></li>    
+    {% if ProjectID is defined and ProjectID is not empty %}
+    	<li class="active">Edit Details</li>
+    {% else %}
+    	<li class="active">Add Details</li>
+    {% endif %}
+    
+</ol>
+	
+<form class="form-horizontal" role="form" id="frmAddEditRecord" method="post" action="{% if ProjectID is defined %} {{ path('EditDocumentDetails', { ID : ProjectID } ) }} {% else %} {{ path('AddDocumentDetails') }} {% endif %}"> 
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="ProjectName">Project :</label>
+    <div class="col-sm-4">  
+    	<select name="Project" id="Project" class="form-control" required>
+    	<option value="">--Select--</option>
+    	{% for row in Projects %}    
+       		<option value="{{ row.getProjectID() }}" {% if ProjectID is defined and ProjectID == row.getProjectID() %} selected {% endif %}>{{ row.getProjectName() }}</option>
+       	{% endfor %}
+       </select>   
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="Deliverable">Deliverable Name:</label>
+    <div class="col-sm-3">       
+    	<input type="text" name="Deliverable" id="Deliverable" placeholder="Deliverable" value="{% if DocumentDetails is defined %}{{ DocumentDetails.getDeliverable()|trim }}{% endif %}" class="form-control" required>
+    </div>
+  </div>  		 
+   <div class="form-group">
+    <label class="control-label col-sm-2" for="DocumentName">Document Name:</label>
+    <div class="col-sm-3">       
+    	<input type="text" name="DocumentName" id="DocumentName" placeholder="Document Name" value="{% if DocumentDetails is defined %}{{ DocumentDetails.getDocumentName()|trim }}{% endif %}" class="form-control" required>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="Testing">For Testing:</label>
+    <div class="col-sm-4">
+      <input type="checkbox" name="ForTesting" id="ForTesting" value="1" {% if DocumentDetails is defined and DocumentDetails.getTesting() == 1 %} checked {% endif %}">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="DocumentType">Document Type:</label>
+    <div class="col-sm-3">
+      <input type="text" name="DocumentType" class="form-control" id="DocumentType" placeholder="Document Type" value="{% if DocumentDetails is defined %}{{ DocumentDetails.getDocumentType()|trim }}{% endif %}" required>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="DeliveryDate">Delivery Date:</label>
+    <div class="col-sm-2">
+      <input readonly type="text" name="DeliveryDate" class="form-control datepicker" id="DeliveryDate" placeholder="Delivery Date" value="{% if DocumentDetails is defined %}{{ DocumentDetails.getDeliveryDate()|trim }}{% endif %}">
+   	  <a href="#" class="clearDeliveryDate">clear</a>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="SignoffDate">Sign off Date:</label>
+    <div class="col-sm-2">
+      <input readonly type="text" name="SignoffDate" class="form-control datepicker" id="SignoffDate" placeholder="Sign off Date" value="{% if DocumentDetails is defined %}{{ DocumentDetails.getSignOffDate()|trim }}{% endif %}">
+      <a href="#" class="clearSignoffDate">clear</a>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="RepositoryLink">Repository Link:</label>
+    <div class="col-sm-4">
+      <input type="url" name="RepositoryLink" class="form-control" id="RepositoryLink" placeholder="Repository Link" value="{% if DocumentDetails is defined %}{{ DocumentDetails.getRepositoryLink()|trim }}{% endif %}">
+    </div>
+  </div>  
+   <div class="form-group">
+	   <div class="col-sm-offset-2 col-sm-10">
+	      <button type="submit" name="submit" id="submit" class="btn btn-primary">Submit</button>
+	      <button type="reset" name="reset" id="reset" class="btn btn-primary">Reset</button>
+	   </div>
+   </div>	 
+  <div id="dialog" title="Result Action" class="modal-dialog"></div>
+   <input type="hidden" name="ProjectID" value="{% if ProjectID is defined %}{{ ProjectID }}{% endif %}" >
+</form>
+
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	<script src="{{ asset('js/KPI/KPI_common.js') }}"></script>
+	<script>
+		DocumentationFunction();
+	</script>
+{% endblock %}

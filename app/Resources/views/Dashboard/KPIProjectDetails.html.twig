@@ -1,0 +1,53 @@
+{% extends 'layout_popup.html.twig' %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-sm-12">
+        <ol class="breadcrumb">        
+            <li class="active">Project Details for KPI - <strong>{{ KPI }}</strong></li>
+        </ol>
+    </div>
+</div>
+
+{% if KPIID == 6 %}	 
+	{{ include ('Dashboard/ViewP1P2KPI.html.twig') }}
+{% elseif KPIID == 7 %}		
+	{{ include ('Dashboard/ViewP3P4KPI.html.twig') }}
+{% elseif KPIID == 17 %}
+	{{ include ('Dashboard/ViewP1P260.html.twig') }}
+{% elseif KPIID == 18 %}
+	{{ include ('Dashboard/ViewP3P460.html.twig') }}
+{% elseif KPIID == 19 %}
+	{{ include ('Dashboard/ViewP1P2365.html.twig') }}
+{% elseif KPIID == 20 %}
+	{{ include ('Dashboard/ViewP3P4365.html.twig') }}
+{% elseif KPIID == 1 or  KPIID == 2 or KPIID == 3 or KPIID == 4 %}
+	{{ include ('Dashboard/ViewQCKPI.html.twig') }} 	
+	 	
+{% endif %}
+
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	<script src="{{ asset('js/Dashboard/Dashboard_common.js') }}"></script>		
+	<script>
+		{# loadDataTable_Export('KPIResults'); #}
+		{# OnTDBlurEditValues(); #}		
+		
+		DashboardGeneralFunctions();
+		
+	</script>	
+{% endblock %}
+
+{% block documentready %}
+	<script>			
+		$.fn.editable.defaults.mode = 'popup';		
+		
+		$('[data-toggle="tooltip"]').tooltip({
+			html: true,			
+    		max-width:none;
+		});
+	</script>
+{% endblock %}

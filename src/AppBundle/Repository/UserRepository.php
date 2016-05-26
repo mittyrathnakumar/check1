@@ -29,17 +29,18 @@ class UserRepository
 	 */
 	
 	public function fetchUserDetails($email, $password) {
-		$this->oracle->openConnection('Siebeldata');
+		$this->oracle->openConnection('KPIDASHBOARD');
 		$conn = $this->oracle->getConnection();
 		
 		$objValidate = new Validate();
 		$email = $objValidate->cv($email);
 		$password = $objValidate->cv($password);		
 
-		$query = "SELECT * FROM ART_USERS AU
+		$query = "SELECT * FROM KPI_USERS
 				WHERE EMAILID = :email				
 				AND ACTIVE = 1"; 
 		
+		//echo $query;exit;
 		$queryParse = oci_parse($conn, $query);		
 		oci_bind_by_name($queryParse, ':email', $email);				
 		
@@ -55,12 +56,12 @@ class UserRepository
 				$user->setEmail($row['EMAILID']);
 				$user->setFirstName($row['FIRSTNAME']);
 				$user->setLastName($row['LASTNAME']);
-				$user->setUserRole($row['USERROLE']);
+				//$user->setUserRole($row['USERROLE']);
 				$user->setUserID($row['USERID']);
 				$user->setUserActive($row['ACTIVE']);				
 				
 			} else {				
-				$user->setInvalid('Invalid Password');
+				$user->setInvalid('Invalid Password !!!');
 			}			
 		} 
 		

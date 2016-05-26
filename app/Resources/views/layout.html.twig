@@ -1,10 +1,9 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-	<div class="container-fluid">
-		{{ include('navbar.html.twig') }}
-		
-		<div class="row">			
+	<div class="wrapper">
+		{{ include('navbar.html.twig') }}		
+		 <div class="container-fluid">		
 			<!-- Page Content -->
 			<div class="content main">
 				{% block breadcrumb %}{% endblock %}

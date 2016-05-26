@@ -1,0 +1,100 @@
+{% extends 'layout.html.twig' %}
+{% block content %}
+
+<h1 class="page-header">ITSM Defects</h1>
+ <ol class="breadcrumb">
+    <li><a href="">KPI</a></li>
+    <li class="active">ITSM Defects</li>  
+</ol>
+{#
+<div class="row col-md-8">
+	<form class="form-inline" role="form" id="frmMonthSearch" method="Post" action="">
+    <div class="col-md-4">
+     <label for="Month">Month/Year : </label>	    
+	    <select name="Month" id="Month" class="form-control">
+	       	<option value="">--Select--</option>
+	       	{% if postData.Month is defined %}
+	       		{% set Month = postData.Month %}
+	       	{% else %}
+	       		{% set Month = ("now"|date("F/y")| upper) %}
+	       	{% endif %}
+	       		       	
+	       	{% for row in monthYearArray %}
+	       		<option value="{{ row }}" {% if Month is defined and Month == row %} selected {% endif %}>{{ row }}</option>
+	       	{% endfor %}
+		 </select>
+    </div>
+    <div class="col-md-6">
+      <button type="submit" name="Search" valuw="1" class="btn btn-primary">Search</button> 
+	  <button type="submit" name="ShowAll" value="1" class="btn btn-primary">Refresh</button>
+    </div>
+    </form>
+</div>
+<br><br>
+#}
+<div class="row col-md-10">		
+	<table class="table-bordered table-condensed" id="dataTable">
+		<thead>
+			<tr>					
+				<th>No.</th>
+				<th>Projectname</th>
+				<th>P1 & P2 Defects</th>
+				<th>P3 & P4 Defects</th>
+				{#
+				<th>P1 and P2 Defects+ 60 days</th>
+				<th>P3 and P4 Defects+ 60 days</th>
+				<th>Defect Density (P1 and P2) - Production + 61 days to 365 days</th>
+				<th>Defect Density (P3 and P4) - Production + 61 days to 365 days</th>
+				#}
+			</tr>
+		</thead>
+		<tbody>
+			
+			{% if DefectDetails|length > 0 %}
+				{% for month, resultArr in DefectDetails %}
+					<tr><td class="text-primary" colspan="8"><strong>{{ month }}</strong></td></tr>
+					{% if resultArr|length > 0 %}
+						{% for row in resultArr %}
+							<tr>
+							<td>{{ loop.index }}</td>	
+							<td>{{ row['PROJECTNAME'] }}</td>
+							<td><span class="p1p2" title="Enter value" column="P1_P2" style="cursor:pointer" data-type="number" id="p1p2_{{ row['PROJECTID'] }}">{{ row['P1_P2'] }}</span></td>
+							<td><span class="p3p4" title="Enter value" column="P3_P4" style="cursor:pointer" data-type="number" id="p3p4_{{ row['PROJECTID'] }}">{{ row['P3_P4'] }}</span></td>
+							{#
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							#}
+							</tr>
+						{% endfor %}
+						<tr><td class="text-primary div-center" colspan="8"></td></tr>
+					{% else %}
+						<tr><td class="text-primary div-center" colspan="8">N/A</td></tr>
+					{% endif %}
+		    	{% endfor %}
+		    {% else %}
+		    	<tr><td class="text-primary div-center" colspan="8">No data available !!!</td></tr>
+		    {% endif %}
+		</tbody>
+	</table>			
+</div>
+<div id="dialog" title="Result Action" class="modal_dialog"></div>
+
+{% endblock %}
+
+{% block documentready %}
+	<script>			
+		$.fn.editable.defaults.mode = 'popup';
+	</script>	
+{% endblock %}
+
+
+{% block javascripts %}
+	{{ parent() }}
+	<script src="{{ asset('js/KPI/KPI_common.js') }}"></script>		
+	<script>		
+		loadDataTable_Export('ITSMDefects');
+		ITSMDefectsFunctions();						
+	</script>
+{% endblock %}
