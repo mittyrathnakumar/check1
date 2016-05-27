@@ -1,0 +1,46 @@
+<div class="text-primary pull-left">This result shows data for <strong>{{ Month }}</strong>.</div><br><br>
+<div class="row col-md-12">		
+	<table class="table table-bordered table-hover" id="dataTable">
+		<thead>
+			<tr class="bg_grey">					
+				<th>No.</th>
+				<th>Project Name</th>
+				<th>Engagement Date</th>
+				<th>Gate1 Estimation Delivery Date</th>
+				<th>Diff in Dates</th>
+				<th>Gate1 Estimation</th>
+				<th>Gate2 Estimation</th>
+				<th>Final Estimation</th>
+				<th>Gate1 Variance</th>
+				<th>Gate2 Variance</th>				
+			</tr>
+		</thead>
+		<tbody>			
+	    	{% if KPIResults|length > 0 %}
+				{% for month, resultArr in KPIResults %}					
+					{% if resultArr|length > 0 %}
+						{% for row in resultArr %}
+							<tr>
+							<td>{{ loop.index }}</td>							
+							<td>{{ row['PROJECTNAME'] }}</td>
+							<td>{{ row['ENGAGEMENT_DATE'] }}</td>
+							<td>{{ row['GATE1_ESTIMATION_DELIVERY_DATE'] }}</td>
+							<td>{{ row['DIFF_DATES'] }}</td>
+							<td>{{ row['GATE1_ESTIMATION'] }}</td>
+							<td>{{ row['GATE2_ESTIMATION'] }}</td>
+							<td>{{ row['FINAL_ESTIMATION'] }}</td>
+							<td>{{ row['GATE1_VARIANCE'] }}</td>
+							<td>{{ row['GATE2_VARIANCE'] }}</td>						
+							</tr>	
+						{% endfor %}						
+					{% else %}
+						<tr><td class="text-primary" style="align-center" colspan="8">No data available !!!</td></tr>
+					{% endif %}
+		    	{% endfor %}
+		    {% else %}
+		    	<tr><td class="text-primary div-center" colspan="8">No data available !!!</td></tr>
+		    {% endif %} 
+		    
+		</tbody>
+	</table>			
+</div>

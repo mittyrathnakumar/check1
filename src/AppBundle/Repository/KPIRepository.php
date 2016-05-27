@@ -8,6 +8,7 @@ use AppBundle\Entity\DeliverySlippage;
 use AppBundle\Entity\STAutomationEntity;
 use AppBundle\Entity\KPI;
 use AppBundle\Entity\Projects;
+use AppBundle\Entity\Documents;
 
 
 /**
@@ -331,7 +332,7 @@ class KPIRepository
 		
 		$this->oracle->openConnection('KPIDASHBOARD');
 		$conn = $this->oracle->getConnection();
-		$ProjectDetails = array();
+		$DocumentDetails = array();
 		
 		
 		$query = "SELECT PROJECTID, PROJECTNAME, DELIVERABLE, DOCUMENT_NAME, DOCUMENT_TYPE, IS_TESTING, 
@@ -348,26 +349,26 @@ class KPIRepository
 		
 		
 		while ($row = oci_fetch_array($queryParse, OCI_ASSOC+OCI_RETURN_NULLS)) {
-			$Project = new Projects(); 
+			$Document = new Documents(); 
 			
-			$Project->setProjectID($row['PROJECTID']);
-			$Project->setDeliverable($row['DELIVERABLE']);
-			$Project->setProjectName($row['PROJECTNAME']);
-			$Project->setDocumentName($row['DOCUMENT_NAME']);
-			$Project->setDocumentType($row['DOCUMENT_TYPE']);
-			$Project->setTesting($row['IS_TESTING']);
-			$Project->setDeliveryDate($row['DELIVERY_DATE']);
-			$Project->setSignOffDate($row['SIGN_OFF_DATE']);
-			$Project->setRepositoryLink($row['REPOSITORY_LINK']);
+			$Document->setProjectID($row['PROJECTID']);
+			$Document->setDeliverable($row['DELIVERABLE']);
+			$Document->setProjectName($row['PROJECTNAME']);
+			$Document->setDocumentName($row['DOCUMENT_NAME']);
+			$Document->setDocumentType($row['DOCUMENT_TYPE']);
+			$Document->setTesting($row['IS_TESTING']);
+			$Document->setDeliveryDate($row['DELIVERY_DATE']);
+			$Document->setSignOffDate($row['SIGN_OFF_DATE']);
+			$Document->setRepositoryLink($row['REPOSITORY_LINK']);
 			
-			$ProjectDetails[] = $Project;
+			$DocumentDetails[] = $Document;
 		
 		}
 		
 		//echo "<pre>";print_r($ProjectDetails);exit;
 		oci_free_statement($queryParse);
 		$this->oracle->closeConnection();
-		return $ProjectDetails;
+		return $DocumentDetails;
 		
 	}
 	
@@ -630,39 +631,34 @@ class KPIRepository
 	
 		if (! empty ( $postData ['Month'] ))
 			$currentMonth = $postData ['Month'];
-			else if (! empty ( $Month ))
-				$currentMonth = $Month;
+		else if (! empty ( $Month ))
+			$currentMonth = $Month;
 	
-				$currentMonth = str_replace ( "-", "/", strtoupper ( trim ( $currentMonth ) ) );
-	
-				$query = "SELECT PROJECTID,PROJECTNAME,ESTIMATED_PROD_LIVE_DATE,ACTUAL_PROD_LIVE_DATE FROM KPI_PROJECTS WHERE ACTIVE = 1 AND TO_CHAR(ESTIMATED_PROD_LIVE_DATE, 'MON/YY') LIKE '%" . $currentMonth . "%'";
-	
-				// echo $query;//exit;
-				$queryParse = oci_parse ( $conn, $query );
-				oci_execute ( $queryParse );
-	
-				while ( $row = oci_fetch_array ( $queryParse, OCI_ASSOC + OCI_RETURN_NULLS ) ) {
-						
-					$deliverySlippage = new DeliverySlippage ();
-					$deliverySlippage->setProjectId ( $row ['PROJECTID'] );
-					$deliverySlippage->setProjectName ( $row ['PROJECTNAME'] );
-					$deliverySlippage->setEstimatedProdLiveDate ( $row ['ESTIMATED_PROD_LIVE_DATE'] );
-					$deliverySlippage->setDeliveryDate ( $row ['ACTUAL_PROD_LIVE_DATE'] );
-					$date1 = new \DateTime ( $row ['ESTIMATED_PROD_LIVE_DATE'] );
-					$date2 = new \DateTime ( $row ['ACTUAL_PROD_LIVE_DATE'] );
-						
-					$differenceInDate = $date2->diff ( $date1 )->format ( "%a" );
-						
-					$deliverySlippage->setDifferenceInDate ( $differenceInDate );
-					$deliverySlippages [] = $deliverySlippage;
-				}
-				/*
-				 * foreach ($deliverySlippages as $deliverySlippage){
-				 * echo $deliverySlippage->getprojectName();
-				 * }
-				 * exit;
-				 */
-				return $deliverySlippages;
+		$currentMonth = str_replace ( "-", "/", strtoupper ( trim ( $currentMonth ) ) );
+
+		$query = "SELECT PROJECTID,PROJECTNAME,ESTIMATED_PROD_LIVE_DATE,ACTUAL_PROD_LIVE_DATE FROM KPI_PROJECTS WHERE ACTIVE = 1 AND TO_CHAR(ESTIMATED_PROD_LIVE_DATE, 'MON/YY') LIKE '%" . $currentMonth . "%'";
+
+		// echo $query;//exit;
+		$queryParse = oci_parse ( $conn, $query );
+		oci_execute ( $queryParse );
+
+		while ( $row = oci_fetch_array ( $queryParse, OCI_ASSOC + OCI_RETURN_NULLS ) ) {
+				
+			$deliverySlippage = new DeliverySlippage ();
+			$deliverySlippage->setProjectId ( $row ['PROJECTID'] );
+			$deliverySlippage->setProjectName ( $row ['PROJECTNAME'] );
+			$deliverySlippage->setEstimatedProdLiveDate ( $row ['ESTIMATED_PROD_LIVE_DATE'] );
+			$deliverySlippage->setDeliveryDate ( $row ['ACTUAL_PROD_LIVE_DATE'] );
+			$date1 = new \DateTime ( $row ['ESTIMATED_PROD_LIVE_DATE'] );
+			$date2 = new \DateTime ( $row ['ACTUAL_PROD_LIVE_DATE'] );
+				
+			$differenceInDate = $date2->diff ( $date1 );
+				
+			$deliverySlippage->setDifferenceInDate ( $differenceInDate->days );
+			$deliverySlippages [] = $deliverySlippage;
+		}
+		
+		return $deliverySlippages;
 	}
 
 	public function getSTAutomation($Month = "") {
@@ -738,7 +734,7 @@ class KPIRepository
 					$date2 = new \DateTime ( $row ['ACTUAL_PROD_LIVE_DATE'] );
 						
 					$differenceInDate = $date2->diff ( $date1 )->format ( "%a" );
-					$response = 'Details updated-' . $differenceInDate." !!!";
+					$response = 'Details updated-' . $differenceInDate;
 				}
 			} else {
 				$response = 'Some problem occurred, pls try again !!!';
@@ -799,6 +795,10 @@ class KPIRepository
 	
 			return $response;
 		}
+		
+		spl_autoload_register();
 	}
+	
+	
 	
 }

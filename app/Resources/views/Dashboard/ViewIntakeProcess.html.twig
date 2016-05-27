@@ -1,0 +1,48 @@
+<div class="text-primary pull-left">This result shows data for <strong>{{ Month }}</strong>.</div><br><br>
+<div class="row col-sm-12">		
+	<table class="table table-bordered table-hover" id="dataTable">
+		<thead>
+			<tr class="bg_grey">					
+				<th>No.</th>
+				<th>Programme</th>
+				<th>Project Name</th>
+				<th>Proposal Type</th>
+				<th>Solution Component</th>
+				<th>Project/Programme Manager</th>
+				<th>WP/PO Status</th>		
+				<th>Status</th>
+				<th>Request Date</th>
+				<th>Submission Date</th>
+				<th>Value</th>
+			</tr>
+		</thead>
+		<tbody>		
+	    	{% if KPIResults|length > 0 %}
+				{% for month, resultArr in KPIResults %}					
+					{% if resultArr|length > 0 %}
+						{% for row in resultArr %}
+							<tr>
+							<td>{{ loop.index }}</td>	
+							<td>{{ row['PROGRAMME'] }}</td>
+							<td>{{ row['PROJECTNAME'] }}</td>
+							<td>{{ row['PROPOSAL_TYPE'] }}</td>
+							<td>{{ row['SOLUTION_COMPONENT'] }}</td>
+							<td>{{ row['PROJ_PROG_MGR'] }}</td>
+							<td>{{ row['WP_PO_STATUS'] }}</td>
+							<td>{{ row['STATUS'] }}</td>
+							<td>{{ row['REQUEST_DATE'] }}</td>
+							<td>{{ row['SUBMISSION_DATE'] }}</td>
+							<td>{{ row['VALUE'] }}</td>						
+							</tr>
+						{% endfor %}						
+					{% else %}
+						<tr><td class="text-primary" style="align-center" colspan="8">No data available !!!</td></tr>
+					{% endif %}
+		    	{% endfor %}
+		    {% else %}
+		    	<tr><td class="text-primary div-center" colspan="8">No data available !!!</td></tr>
+		    {% endif %} 
+		    
+		</tbody>
+	</table>			
+</div>

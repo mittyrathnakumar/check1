@@ -1,0 +1,64 @@
+{% extends 'layout.html.twig' %}
+{% block content %}
+
+<h1 class="page-header">Project Details</h1>
+ <ol class="breadcrumb">
+    <li><a href="">Projects</a></li>
+    <li class="active">Project Details</li>  
+</ol>
+
+{% if msg is defined and msg is not empty %}
+	<div class="bg-info">{{ msg }}</div>
+{% endif %}
+
+<div class="col-md-8 pull-left"><a href="{{ path('AddProject') }}"><strong>Add Project</strong></a></div></br></br>
+<div class="col-md-10">		
+	<table class="table-condensed table-bordered table-hover" id="dataTable">
+		<thead>
+			<tr class="bg_grey">					
+				<th>No.</th>
+				<th>Projectname</th>
+				<th>QC Projectname</th>
+				<th>Domain</th>
+				<th>Scope</th>
+				<th>POC</th>
+				<th>Estimated Prod Live Date</th>	
+				<th>Reusability(%)</th>		
+				<th>Gate1 Variance</th>
+				<th>Gate2 Variance</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for row in ProjectDetails %}
+				<tr>
+				<td>{{ loop.index}}</td>				
+				<td><a href="{{ path('EditProject', {ProjectID : row.getProjectID() } )}}">{{ row.getProjectName()}}</a></td>	
+				<td>{{ row.getQCProjectName()}}</a></td>
+				<td>{{ row.getDomain()}}</a></td>
+				<td>{{ row.getScope()}}</a></td>
+				<td>{{ row.getPOC()}}</td>
+				
+				{% if "now"|date('Y-m-d') > row.GetEstimatedProdLiveDate()|date('Y-m-d') %}
+    				{% set text = "bg-danger" %}
+    			{% else %}
+    				{% set text = "bg-success" %}    				
+				{% endif %}
+							
+				<td class={{ text }}>{{ row.GetEstimatedProdLiveDate()}}</td>				
+				<td>{{ row.getReusability()}}{% if row.getReusability() is not empty %}%{% endif %}</td>				
+				<td>{{ row.getGate1Variance()| number_format(2, '.', ',') }}%</td>
+				<td>{{ row.getGate2Variance()| number_format(2, '.', ',')}}%</td>
+				</tr>
+	    	{% endfor %}
+		</tbody>
+	</table>			
+</div>
+<div id="dialog" title="Result Action" class="modal_dialog"></div>
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}		
+	<script>
+		loadDataTable_Export('ProjectDetails');						
+	</script>
+{% endblock %}

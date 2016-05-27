@@ -8,57 +8,36 @@
 </div>
 <form class="form-inline" role="form" id="frmMonthSearch" method="Post" action="">
 <div class="row col-md-12">	
-    <div class="col-md-3">
-    {% if postData.Month is defined %}
-		{% set Month = postData.Month %}
-	{% else %}
-		{% set Month = "now"|date("F-y") %}
-	{% endif %}
-     <label for="Month">Month/Year : </label>	    
-	    <select name="Month" id="Month" class="form-control">
+    <div class="row col-md-3">
+	    {% if postData.Month is defined %}
+			{% set Month = postData.Month %}
+		{% else %}
+			{% set Month = "now"|date("F-y") %}
+		{% endif %}
+	     <label for="Month">Month-Year : </label>	    
+	     <select name="Month" id="Month" class="form-control">
 	       	<option value="">--Select--</option>       		       	
 	       	{% for row in monthYearArray %}
 	       		<option value="{{ row }}" {% if Month is defined and Month == row %} selected {% endif %}>{{ row }}</option>
 	       	{% endfor %}
 		 </select>
     </div>
-    <div class="col-md-2">
+    <div class="col-md-2 text-left">
       <button type="submit" name="Search" valuw="1" class="btn btn-primary">Search</button> 
 	  <button type="submit" name="ShowAll" value="1" class="btn btn-primary">Refresh</button>
     </div>
-     <div class="col-md-1">
-     <button align="left" id="Export" class="btn btn-primary">Export</button>	 
+     <div class="col-md-2 text-right">
+     <button id="Export" class="btn btn-primary">Export</button>	 
     </div>    
 </div>
 </form>
-{#
-<div>
-	<form class="form-inline" role="form" id="frmSearch" method="Post" action="">
-	  <div class="form-group">
-	    <label for="Month">Month/Year : </label>	    
-	    <select name="Month" id="Month" class="form-control">
-	       	<option value="">--Select--</option>
-	       	{% if postData.Month is defined %}
-	       		{% set Month = postData.Month %}
-	       	{% endif %}
-	       		       	
-	       	{% for row in monthYearArray %}
-	       		<option value="{{ row }}" {% if Month is defined and Month == row %} selected {% endif %}>{{ row }}</option>
-	       	{% endfor %}
-		  </select>
-	  </div>
-	  <button type="submit" name="Search" valuw="1" class="btn btn-primary">Search</button> 
-	  <button type="submit" name="ShowAll" value="1" class="btn btn-primary">Refresh</button>
-	</form>
-</div>
-#}
 <br><br>
 {% if Month is defined and Month is not empty %}
 	<div class="text-primary pull-left">This result shows data for <strong>{{ Month }}</strong>.</div><br><br>
 {% else %}
 	<div class="text-primary">(Default list shows results from current month. Pls make a search to find out other projects.)</div><br>
 {% endif %}
-<div class="col-sm-10 pull-left">
+<div class="row col-sm-10">
 	<table id="dataTable" class="table-bordered compact-table">
 		<thead>
 			<tr>				

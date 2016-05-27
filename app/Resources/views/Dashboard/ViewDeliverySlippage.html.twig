@@ -1,0 +1,36 @@
+<div class="row col-md-8">		
+	<table class="table table-bordered table-hover" id="dataTable">
+		<thead>
+			<tr class="bg_grey">					
+				<th>No.</th>
+				<th>Project Name</th>
+				<th>Estimated Prod Live Date</th>
+				<th>Actual Delivery Date</th>
+				<th>Difference</th>
+			</tr>
+		</thead>
+		<tbody>			
+	    	{% if KPIResults|length > 0 %}
+				{% for month, resultArr in KPIResults %}
+					<tr><td class="text-primary" colspan="8"><strong>{{ month }}</strong></td></tr>
+					{% if resultArr|length > 0 %}
+						{% for row in resultArr %}
+							<tr>
+							<td>{{ loop.index }}</td>	
+							<td>{{ row['PROJECTNAME'] }}</td>
+							<td>{{ row['ESTIMATED_PROD_LIVE_DATE'] }}</td>
+							<td>{{ row['ACTUAL_PROD_LIVE_DATE'] }}</td>
+							<td>{{ row['DATE_DIFF'] }}</td>
+							</tr>
+						{% endfor %}						
+					{% else %}
+						<tr><td class="text-primary" style="align-center" colspan="8">No data available !!!</td></tr>
+					{% endif %}
+		    	{% endfor %}
+		    {% else %}
+		    	<tr><td class="text-primary div-center" colspan="8">No data available !!!</td></tr>
+		    {% endif %} 
+		    
+		</tbody>
+	</table>			
+</div>

@@ -1,0 +1,177 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+
+<h1 class="page-header">Project Details</h1>
+<ol class="breadcrumb">
+    <li><a href="{{ path('ViewProjects') }}">Projects</a></li>    
+    {% if ProjectID is defined %}
+    	<li class="active">Edit Project</li>
+    {% else %}
+    	<li class="active">Add Project</li>
+    {% endif %}
+    
+</ol>
+	
+<form class="form-horizontal" role="form" id="frmAddEditProject" method="post" action="{% if ProjectID is defined %} {{ path('EditProjectPost') }} {% else %} {{ path('AddProjectPost') }} {% endif %}">
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="ProjectName">Project :</label>
+    <div class="col-sm-4">      
+       <input type="text" name="ProjectName" id="ProjectName" class="form-control" value="{% if ProjectDetails is defined %}{{ProjectDetails[0]['PROJECTNAME']|trim}}{% endif %}" required>   
+    </div>
+  </div>
+   <div class="form-group">
+    <label class="control-label col-sm-2" for="QCProjectName">QC Project name :</label>
+    <div class="col-sm-4">
+    	<input type="text" name="QCProjectName" id="QCProjectName" placeholder="QCProjectName" value="{% if ProjectDetails is defined %}{{ ProjectDetails[0]['QC_PROJECTNAME']|trim }}{% endif %}" class="form-control">       
+    </div>
+  </div>		 
+   <div class="form-group">
+    <label class="control-label col-sm-2" for="POC">POC:</label>
+    <div class="col-sm-3">
+       <input type="text" name="POC" id="POC" class="form-control" placeholder="POC" value="{% if ProjectDetails is defined %}{{ ProjectDetails[0]['POC']|trim }}{% endif %}" required autofocus>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="Domain">Domain:</label>
+    <div class="col-sm-2">
+      <input type="text" name="Domain" class="form-control" id="Domain" placeholder="Domain" value="{% if ProjectDetails is defined %}{{ ProjectDetails[0]['DOMAIN']|trim }}{% endif %}" required>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="CycleID">Cycle ID:</label>
+    <div class="col-sm-3">
+      <input type="text" name="CycleID" class="form-control" id="CycleID" placeholder="CycleID" value="{% if ProjectDetails is defined %}{{ ProjectDetails[0]['CYCLE_ID']|trim }}{% endif %}"> (Separated by comma)
+    </div>
+  </div>
+   <div class="form-group">
+    <label class="control-label col-sm-2" for="WP">WP:</label>
+    <div class="col-sm-3">
+      <input type="text" name="WP" class="form-control" id="WP" placeholder="WP" value="{% if ProjectDetails is defined %}{{ ProjectDetails[0]['WP']|trim }}{% endif %}" required>
+    </div>
+  </div>  
+   <div class="form-group">
+    <label class="control-label col-sm-2" for="Scope">Scope:</label>
+    <div class="col-sm-2">
+      <select name="Scope" id="Scope" class="form-control" placeholder="Scope" required>
+	      <option value="">--Select--</option>
+	      <option value="Dev" {% if ProjectDetails is defined and ProjectDetails[0]['SCOPE'] == 'Dev' %} selected {% endif %} >Dev</option>
+	      <option value="Testing" {% if ProjectDetails is defined and ProjectDetails[0]['SCOPE'] == 'Testing' %} selected {% endif %}>Testing</option>
+	      <option value="Both" {% if ProjectDetails is defined and ProjectDetails[0]['SCOPE'] == 'Both' %} selected {% endif %}>Both</option>
+      </select>
+    </div>
+  </div>  
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="EstimatedProdLiveDate">Estimated Prod Live Date:</label>
+    <div class="col-sm-2">
+      <input readonly type="text" name="EstimatedProdLiveDate" class="form-control datepicker" id="EstimatedProdLiveDate" placeholder="Estimated Prod Live Date" value="{% if ProjectDetails is defined %}{{ ProjectDetails[0]['ESTIMATED_PROD_LIVE_DATE']|trim }}{% endif %}" >
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="ActualProdLiveDate">Actual Prod Live Date:</label>
+    <div class="col-sm-2">
+      <input readonly type="text" name="ActualProdLiveDate" class="form-control datepicker" id="ActualProdLiveDate" placeholder="Actual Prod Live Date" value="{% if ProjectDetails is defined %}{{ ProjectDetails[0]['ACTUAL_PROD_LIVE_DATE']|trim }}{% endif %}" >
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="Reusability">Reusability(%):</label>
+    <div class="col-sm-2">
+      <input type="number" name="Reusability" class="form-control" id="Reusability" placeholder="Reusability" value="{% if ProjectDetails is defined %}{{ ProjectDetails[0]['REUSABILITY']|trim }}{% endif %}" >
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="Remark">Remark:</label>
+    <div class="col-sm-3">
+    	<textarea name="Remark" id="Remark" class="form-control">{% if ProjectDetails is defined %}{{ ProjectDetails[0]['REMARK'] }}{% endif %}</textarea>      
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="EngagementDate">Engagement Date:</label>
+    <div class="col-sm-2">
+      <input readonly type="text" name="EngagementDate" class="form-control datepicker" id="EngagementDate" placeholder="Engagement Date" value="{% if ProjectDetails is defined %}{{ ProjectDetails[0]['ENGAGEMENT_DATE']|trim }}{% endif %}" >
+    </div>
+  </div>
+   <div class="form-group">
+    <label class="control-label col-sm-2" for="Gate1EstimationDeliveryDate">Gate1 Estimation Delivery Date:</label>
+    <div class="col-sm-2">
+      <input readonly type="text" name="Gate1EstimationDeliveryDate" class="form-control datepicker" id="Gate1EstimationDeliveryDate" placeholder="Gate1 Estimation Delivery Date" value="{% if ProjectDetails is defined %}{{ ProjectDetails[0]['GATE1_ESTIMATION_DELIVERY_DATE']|trim }}{% endif %}" >
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="Gate1Estimation">Gate1 Estimation:</label>
+    <div class="col-sm-2">
+      <input type="number" name="Gate1Estimation" class="form-control" id="Gate1Estimation" placeholder="Gate1 Estimation" value="{% if ProjectDetails is defined %}{{ ProjectDetails[0]['GATE1_ESTIMATION']|trim }}{% endif %}" >
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="Gate2Estimation">Gate2 Estimation:</label>
+    <div class="col-sm-2">
+      <input type="number" name="Gate2Estimation" class="form-control" id="Gate2Estimation" placeholder="Gate2 Estimation" value="{% if ProjectDetails is defined %}{{ ProjectDetails[0]['GATE2_ESTIMATION']|trim }}{% endif %}" >
+    </div>
+  </div>
+   <div class="form-group">
+    <label class="control-label col-sm-2" for="FinalEstimation">Final Estimation:</label>
+    <div class="col-sm-2">
+      <input type="number" name="FinalEstimation" class="form-control" id="FinalEstimation" placeholder="Final Estimation" value="{% if ProjectDetails is defined %}{{ ProjectDetails[0]['FINAL_ESTIMATION']|trim }}{% endif %}" >
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="DocumentName">Document Name:</label>
+    <div class="col-sm-3">
+      <input type="text" name="DocumentName" class="form-control" id="DocumentName" placeholder="Document Name" value="{% if ProjectDetails is defined %}{{ ProjectDetails[0]['DOCUMENT_NAME']|trim }}{% endif %}" >
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="DocumentType">Document Type:</label>
+    <div class="col-sm-2">
+      <input type="text" name="DocumentType" class="form-control" id="DocumentType" placeholder="Document Type" value="{% if ProjectDetails is defined %}{{ ProjectDetails[0]['DOCUMENT_TYPE']|trim }}{% endif %}" >
+    </div>
+  </div>
+  {# <div class="form-group">
+    <label class="control-label col-sm-2" for="TestingEnvType">Testing:</label>
+    <div class="col-sm-2">
+      <select name="TestingEnvType" id="TestingEnvType" class="form-control" placeholder="User Role" required>
+	      <option>--Select--</option>
+	      <option value="Dev">Dev</option>
+	      <option value="Testing">Testing</option>
+	      <option value="Both">Both</option>
+      </select>
+    </div>
+  </div> #}
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="DeliveryDate">Delivery Date:</label>
+    <div class="col-sm-2">
+      <input readonly type="text" name="DeliveryDate" class="form-control datepicker" id="DeliveryDate" placeholder="Delivery Date" value="{% if ProjectDetails is defined %}{{ ProjectDetails[0]['DELIVERY_DATE']|trim }}{% endif %}">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="SignoffDate">Sign off Date:</label>
+    <div class="col-sm-2">
+      <input readonly type="text" name="SignoffDate" class="form-control datepicker" id="SignoffDate" placeholder="Sign off Date" value="{% if ProjectDetails is defined %}{{ ProjectDetails[0]['SIGN_OFF_DATE']|trim }}{% endif %}">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="RepositoryLink">Repository Link:</label>
+    <div class="col-sm-4">
+      <input type="url" name="RepositoryLink" class="form-control" id="RepositoryLink" placeholder="Repository Link" value="{% if ProjectDetails is defined %}{{ ProjectDetails[0]['REPOSITORY_LINK']|trim }}{% endif %}">
+    </div>
+  </div>  
+   <div class="form-group">
+	    <div class="col-sm-offset-2 col-sm-10">
+	      <button type="submit" name="submit" id="submit" class="btn btn-primary">Submit</button>
+	      <button type="reset" name="reset" id="reset" class="btn btn-primary">Reset</button>
+	    </div>
+	  </div>	 
+  <div id="dialog" title="Result Action" class="modal-dialog"></div>
+   <input type="hidden" name="ProjectID" value="{% if ProjectID is defined %}{{ ProjectID }}{% endif %}" >
+</form>
+
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	<script src="{{ asset('js/Projects/Projects_common.js') }}"></script>
+	<script>
+		formGeneralFunctions();
+	</script>
+{% endblock %}

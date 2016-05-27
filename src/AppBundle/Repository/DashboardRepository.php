@@ -345,11 +345,12 @@ class DashboardRepository
 	private function getKPIProjectData($KPIResult, $Month){
 		
 		$conn = $this->oracle->getConnection();
+		$KPIResults = array();		
 		
 		/* QC PROJECTS RESULT */			
 		
 		if($KPIResult['QC'] == 1){
-		
+			
 			if($KPIResult['SCOPE'] != 'Both'){
 				if($KPIResult['SCOPE'] == 'Dev')
 					$KPIProjectScope = 'Dev';
@@ -371,7 +372,8 @@ class DashboardRepository
 				 while($ProjectResultTemp = oci_fetch_array($queryProjectsParse, OCI_ASSOC+OCI_RETURN_NULLS)){
 				 	$ProjectResult[] = $ProjectResultTemp;
 				 }
-				 	
+				 
+				 //print_r($ProjectResult);exit;
 				 if(count($ProjectResult) > 0){
 				 		
 				 	if(!empty($conn))
@@ -508,8 +510,9 @@ class DashboardRepository
 		
 			switch($KPID){
 				
-				case "5" :
-						
+				/* Delivery Slippage */
+				case "5" :						
+					$KPIResults = $this->getDeliverySlippageResult($KPID, $Month);										
 					break;
 						
 				case "8" :
@@ -523,14 +526,18 @@ class DashboardRepository
 				case "10" :
 						
 					break;
-						
+				
+				
+				/* Intake Process */		
 				case "11" :
-						
+					$KPIResults = $this->getIntakeProcessResult($KPID, $Month);
 					break;
-						
+					
+				/* Quality Estimation */
 				case "12" :
-						
+					$KPIResults = $this->getQualityEstimationResult($KPID, $Month);
 					break;
+					
 				case "13" :
 						
 					break;
@@ -549,14 +556,12 @@ class DashboardRepository
 						
 				/* Defect free deliveries (P1 and P2) */
 				case "6" :
-					$KPIResults = $this->getP1P2KPIResult($KPID, $Month);
-					//echo "<pre>";print_r($DefectbasedKPIResult);exit;					
+					$KPIResults = $this->getP1P2KPIResult($KPID, $Month);										
 					break;
 						
 					/* # of Defect (P3 and P4) */
 				case "7" :
 					$KPIResults = $this->getP3P4KPIResult($KPID, $Month);
-					//echo "<pre>";print_r($DefectbasedKPIResult);exit;
 					break;					
 		
 					/* Defect Density (P1 and P2) - Production + 60 days) */
@@ -589,6 +594,98 @@ class DashboardRepository
 		return $KPIResults;
 		
 	}	
+	
+	private function getQualityEstimationResult($KPID, $Month){
+		$conn = $this->oracle->getConnection();
+	
+		if(!empty($Month)){
+			$EstimationResult[$Month] = array();
+			$EstimationResultTemp = array();
+			$EstimationTemp = array();				
+		
+			$query = "SELECT * FROM KPI_QUALITY_ESITMATION
+					WHERE ACTIVE = 1
+					AND (TO_CHAR(ENGAGEMENT_DATE, 'MON/YY') LIKE '%".$Month."%'
+					OR TO_CHAR(GATE1_ESTIMATION_DELIVERY_DATE, 'MON/YY') LIKE '%".$Month."%') ORDER BY ENGAGEMENT_DATE";
+		
+			//echo $query;exit;
+			$queryParse = oci_parse($conn, $query);
+			oci_execute($queryParse);		
+		
+			while ($row = oci_fetch_array($queryParse, OCI_ASSOC+OCI_RETURN_NULLS)) {				
+				$EstimationTemp['PROJECTNAME'] =  $row ['PROJECT_NAME'];
+				$EstimationTemp['ENGAGEMENT_DATE'] = $row['ENGAGEMENT_DATE'];								
+				$EstimationTemp['GATE1_ESTIMATION_DELIVERY_DATE'] = $row['GATE1_ESTIMATION_DELIVERY_DATE'];
+				$EstimationTemp['DIFF_DATES'] = $row['DIFF_DATES'];
+				$EstimationTemp['GATE1_ESTIMATION'] = $row['GATE1_ESTIMATION'];
+				$EstimationTemp['GATE2_ESTIMATION'] = $row['GATE2_ESTIMATION'];
+				$EstimationTemp['FINAL_ESTIMATION'] = $row['FINAL_ESTIMATION'];
+				$EstimationTemp['GATE1_VARIANCE'] = $row['GATE1_VARIANCE'];
+				$EstimationTemp['GATE2_VARIANCE'] = $row['GATE2_VARIANCE'];				
+					
+				$EstimationResultTemp[] = $EstimationTemp;
+			}
+			
+			$EstimationResult[$Month] = $EstimationResultTemp;
+			oci_free_statement($queryParse);
+			$this->oracle->closeConnection();
+		}
+		
+		else
+			$EstimationResult = array();
+	
+		
+		//echo "<pre>";print_r($EstimationResult);exit;
+	
+		return $EstimationResult;
+		
+	}
+	
+	private function getIntakeProcessResult($KPID, $Month){		
+		
+		$conn = $this->oracle->getConnection();					
+		
+		if(!empty($Month)){
+			$ProcessResult[$Month] = array();
+			$ProcessResultTemp = array();
+			$ProcessTemp = array();
+			
+			$query = "SELECT * FROM KPI_INTAKE_PROCESS 
+					WHERE ACTIVE = 1 
+					AND (TO_CHAR(REQUEST_DATE, 'MON/YY') LIKE '%".$Month."%'
+					OR TO_CHAR(SUBMISSION_DATE, 'MON/YY') LIKE '%".$Month."%')";
+		
+			$queryParse = oci_parse($conn, $query);
+			oci_execute($queryParse);
+	
+			while ($row = oci_fetch_array($queryParse, OCI_ASSOC+OCI_RETURN_NULLS)) {
+				
+				$ProcessTemp['PROGRAMME'] = $row['PROGRAMME'];
+				$ProcessTemp['PROJECTNAME'] =  $row ['PROJECT_NAME'];				
+				$ProcessTemp['PROPOSAL_TYPE'] = $row['PROPOSAL_TYPE'];
+				$ProcessTemp['SOLUTION_COMPONENT'] = $row['SOLUTION_COMPONENT'];
+				$ProcessTemp['PROJ_PROG_MGR'] = $row['PROJ_PROG_MGR'];
+				$ProcessTemp['WP_PO_STATUS'] = $row['WP_PO_STATUS'];
+				$ProcessTemp['STATUS'] = $row['STATUS'];
+				$ProcessTemp['REQUEST_DATE'] = $row['REQUEST_DATE'];
+				$ProcessTemp['SUBMISSION_DATE'] = $row['SUBMISSION_DATE'];
+				$ProcessTemp['VALUE'] = $row['VALUE'];
+					
+				$ProcessResultTemp[] = $ProcessTemp;
+			}
+			
+			$ProcessResult[$Month] = $ProcessResultTemp;			
+			oci_free_statement($queryParse);						
+		}	
+		else 
+			$ProcessResult[] = array();
+		
+		//echo "<pre>";print_r($ProcessResult);exit;
+		
+		return $ProcessResult;
+	
+		
+	}
 	
 	private function get60KPIResult($KPID, $Month, $DefectType){
 		$conn = $this->oracle->getConnection();
@@ -657,6 +754,47 @@ class DashboardRepository
 		return $DefectsResult;
 		
 	}
+	
+	private function getDeliverySlippageResult($KPID, $Month){
+		$conn = $this->oracle->getConnection();		
+		
+		if(!empty($Month)){
+			$query = "SELECT PROJECTID, PROJECTNAME, ESTIMATED_PROD_LIVE_DATE, ACTUAL_PROD_LIVE_DATE
+					FROM KPI_PROJECTS
+					WHERE ACTIVE = 1
+					AND TO_CHAR(ESTIMATED_PROD_LIVE_DATE, 'MON/YY') LIKE '%". $Month . "%'";	
+			
+			$queryParse = oci_parse ( $conn, $query );
+			oci_execute ( $queryParse );
+			$DeliveryResult[$Month] = array();
+			$DeliveryResultTemp = array();
+			$DeliveryTemp = array();
+			
+			while ( $row = oci_fetch_array ( $queryParse, OCI_ASSOC + OCI_RETURN_NULLS ) ) {	
+				$date1 = new \DateTime ( $row ['ESTIMATED_PROD_LIVE_DATE'] );
+				$date2 = new \DateTime ( $row ['ACTUAL_PROD_LIVE_DATE'] );
+				
+				$differenceInDate = $date2->diff ( $date1 );
+				
+				$DeliveryTemp['PROJECTID'] =  $row ['PROJECTID'];
+				$DeliveryTemp['PROJECTNAME'] =  $row ['PROJECTNAME'];
+				$DeliveryTemp['ESTIMATED_PROD_LIVE_DATE'] =  $row ['ESTIMATED_PROD_LIVE_DATE'];
+				$DeliveryTemp['ACTUAL_PROD_LIVE_DATE'] =  $row ['ACTUAL_PROD_LIVE_DATE'];
+				$DeliveryTemp['DATE_DIFF'] =  $differenceInDate->days;			
+			
+				$DeliveryResultTemp[] = $DeliveryTemp;
+			}
+			
+			$DeliveryResult[$Month] = $DeliveryResultTemp;
+		} else 
+			$DeliveryResult[] = array();
+		
+		//echo "<pre>";print_r($DeliveryResult);exit;
+	
+		return $DeliveryResult;
+	}
+	
+	
 	
 	private function getP1P2KPIResult($KPID, $Month){		
 		
