@@ -1,0 +1,68 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+
+{% set sessionUserModuleIDAccess = app.session.get('UserModuleIDAccess') %}
+
+{# DEFINE CONSTANT IDs FOR MODULES #}
+
+{% set DASHBOARD = 1 %}
+{% set DATA_INPUTS = 2 %}
+{% set USER_MANAGEMENT = 3 %}
+
+{% set PROJECTS = 4 %}
+{% set DELIVERY_SLIPPAGE = 5 %}
+{% set ST_AUTOMATION = 6 %}
+
+{% set ITSM_DEFECTS = 7 %}
+{% set INTAKE_PROCESS = 8 %}
+{% set QUALITY_ESTIMATION = 9 %}
+
+{% set DOCUMENTATION = 10 %}
+{% set PROD_TEST_ACCOUNTS = 11 %}
+	
+
+{# === #}
+
+
+<h1 class="page-header">Data Inputs</h1>
+<div>
+  <ol class="list-group">
+	   {% if PROJECTS in sessionUserModuleIDAccess %}
+			<a href="{{ path('ViewProjects') }}" target="_blank"><li class="list-group-item">Projects</li></a>
+	   {% endif %}
+	   
+	   {% if DELIVERY_SLIPPAGE in sessionUserModuleIDAccess %}
+			<a href="{{ path('DeliverySlippages') }}" target="_blank"><li class="list-group-item">Delivery Slippage</li></a>
+	   {% endif %}
+	   
+	   {% if ST_AUTOMATION in sessionUserModuleIDAccess %} 
+			<a href="{{ path('STAutomation') }}" target="_blank"><li class="list-group-item">ST Automation</li></a>
+	   {% endif %} 
+	      
+	   {% if ITSM_DEFECTS in sessionUserModuleIDAccess %}
+	    	<a href="{{ path('ITSMDefects') }}" target="_blank"><li class="list-group-item">ITSM Defects</li></a>
+	   {% endif %}
+	   
+	   {% if INTAKE_PROCESS in sessionUserModuleIDAccess %}
+	   	    <a href="{{ path('IntakeProcess') }}" target="_blank"><li class="list-group-item">Intake Process</li></a>
+	   {% endif %}	   	   
+	   
+	   {% if QUALITY_ESTIMATION in sessionUserModuleIDAccess %}
+	    	<a href="{{ path('QualityEstimation') }}" target="_blank"><li class="list-group-item">Quality Estimation</li></a>
+	   {% endif %}	    
+	    
+	   {% if DOCUMENTATION in sessionUserModuleIDAccess %}
+	   		<a href="{{ path('Documentation') }}" target="_blank"><li class="list-group-item">Documentation/Knowledge Management</li></a>
+	   {% endif %}	    
+	   
+	   {% if PROD_TEST_ACCOUNTS in sessionUserModuleIDAccess %}
+	    	<a href="{{ path('ViewProdTestAccounts') }}" target="_blank"><li class="list-group-item">Production Test Account</li></a>
+  	   {% endif %}
+  </ol>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}	
+{% endblock %}

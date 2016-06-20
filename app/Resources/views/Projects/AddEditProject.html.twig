@@ -2,6 +2,9 @@
 
 {% block content %}
 
+{% set sessionUserRole = app.session.get('UserRole') %}
+
+
 <h1 class="page-header">Project Details</h1>
 <ol class="breadcrumb">
     <li><a href="{{ path('ViewProjects') }}">Projects</a></li>    
@@ -9,84 +12,143 @@
     	<li class="active">Edit Project</li>
     {% else %}
     	<li class="active">Add Project</li>
-    {% endif %}
-    
+    {% endif %}    
 </ol>
-<form class="form-horizontal" role="form" id="frmAddEditProject" method="post" action="{% if ProjectID is defined %} {{ path('EditProjectPost') }} {% else %} {{ path('AddProjectPost') }} {% endif %}">
+
+{# Make certain fields disable/enable based on PMO / Manager role #}
+
+{% set readonlyforMgr = '' %}
+{% set readonlyforPMO = '' %}
+{% set requiredforMgr = '' %}
+{% set requiredforPMO = '' %}
+{% set disabledforPMO = '' %}
+
+
+{% if sessionUserRole == 4 %}   {# For PMO #}
+	{# {% set readonlyforPMO = 'readonly' %} #}	
+	{% set requiredforPMO = 'required' %}
+{% elseif sessionUserRole == 2 or sessionUserRole == 3 %} {# For Managers #}
+	{% set readonlyforMgr = 'readonly' %}
+	{% set requiredforMgr = 'required' %}
+{% endif %}
+
+{# === #}
+
+{% if msg is defined and msg is not empty %}
+    <div class="bg-danger">{{ msg }}</div><br>
+{% endif %}
+
+
+{% if Month is defined and Month is not empty%}
+	{% set Month = Month %}
+{% else %}
+	{% set Month = '' %}
+{% endif %}
+
+{% if ProjectID is defined and ProjectID is not empty %}
+	{% set ProjectID = ProjectID %}
+{% else %}
+	{% set ProjectID = '' %}
+{% endif %}
+
+
+
+{% if postData is defined  and postData['ProjectName'] is not empty %}
+	{% set ProjectName = postData['ProjectName'] %}
+{% elseif ProjectDetails.getProjectName is defined %}
+	{% set ProjectName = ProjectDetails.getProjectName %}
+{% else %}
+	{% set ProjectName = '' %}
+{% endif %}
+
+
+
+<form class="form-horizontal" role="form" id="frmAddEditProject" method="post" action="{% if ProjectID is defined and ProjectID is not empty %} {{ path('EditProjectPost') }} {% else %} {{ path('AddProjectPost') }} {% endif %}">
  
   <div class="form-group">
     <label class="control-label col-sm-2" for="ProjectName">Project :</label>
     <div class="col-sm-4">      
-       <input type="text" name="ProjectName" id="ProjectName" placeholder="ProjectName" class="form-control" value="{% if ProjectDetails is defined %}{{ProjectDetails.getProjectName|trim}}{% endif %}" required>   
+       <input {{ readonlyforMgr }} type="text" name="ProjectName" id="ProjectName" placeholder="ProjectName" class="form-control" value="{% if ProjectDetails is defined %}{{ ProjectDetails['ProjectName']|trim }}{% endif %}" {{ requiredforPMO }} >   
     </div>
   </div>
+  {#
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="QCTableName">QC Table Name:</label>
+    <div class="col-sm-4">      
+       <input type="text" name="QCTableName" id="QCTableName" placeholder="QCTableName" class="form-control" value="{% if ProjectDetails is defined %}{{ ProjectDetails['QCTableName']|trim }}{% endif %}">   
+    </div>
+  </div>
+  #}
    <div class="form-group">
     <label class="control-label col-sm-2" for="QCProjectName">QC Project name :</label>
     <div class="col-sm-4">
-    	<input type="text" name="QCProjectName" id="QCProjectName" placeholder="QCProjectName" value="{% if ProjectDetails is defined %}{{ ProjectDetails.getQCProjectName|trim }}{% endif %}" class="form-control">       
+    	<input {{ readonlyforPMO }} type="text" name="QCProjectName" id="QCProjectName" placeholder="QCProjectName" value="{% if ProjectDetails is defined %}{{ ProjectDetails['QCProjectName']|trim }}{% endif %}" class="form-control" {{ requiredforMgr }} >       
     </div>
-  </div>		 
+  </div>
+  		 
    <div class="form-group">
     <label class="control-label col-sm-2" for="POC">POC:</label>
     <div class="col-sm-3">
-       <input type="text" name="POC" id="POC" class="form-control" placeholder="POC" value="{% if ProjectDetails is defined %}{{ ProjectDetails.getPOC|trim }}{% endif %}" required autofocus>
+       <input {{ readonlyforPMO }}  type="text" name="POC" id="POC" class="form-control" placeholder="POC" value="{% if ProjectDetails is defined %}{{ ProjectDetails['POC']|trim }}{% endif %}" {{ requiredforMgr }}>
     </div>
   </div>
+  
   <div class="form-group">
     <label class="control-label col-sm-2" for="Domain">Domain:</label>
     <div class="col-sm-2">
-      <input type="text" name="Domain" class="form-control" id="Domain" placeholder="Domain" value="{% if ProjectDetails is defined %}{{ ProjectDetails.getDomain|trim }}{% endif %}" required>
+      <input {{ readonlyforPMO }}  type="text" name="Domain" class="form-control" id="Domain" placeholder="Domain" value="{% if ProjectDetails is defined %}{{ ProjectDetails['Domain']|trim }}{% endif %}" {{ requiredforMgr }}>
     </div>
   </div>
+  
   <div class="form-group">
     <label class="control-label col-sm-2" for="CycleID">Cycle ID:</label>
     <div class="col-sm-3">
-      <input type="text" name="CycleID" class="form-control" id="CycleID" placeholder="CycleID" value="{% if ProjectDetails is defined %}{{ ProjectDetails.getCycleID|trim }}{% endif %}"> (Separated by comma)
+      <input {{ readonlyforPMO }}  type="text" name="CycleID" class="form-control" id="CycleID" placeholder="CycleID" value="{% if ProjectDetails is defined %}{{ ProjectDetails['CycleID']|trim }}{% endif %}" {{ requiredforMgr }}> (Separated by comma)
     </div>
   </div>
    <div class="form-group">
     <label class="control-label col-sm-2" for="WP">WP:</label>
-    <div class="col-sm-3">
-      <input type="text" name="WP" class="form-control" id="WP" placeholder="WP" value="{% if ProjectDetails is defined %}{{ ProjectDetails.getWP|trim }}{% endif %}" required>
+    <div class="col-sm-5">
+      <input {{ readonlyforMgr }} type="text" name="WP" class="form-control" id="WP" placeholder="WP" value="{% if ProjectDetails is defined %}{{ ProjectDetails['WP']|trim }}{% endif %}" {{ requiredforPMO }}>
     </div>
   </div>  
    <div class="form-group">
     <label class="control-label col-sm-2" for="Scope">Scope:</label>
     <div class="col-sm-2">
-      <select name="Scope" id="Scope" class="form-control" placeholder="Scope" required>
+      <select {{ disabledforPMO }}  name="Scope" id="Scope" class="form-control" placeholder="Scope" {{ requiredforMgr }}>
 	      <option value="">--Select--</option>
-	      <option value="Dev" {% if ProjectDetails is defined and ProjectDetails.getScope == 'Dev' %} selected {% endif %} >Dev</option>
-	      <option value="Testing" {% if ProjectDetails is defined and ProjectDetails.getScope == 'Testing' %} selected {% endif %}>Testing</option>
-	      <option value="Both" {% if ProjectDetails is defined and ProjectDetails.getScope == 'Both' %} selected {% endif %}>Both</option>
-      </select>
+	      <option value="Dev" {% if ProjectDetails is defined and ProjectDetails['Scope'] == 'Dev' %} selected {% endif %} >Dev</option>
+	      <option value="Testing" {% if ProjectDetails is defined and ProjectDetails['Scope'] == 'Testing' %} selected {% endif %}>Testing</option>
+	      <option value="Both" {% if ProjectDetails is defined and ProjectDetails['Scope'] == 'Both' %} selected {% endif %}>Both</option>
+      </select>      
     </div>
   </div>  
   <div class="form-group">
     <label class="control-label col-sm-2" for="EstimatedProdLiveDate">Estimated Prod Live Date:</label>
     <div class="col-sm-2">
-      <input readonly type="text" name="EstimatedProdLiveDate" class="form-control datepicker" id="EstimatedProdLiveDate" placeholder="Estimated Prod Live Date" value="{% if ProjectDetails is defined %}{{ ProjectDetails.getEstimatedProdLiveDate|trim }}{% endif %}" >
+      <input readonly type="text" name="EstimatedProdLiveDate" class="form-control datepicker" id="EstimatedProdLiveDate" placeholder="Estimated Prod Live Date" value="{% if ProjectDetails is defined %}{{ ProjectDetails['EstimatedProdLiveDate']|trim }}{% endif %}" {{ requiredforMgr }}>
     </div>
   </div>
   <div class="form-group">
     <label class="control-label col-sm-2" for="ActualProdLiveDate">Actual Prod Live Date:</label>
     <div class="col-sm-2">
-      <input readonly type="text" name="ActualProdLiveDate" class="form-control datepicker" id="ActualProdLiveDate" placeholder="Actual Prod Live Date" value="{% if ProjectDetails is defined %}{{ ProjectDetails.getActualProdLiveDate|trim }}{% endif %}" >
+      <input readonly type="text" name="ActualProdLiveDate" class="form-control datepicker" id="ActualProdLiveDate" placeholder="Actual Prod Live Date" value="{% if ProjectDetails is defined %}{{ ProjectDetails['ActualProdLiveDate']|trim }}{% endif %}" >
     </div>
   </div>
   <div class="form-group">
     <label class="control-label col-sm-2" for="Reusability">Reusability(%):</label>
     <div class="col-sm-2">
-      <input type="number" name="Reusability" class="form-control" id="Reusability" placeholder="Reusability" value="{% if ProjectDetails is defined %}{{ ProjectDetails.getReusability|trim }}{% endif %}" >
+      <input {{ readonlyforPMO }}  type="number" name="Reusability" class="form-control" id="Reusability" placeholder="Reusability" value="{% if ProjectDetails is defined %}{{ ProjectDetails['Reusability']|trim }}{% endif %}" {{ requiredforMgr }}>
     </div>
   </div>
   
   <div class="form-group">
     <label class="control-label col-sm-2" for="uatApplicable">UAT Applicable:</label>
     <div class="col-sm-2">
-      <select name="uatApplicable" id="uatApplicable" class="form-control" placeholder="uatApplicable" required>
+      <select {{ disabledforPMO }}  name="uatApplicable" id="uatApplicable" class="form-control" placeholder="uatApplicable" {{ requiredforMgr }}>
 	      <option value="">--Select--</option>
-	      <option value="Yes" {% if ProjectDetails is defined and ProjectDetails.getUatApplicable == 'Yes' %} selected {% endif %}>Yes</option>
-	      <option value="No" {% if ProjectDetails is defined and ProjectDetails.getUatApplicable == 'No' %} selected {% endif %}>No</option>
+	      <option value="Yes" {% if ProjectDetails is defined and ProjectDetails['uatApplicable'] == 'Yes' %} selected {% endif %}>Yes</option>
+	      <option value="No" {% if ProjectDetails is defined and ProjectDetails['uatApplicable'] == 'No' %} selected {% endif %}>No</option>
 	     </select>
     </div>
   </div> 
@@ -94,15 +156,15 @@
   <div class="form-group">
     <label class="control-label col-sm-2" for="stAutomatedTestCases">No of Automated Test cases in ST :</label>
     <div class="col-sm-3">
-      <input type="text" name="stAutomatedTestCases" class="form-control" id="stAutomatedTestCases" placeholder="No of Automated Test cases in ST" value="{% if ProjectDetails is defined %}{{ ProjectDetails.getSTAutomatedTestCases|trim }}{% endif %}" required>
+      <input {{ readonlyforPMO }}  type="text" name="stAutomatedTestCases" class="form-control" id="stAutomatedTestCases" placeholder="No of Automated Test cases in ST" value="{% if ProjectDetails is defined %}{{ ProjectDetails['stAutomatedTestCases']|trim }}{% endif %}">
     </div>
   </div>
   <div class="form-group">
      <label class="control-label col-sm-2" for="stTotalTestCases">Total No. of Test Cases in ST :</label>
     <div class="col-sm-3">
-      <input type="text" name="stTotalTestCases" class="form-control" id="stTotalTestCases" placeholder="Total No. of Test Cases in ST" value="{% if ProjectDetails is defined %}{{ ProjectDetails.getSTTotalTestCases|trim }}{% endif %}" required>
+      <input {{ readonlyforPMO }}  type="text" name="stTotalTestCases" class="form-control" id="stTotalTestCases" placeholder="Total No. of Test Cases in ST" value="{% if ProjectDetails is defined %}{{ ProjectDetails['stTotalTestCases']|trim }}{% endif %}">
     </div>
-  </div>
+  </div>  
    <div class="form-group">
 	    <div class="col-sm-offset-2 col-sm-10">
 	      <button type="submit" name="submit" id="submit" class="btn btn-primary">Submit</button>
@@ -110,7 +172,10 @@
 	    </div>
 	  </div>	 
   <div id="dialog" title="Result Action" class="modal-dialog"></div>
-   <input type="hidden" name="ProjectID" value="{% if ProjectID is defined %}{{ ProjectID }}{% endif %}" >
+   <input type="hidden" name="ProjectID" value="{{ ProjectID }}" >
+   <input type="hidden" name="Month" value="{{ Month }}" >
+   <input type="hidden" id="RoleID" value="{{ sessionUserRole }}" >
+   
 </form>
 
 {% endblock %}
@@ -119,6 +184,6 @@
 	{{ parent() }}
 	<script src="{{ asset('js/Projects/Projects_common.js') }}"></script>
 	<script>
-		formGeneralFunctions();
+		ProjectFormGeneralFunctions();
 	</script>
 {% endblock %}

@@ -32,25 +32,12 @@ $(function() {
 			dataType : 'JSON',
 			data : Data,
 			success : function(data) {
+				
 				var split = data.split("-");
 				var data2 =split[0]; 
-				var data3=split[1];
-				$( "#dialog" ).dialog({
-					   modal: true,
-				       autoOpen: false,		
-				       height: 200,
-					   width: 400,
-				       buttons: {
-				          Ok : function(){
-				        	  $(this).dialog("close");
-				          }
-				       } 						       
-				 });
-				
-				htmltext = "<div class='small'>"+data2+"</div>";
-				
-				$( "#dialog" ).html(htmltext);
-				$( "#dialog" ).dialog( "open" );
+				var data3=split[1];		
+
+				window.location.reload();
 				
 				$(stAutomationid).html(data3);
 				

@@ -10,12 +10,9 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
 
-//use Symfony\Component\HttpFoundation\ParameterBag;
-
 use AppBundle\Repository\KPIRepository;
 use AppBundle\Repository\ProjectRepository;
 use AppBundle\Repository\DashboardRepository;
-
 
 
 
@@ -26,16 +23,7 @@ use AppBundle\Repository\DashboardRepository;
 class KPIController extends Controller 
 {	
 	
-	/**
-	 * @var adminRepository
-	 */
-	
-	private $adminRespository;
-	
-	public function __construct(){
-		$this->KPIRepository = new KPIRepository();		
-	}	
-	
+
 	
 	/**
 	 * @Route("/KPI/ITSMDefects", name="ITSMDefects")
@@ -43,13 +31,19 @@ class KPIController extends Controller
 	 */
 	public function renderITSMDefectsAction(Request $request) {
 	
-		// USER AUTHENTICATION
+		/* USER AUTHENTICATION */
+		
 		$session = new Session();
 		$userID = $session->get('UserID');
-	
+		
 		if(empty($userID)){
-			return $this->redirectToRoute('Login');	
-		}				
+			$referrer = $request->attributes->get('_route');
+			$parameters = array();
+			$parameters['referrer'] = $referrer;
+			return $this->redirectToRoute('Login', $parameters);
+		}
+		
+		/* === */				
 	
 		$KPIRepository = new KPIRepository();		
 		$DefectDetails = $KPIRepository->getDefectDetails();
@@ -74,7 +68,7 @@ class KPIController extends Controller
 		
 		if(!empty($postData['action']) && $postData['action'] == 'updateDefects'){					
 			$KPIRepository = new KPIRepository();		
-			$response = $this->KPIRepository->updateDefectDetails($postData);
+			$response = $KPIRepository->updateDefectDetails($postData);
 			return new JsonResponse($response);
 		}
 		
@@ -100,22 +94,19 @@ class KPIController extends Controller
 	 */
 	public function renderIntakeProcessAction(Request $request) {
 	
-		// USER AUTHENTICATION
+		/* USER AUTHENTICATION */
+		
 		$session = new Session();
 		$userID = $session->get('UserID');
-	
+		
 		if(empty($userID)){
-			/*$RquestedUrl = $request->attributes->all()['_route'];
+			$referrer = $request->attributes->get('_route');
 			$parameters = array();
-			
-			if($RquestedUrl != 'Login'){
-				$parameters = array($RquestedUrl);
-			}
-			
+			$parameters['referrer'] = $referrer;
 			return $this->redirectToRoute('Login', $parameters);
-			*/			
-			return $this->redirectToRoute('Login');
 		}
+		
+		/* === */
 		
 		$KPIRepository = new KPIRepository();
 		
@@ -146,35 +137,6 @@ class KPIController extends Controller
 	
 	}
 	
-	/**
-	 * @Route("/KPI/IntakeProcess/{Auto}", name="IntakeProcessAuto")
-	 * @Method({"GET","HEAD"})
-	 */
-	/*public function renderIntakeProcessAutoAction(Request $request, $Auto) {
-	
-		// USER AUTHENTICATION
-		$session = new Session();
-		$userID = $session->get('UserID');
-	
-		if(empty($userID)){
-			return $this->redirectToRoute('Login');
-		}
-		
-		echo $Auto;exit;
-	
-		$KPIRepository = new KPIRepository();
-		$ProcessDetails = $KPIRepository->getProcessDetails();
-		$monthYearArray = $KPIRepository->getmonthArray();
-	
-		//echo "<pre>";print_r($DefectDetail);exit;
-	
-		return $this->render('KPI/IntakeProcess.html.twig', [
-				"ProcessDetails" => $ProcessDetails,
-				"monthYearArray" => $monthYearArray
-		]);
-	
-	}	
-	*/
 	
 	/**
 	 * @Route("/KPI/AddIntakeProcess", name="AddIntakeProcess")
@@ -182,16 +144,21 @@ class KPIController extends Controller
 	 */
 	public function renderAddIntakeProcessAction(Request $request) {
 	
-		/* User Authentication */		
+		/* USER AUTHENTICATION */
+		
 		$session = new Session();
 		$userID = $session->get('UserID');
-	
+		
 		if(empty($userID)){
-			return $this->redirectToRoute('Login');
+			$referrer = $request->attributes->get('_route');
+			$parameters = array();
+			$parameters['referrer'] = $referrer;
+			return $this->redirectToRoute('Login', $parameters);
 		}
 		
-		$postData = $request->request->all();
-		//echo "<pre>";print_r($postData);exit;
+		/* === */
+		
+		$postData = $request->request->all();		
 		
 		$KPIRepository = new KPIRepository();
 		
@@ -224,16 +191,21 @@ class KPIController extends Controller
 	 */
 	public function renderEditIntakeProcessAction(Request $request, $IntakeID) {
 	
-		/* User Authentication */		
+		/* USER AUTHENTICATION */
+		
 		$session = new Session();
 		$userID = $session->get('UserID');
-	
+		
 		if(empty($userID)){
-			return $this->redirectToRoute('Login');
+			$referrer = $request->attributes->get('_route');
+			$parameters = array();
+			$parameters['referrer'] = $referrer;
+			return $this->redirectToRoute('Login', $parameters);
 		}
 		
-		$postData = $request->request->all();
-		//echo "<pre>";print_r($postData);exit;
+		/* === */
+		
+		$postData = $request->request->all();		
 		
 		$KPIRepository = new KPIRepository();		 
 		
@@ -273,12 +245,18 @@ class KPIController extends Controller
 	public function renderDocumentationAction(Request $request) {
 	
 		/* USER AUTHENTICATION */
+		
 		$session = new Session();
 		$userID = $session->get('UserID');
-	
-		if(empty($userID)){			
-			return $this->redirectToRoute('Login');
-		}	
+		
+		if(empty($userID)){
+			$referrer = $request->attributes->get('_route');
+			$parameters = array();
+			$parameters['referrer'] = $referrer;
+			return $this->redirectToRoute('Login', $parameters);
+		}
+		
+		/* === */	
 	
 		$KPIRepository = new KPIRepository();
 		$DocumentDetails = $KPIRepository->getDocumentDetails();
@@ -298,13 +276,19 @@ class KPIController extends Controller
 	 */
 	public function renderAddDocumentDetailsAction(Request $request) {
 	
-		/* User Authentication */
+		/* USER AUTHENTICATION */
+		
 		$session = new Session();
 		$userID = $session->get('UserID');
-	
+		
 		if(empty($userID)){
-			return $this->redirectToRoute('Login');
+			$referrer = $request->attributes->get('_route');
+			$parameters = array();
+			$parameters['referrer'] = $referrer;
+			return $this->redirectToRoute('Login', $parameters);
 		}
+		
+		/* === */
 	
 		$postData = $request->request->all();
 		//echo "<pre>";print_r($postData);exit;
@@ -338,13 +322,19 @@ class KPIController extends Controller
 	 */
 	public function renderEditDocumentDetailsAction(Request $request, $ID) {
 	
-		/* User Authentication */
+		/* USER AUTHENTICATION */
+		
 		$session = new Session();
 		$userID = $session->get('UserID');
-	
+		
 		if(empty($userID)){
-			return $this->redirectToRoute('Login');
+			$referrer = $request->attributes->get('_route');
+			$parameters = array();
+			$parameters['referrer'] = $referrer;
+			return $this->redirectToRoute('Login', $parameters);
 		}
+		
+		/* === */
 	
 		$postData = $request->request->all();
 		//echo "<pre>";print_r($postData);exit;
@@ -391,12 +381,18 @@ class KPIController extends Controller
 	public function renderQualityEstimationAction(Request $request) {
 	
 		/* USER AUTHENTICATION */
+		
 		$session = new Session();
 		$userID = $session->get('UserID');
-	
+		
 		if(empty($userID)){
-			return $this->redirectToRoute('Login');
+			$referrer = $request->attributes->get('_route');
+			$parameters = array();
+			$parameters['referrer'] = $referrer;
+			return $this->redirectToRoute('Login', $parameters);
 		}
+		
+		/* === */
 	
 		$KPIRepository = new KPIRepository();
 		$EstimationDetails = $KPIRepository->getEstimationDetails();
@@ -416,13 +412,19 @@ class KPIController extends Controller
 	 */
 	public function renderAddQualityEstimationDetailsAction(Request $request) {
 	
-		/* User Authentication */
+		/* USER AUTHENTICATION */
+		
 		$session = new Session();
 		$userID = $session->get('UserID');
-	
+		
 		if(empty($userID)){
-			return $this->redirectToRoute('Login');
+			$referrer = $request->attributes->get('_route');
+			$parameters = array();
+			$parameters['referrer'] = $referrer;
+			return $this->redirectToRoute('Login', $parameters);
 		}
+		
+		/* === */
 	
 		
 		$postData = $request->request->all();
@@ -466,13 +468,19 @@ class KPIController extends Controller
 	 */
 	public function renderEditQualityEstimationDetailsAction(Request $request, $ID) {
 	
-		/* User Authentication */
+		/* USER AUTHENTICATION */
+		
 		$session = new Session();
 		$userID = $session->get('UserID');
-	
+		
 		if(empty($userID)){
-			return $this->redirectToRoute('Login');
+			$referrer = $request->attributes->get('_route');
+			$parameters = array();
+			$parameters['referrer'] = $referrer;
+			return $this->redirectToRoute('Login', $parameters);
 		}
+		
+		/* === */
 	
 		$postData = $request->request->all();
 		//echo "<pre>";print_r($postData);exit;
@@ -518,8 +526,20 @@ class KPIController extends Controller
 	 */
 	
 	public function renderDeliverySlippagesAction(Request $request) {
+		/* USER AUTHENTICATION */
+		
 		$session = new Session();
 		$userID = $session->get('UserID');
+		
+		if(empty($userID)){
+			$referrer = $request->attributes->get('_route');
+			$parameters = array();
+			$parameters['referrer'] = $referrer;
+			return $this->redirectToRoute('Login', $parameters);
+		}
+		
+		/* === */
+		
 		$check = "in";
 		//$obj1 = new KPIRepository ();
 		if(empty($userID)){
@@ -541,23 +561,23 @@ class KPIController extends Controller
 		else{
 			if(!empty($postData['Month']))
 				$Month = $postData['Month'];
-				else
-					$Month = '';
+			else
+				$Month = '';
 	
-					if(!empty($postData['ShowAll']) && $postData['ShowAll'] == 1){
-						return $this->redirectToRoute('DeliverySlippages');
-					}
-	
-					$deliverySlippages = $KPIRepository->getDeliverySlippages ($Month);
-					$monthYearArray = $DashRepository->getmonthYearArray ();
-	
-					//echo "<pre>";print_r($KPIResults);exit;
-	
-					return $this->render ( 'KPI/DeliverySlippage.html.twig', [
-							"DeliverySlippages" => $deliverySlippages,
-							"monthYearArray" => $monthYearArray,
-							"Month" => $Month
-					]);
+			if(!empty($postData['ShowAll']) && $postData['ShowAll'] == 1){
+				return $this->redirectToRoute('DeliverySlippages');
+			}
+
+			$deliverySlippages = $KPIRepository->getDeliverySlippages ($Month);
+			$monthYearArray = $DashRepository->getmonthYearArray ();
+
+			//echo "<pre>";print_r($KPIResults);exit;
+
+			return $this->render ( 'KPI/DeliverySlippage.html.twig', [
+					"DeliverySlippages" => $deliverySlippages,
+					"monthYearArray" => $monthYearArray,
+					"Month" => $Month
+			]);
 		}
 	}
 	
@@ -567,8 +587,20 @@ class KPIController extends Controller
 	 */
 	
 	public function renderSTAutomationAction(Request $request) {
+		/* USER AUTHENTICATION */
+		
 		$session = new Session();
 		$userID = $session->get('UserID');
+		
+		if(empty($userID)){
+			$referrer = $request->attributes->get('_route');
+			$parameters = array();
+			$parameters['referrer'] = $referrer;
+			return $this->redirectToRoute('Login', $parameters);
+		}
+		
+		/* === */
+		
 		$check = "in";
 		if(empty($userID)){
 			return $this->redirectToRoute('Login');
@@ -609,5 +641,150 @@ class KPIController extends Controller
 							"Month" => $Month
 					]);
 		}
+	}
+	/**
+	 * @Route("/KPI/ProdTestAccounts", name="ProdTestAccounts")
+	 * @Method({"GET","HEAD"})
+	 */
+	
+	public function renderProdTestAccounts(Request $request) {
+		/* USER AUTHENTICATION */
+		
+		$session = new Session();
+		$userID = $session->get('UserID');
+		
+		if(empty($userID)){
+			$referrer = $request->attributes->get('_route');
+			$parameters = array();
+			$parameters['referrer'] = $referrer;
+			return $this->redirectToRoute('Login', $parameters);
+		}
+		
+		/* === */
+		
+		$check = "in";
+		if(empty($userID)){
+			return $this->redirectToRoute('Login');
+		}
+		
+		$postData = $request->request->all();
+		return $this->render ( 'KPI/ProductionTestAccounts.html.twig', [
+		]);
+		
+	}
+	/**
+	 * @Route("/KPI/ProdTestAccounts", name="AddProdTestAccounts")
+	 * @Method({"POST","HEAD"})
+	 */
+	
+	public function renderAddProdTestAccounts(Request $request) {
+		$check = "in";
+		$session = new Session();
+		$userID = $session->get('UserID');
+		if(empty($userID)){
+			return $this->redirectToRoute('Login');
+		}
+	
+		$postData = $request->request->all();
+		$KPIRepository = new KPIRepository();
+
+		$status = $KPIRepository->addProdTestAccounts($postData);
+		$prodTestAccountsEntitys = $KPIRepository->viewProdTestAccounts($postData);
+		
+		return $this->render ( 'KPI/ViewProductionTestAccounts.html.twig', [
+				"ProdTestAccountsEntitys"=>$prodTestAccountsEntitys,
+				"msg" =>$status
+		]);
+	
+	}
+	
+	/**
+	 * @Route("/KPI/ViewProdTestAccounts", name="ViewProdTestAccounts")
+	 * @Method({"GET","HEAD"})
+	 */
+	
+	public function renderViewProdTestAccounts(Request $request) {		
+		
+		/* USER AUTHENTICATION */
+		
+		$session = new Session();
+		$userID = $session->get('UserID');
+		
+		if(empty($userID)){
+			$referrer = $request->attributes->get('_route');
+			$parameters = array();
+			$parameters['referrer'] = $referrer;
+			return $this->redirectToRoute('Login', $parameters);
+		}
+		
+		/* === */	
+		$KPIRepository = new KPIRepository();
+		
+		$prodTestAccountsEntitys = array ();		
+		$prodTestAccountsEntitys = $KPIRepository->viewProdTestAccounts();
+		
+		//echo "<pre>";print_r($prodTestAccountsEntitys);exit;
+		
+		return $this->render ( 'KPI/ViewProductionTestAccounts.html.twig', [
+				"ProdTestAccountsEntitys" => $prodTestAccountsEntitys
+		]);
+	
+	}
+	
+	/**
+	 * @Route("/KPI/EditProdTestAccounts/{rowId}", name="EditProdTestAccounts")
+	 * @Method({"GET","HEAD"})
+	 */
+	
+	public function renderEditProdTestAccounts(Request $request,$rowId) {
+		/* USER AUTHENTICATION */
+		
+		$session = new Session();
+		$userID = $session->get('UserID');
+		
+		if(empty($userID)){
+			$referrer = $request->attributes->get('_route');
+			$parameters = array();
+			$parameters['referrer'] = $referrer;
+			return $this->redirectToRoute('Login', $parameters);
+		}
+		
+		/* === */
+	
+		$postData = $request->request->all();
+		$KPIRepository = new KPIRepository();
+		
+		$prodTestAccountsEntity = $KPIRepository->viewProdTestAccountsForEdit($rowId);
+		
+		return $this->render ( 'KPI/ProductionTestAccounts.html.twig', [
+				"ProdTestAccountsEntity"=>$prodTestAccountsEntity,
+				"rowId"=>$prodTestAccountsEntity->getRowId()
+		]);
+	
+	}
+	/**
+	 * @Route("/KPI/UpdateProdTestAccounts", name="UpdateProdTestAccounts")
+	 * @Method({"POST","HEAD"})
+	 */
+	
+	public function renderUpdateProdTestAccounts(Request $request) {
+		$session = new Session();
+		$userID = $session->get('UserID');
+		
+		if(empty($userID)){
+			return $this->redirectToRoute('Login');
+		}
+	
+		$postData = $request->request->all();
+		$KPIRepository = new KPIRepository();
+		
+		$status = $KPIRepository->updateProdTestAccounts($postData);
+		$prodTestAccountsEntitys = $KPIRepository->viewProdTestAccounts();
+		
+		return $this->render ( 'KPI/ViewProductionTestAccounts.html.twig', [
+				"ProdTestAccountsEntitys"=>$prodTestAccountsEntitys,
+				"msg" =>$status
+		]);
+	
 	}
 }

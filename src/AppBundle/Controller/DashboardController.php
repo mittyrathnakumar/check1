@@ -24,13 +24,20 @@ class DashboardController extends Controller
 	
 	public function renderDashboardAction(Request $request) {	
 		
+		/* USER AUTHENTICATION */
+		
 		$session = new Session();
 		$userID = $session->get('UserID');
 		
 		if(empty($userID)){
-			return $this->redirectToRoute('Login');
-		
+			$referrer = $request->attributes->get('_route');
+			$parameters = array();
+			$parameters['referrer'] = $referrer;
+			return $this->redirectToRoute('Login', $parameters);
 		}
+		
+		/* === */
+		
 		$dashboardRepository = new DashboardRepository();
 		
 		$KPIResults = $dashboardRepository->getKPIResults();
@@ -40,8 +47,7 @@ class DashboardController extends Controller
 				"KPIResults" => $KPIResults,
 				"monthYearArray" => $monthYearArray
 		]);
-	}	
-	
+	}
 	
 	/**
 	 * @Route("/Dashboard", name="DashboardPost")
@@ -49,32 +55,56 @@ class DashboardController extends Controller
 	 */
 	
 	public function renderDashboardPostAction(Request $request) {
-		
+	
 		$session = new Session();
 		$userID = $session->get('UserID');
-		
+	
 		if(empty($userID)){
-			return $this->redirectToRoute('Login');		
+			return $this->redirectToRoute('Login');
 		}
-		
+	
 		$postData = $request->request->all();
 		$dashboardRepository = new DashboardRepository();
-		
+	
 		if(!empty($postData['ShowAll']) && $postData['ShowAll'] == 1){
-			return $this->redirectToRoute('Dashboard');	
+			return $this->redirectToRoute('Dashboard');
+		}	
+		
+		/* Ajax Post request to update Monthly KPI Cause & Action */
+		
+		if(!empty($postData['action']) && $postData['action'] == 'updateMonthlyCauseAction'){
+			//$response = array();
+			$response = $dashboardRepository->updateMonthlyKPIAction($userID, $postData['causeInsert'], $postData['actionInsert'],
+					$postData['kpiid'], $postData['month']);
+			return new JsonResponse($response);
 		}
 		
-		if(!empty($postData['action']) && $postData['action'] == 'updateCauseAction'){			
-			$dashboardRepository->updateKPIAction($userID, $newVal, $KPIID, $month);
+		/* === */
+	
+		
+		
+		/* Ajax Post request to update Project based Cause & Action */
+	
+		if(!empty($postData['action']) && $postData['action'] == 'updateCauseAction'){
+			//$dashboardRepository->updateKPIAction($userID, $newVal, $KPIID, $month);
+			$dashboardRepository->updateKPIAction($userID, $postData['column'], $postData['newVal'], $postData['KPIID'],
+												  $postData['ProjectID']);		
 		}
 		
-				
-		$KPIResults = $dashboardRepository->getKPIResults($postData['Month'], "");
+		/* === */
+		
+		
+		if(isset($postData['Weekly']) && $postData['Weekly'] == 1)
+			$Weekly = $postData['Weekly'];
+		else 
+			$Weekly = 0;
+		
+		$KPIResults = $dashboardRepository->getKPIResults($postData['Month'], "", $Weekly);
 		$monthYearArray = $dashboardRepository->getmonthYearArray();
-
+	
 		//echo "<pre>";print_r($KPIResults);exit;
 		//echo $postData['Month'];exit;
-		
+	
 		return $this->render('Dashboard/Dashboard.html.twig', [
 				"KPIResults" => $KPIResults,
 				"monthYearArray" => $monthYearArray,
@@ -83,94 +113,135 @@ class DashboardController extends Controller
 	}
 	
 	/**
-	 * @Route("/Dashboard/{Month}", name="DashboardMonth")
-	 * @method({"GET","POST"})
+	 * @Route("/ViewCauseAction/{KPIID}/{Month}", name="ViewCauseAction")
+	 * @method({"GET","HEAD"})
 	 */
 	
-	/*public function renderDashboardMonthAction(Request $request, $Month) {
-	
+	public function renderViewCauseActionAction(Request $request, $KPIID, $Month) {
+		
+		/* USER AUTHENTICATION */
+		
 		$session = new Session();
 		$userID = $session->get('UserID');
-	
+		
 		if(empty($userID)){
-			return $this->redirectToRoute('Login');
+			$referrer = $request->attributes->get('_route');
+			$parameters = array();
+			$parameters['referrer'] = $referrer;
+			return $this->redirectToRoute('Login', $parameters);
 		}
+		
+		/* === */
+	
+		if(!empty($postData['action']) && $postData['action'] == 'updateMonthlyCauseAction'){		
+						
+			$response = $dashboardRepository->updateMonthlyKPIAction($userID, $postData['cause'], $postData['action'],
+					$KPIID, $Month);
+			return new JsonResponse($response);
+			
+		} 
+		else {
+			
+			$resultArr = array();
+			$resultArr = $dashboardRepository->getMonthlyCauseAction($KPIID, $Month);
+			return $this->render('Dashboard/ViewCauseAction.html.twig', [
+					"KPIID" => $KPIID,
+					"Month" => $Month,
+					"resultArr" => $resultArr
+			]);
+			
+		}
+	}
+	
+	
+	/**
+	 * @Route("/CauseActionSubmit", name="CauseActionSubmit")
+	 * @method({"POST"})
+	 */
+	
+	public function renderCauseActionSubmitAction(Request $request) {
 		
 		$postData = $request->request->all();
 		
-		if(!empty($postData['Month']))	
-			$Month = $postData['Month'];		
-		
-		if(!empty($postData['ShowAll']) && $postData['ShowAll'] == 1){
-			return $this->redirectToRoute('Dashboard');
+		echo "<pre>";
+		print_r($postData);exit;
+	
+		$session = new Session();
+		$userID = $session->get('UserID');
+	
+		if(empty($userID)){
+			return $this->redirectToRoute('Login');	
 		}
+		
+		if(!empty($postData['action']) && $postData['action'] == 'updateMonthlyCauseAction'){
+			$dashboardRepository = new DashboardRepository();
+			$response = $dashboardRepository->updateMonthlyKPIAction($userID, $postData['cause'], $postData['action'],
+					$postData['KPIID'], $postData['Month']);
+			return new JsonResponse($response);
+		}	
+	}
 	
-		$KPIResults = $this->dashboardRepository->getKPIResults("", "", $Month);
-		$monthYearArray = $this->dashboardRepository->getmonthYearArray();
-	
-		//echo "<pre>";print_r($KPIResults);exit;
-	
-		return $this->render('Dashboard/Dashboard.html.twig', [
-				"KPIResults" => $KPIResults,
-				"monthYearArray" => $monthYearArray,
-				"Month" => $Month
-		]);
-	}*/
 	
 	/**
-	 * @Route("/KPIProjects/{KPIID}", name="KPIProjects")
+	 * @Route("/KPIList", name="KPIList")
 	 * @method({"GET","HEAD"})
 	 */
 	
-	/*public function renderKPIProjectsAction(Request $request, $KPIID) {
+	public function renderKPIListAction(Request $request) {
+	
+		/* USER AUTHENTICATION */
 		
 		$session = new Session();
 		$userID = $session->get('UserID');
 		
 		if(empty($userID)){
-			return $this->redirectToRoute('Login');		
-		}		
-	
-		$dashboardRepository = new DashboardRepository();
-		$KPIResults = $dashboardRepository->getKPIResults("", $KPIID);
-		$monthYearArray = $dashboardRepository->getmonthYearArray();
-		$KPIData = $dashboardRepository->getKPIData($KPIID);
-	
-		//echo "<pre>";print_r($KPIResults);exit;
-	
-		return $this->render('Dashboard/KPIProjectDetails.html.twig', [
-				"KPIResults" => $KPIResults,
-				"monthYearArray" => $monthYearArray,
-				"KPI" => $KPIData['KPI_NAME'],
-				"KPIData" => $KPIData
-		]);
+			$referrer = $request->attributes->get('_route');
+			$parameters = array();
+			$parameters['referrer'] = $referrer;
+			return $this->redirectToRoute('Login', $parameters);
+		}
 		
+		/* === */
+		
+		return $this->render('Dashboard/KPIList.html.twig');
 	}	
-	*/
+
 	
 	/**
 	 * @Route("/KPIProjects/{KPIID}/{Month}", name="KPIProjectsSearch")
-	 * @method({"GET","HEAD"})
+	 * @method({"GET","POST"})
 	 */
 	
 	public function renderKPIMonthAction(Request $request, $KPIID, $Month) {
 		
+		/* USER AUTHENTICATION */
+		
 		$session = new Session();
 		$userID = $session->get('UserID');
 		
 		if(empty($userID)){
-			return $this->redirectToRoute('Login');		
-		}	
+			$referrer = $request->attributes->get('_route');
+			$parameters = array();
+			$parameters['referrer'] = $referrer;
+			return $this->redirectToRoute('Login', $parameters);
+		}
+		
+		/* === */
 	
 		$dashboardRepository = new DashboardRepository();		
+		$postData = $request->request->all();
 		
+		/* Ajax Post request to update Cause & Action */
+		
+		if(!empty($postData['action']) && $postData['action'] == 'updateCauseAction'){
+			$dashboardRepository->updateKPIAction($userID, $postData['column'], $postData['newVal'], $postData['KPIID'],
+												  $postData['ProjectID']);
+		}
 		
 		$KPIResults = $dashboardRepository->getKPIResults($Month, $KPIID);
 		$monthYearArray = $dashboardRepository->getmonthYearArray();
 		$KPIData = $dashboardRepository->getKPIData($KPIID);
 	
-		/* Defect based KPI Calculation */
-		$DefectBasedKPIs = array('6', '7', '17', '18', '19', '20');
 		//echo "<pre>";print_r($KPIResults);exit;
 	
 		return $this->render('Dashboard/KPIProjectDetails.html.twig', [

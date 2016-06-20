@@ -1,0 +1,47 @@
+{% extends 'layout.html.twig' %}
+{% block content %}
+
+<h1 class="page-header">Project Details</h1>
+ <ol class="breadcrumb">
+    <li><a href="">KPI</a></li>
+    <li class="active">Production Test Accounts</li>  
+</ol>
+
+{% if msg is defined and msg is not empty %}
+	<div class="bg-info">{{ msg }}</div>
+{% endif %}
+
+<div class="col-md-8 pull-left"><a href="{{ path('ProdTestAccounts') }}"><strong>Add Production Test Accounts</strong></a></div></br></br>
+<div class="col-md-10">		
+	<table class="table-condensed table-bordered table-hover" id="dataTable">
+		<thead>
+			<tr class="bg_grey">					
+				<th>No.</th>
+				<th>Items</th>
+				<th>Total No of Accounts</th>
+				<th>Consolidated No of Accounts</th>
+				<th>Compliance Percentage</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for row in ProdTestAccountsEntitys %}			
+				<tr>
+				<td>{{ loop.index}}</td>				
+				<td><a href="{{ path('EditProdTestAccounts', { rowId : row.getMonth() } ) }}">Production Test Account - {{ row.getMonth() }}</a></td>	
+				<td>{{ row.getTotalAccounts()}}</a></td>
+				<td>{{ row.getConsolidatedTotal()}}</a></td>					
+				<td>{% if row.getProdTestAccounts() is not empty %}{{ row.getProdTestAccounts()}}%{% endif %}</td>
+				</tr>
+	    	{% endfor %}
+		</tbody>
+	</table>			
+</div>
+<div id="dialog" title="Result Action" class="modal_dialog"></div>
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}		
+	<script>
+		loadDataTable_Export('ProdTestAccountsEntitys');						
+	</script>
+{% endblock %}

@@ -1,22 +1,18 @@
 <div class="text-primary pull-left">This result shows data for <strong>{{ Month }}</strong>.</div><br>
-<div class="text-primary"><strong>KPI Definition</strong> - {{ KPIData['SLA_DESC'] }}</div>
+<div class="text-primary"><strong>KPI Definition</strong> - {{ KPIData['SLA_DESC']|e('html') }}</div>
 <div class="text-primary">Target for this KPI <strong>( {{ KPIData['OPERATOR'] }}{{ KPIData['SLA_VALUE'] }}% )</strong></div><br>
 <div class="row col-md-10">		
 	<table class="table-bordered table-condensed" id="dataTable">
 		<thead>
 			<tr>					
-				<th>No.</th>
-				<th>Deliverable</th>
+				<th>No.</th>				
 				<th>Projectname</th>				
-				<th>Document Name</th>
-				<th>For Testing</th>
-				<th>Document Type</th>
-				<th>Delivery Date</th>	
-				<th>Sign Off Date</th>		
-				<th>Repository Link</th>	
-				<th>RAG</th>	
-				<th>Cause</th>		
-				<th>Action</th>				
+				<th>ST Automated TestCases</th>
+				<th>ST Total TestCases</th>
+				<th>ST Automation %</th>	
+				<th>RAG</th>
+				<th>Cause</th>
+				<th>Action</th>					
 			</tr>
 		</thead>
 		<tbody>			
@@ -24,22 +20,28 @@
 				{% for month, resultArr in KPIResults %}					
 					{% if resultArr|length > 0 %}
 						{% for row in resultArr %}
-							<tr>
-							<td>{{ loop.index }}</td>	
-							<td>{{ row['DELIVERABLE'] }}</td>
+							{% set action = '' %}
+							{% if row['ST_AUTOMATION'] == 'N/A' %}
+								{% set naClass = 'bg_grey' %}
+							{% else %}
+								{% set naClass = '' %}
+							{% endif %}
+							
+							<tr class="{{ naClass }}">
+							<td>{{ loop.index }}</td>							
 							<td>{{ row['PROJECTNAME'] }}</td>							
-							<td>{{ row['DOCUMENT_NAME'] }}</td>
-							<td>{% if row['IS_TESTING'] == 1 %}Yes{% endif %}</td>
-							<td>{{ row['DOCUMENT_TYPE'] }}</td>							
-							<td>{{ row['DELIVERY_DATE'] }}</td>
-							<td>{{ row['SIGN_OFF_DATE'] }}</td>
-							<td>{{ row['REPOSITORY_LINK'] }}</td>
+							<td>{{ row['NO_OF_ST_AUTOMATED_TEST_CASES'] }}</td>						
+							<td>{{ row['TOTAL_NO_OF_ST_TEST_CASES'] }}</td>							
+							<td>{% if row['ST_AUTOMATION'] is not empty and row['ST_AUTOMATION'] != 'N/A'%}{{ row['ST_AUTOMATION'] }}% {% else %}
+							{{ row['ST_AUTOMATION']  }}{% endif %}</td>
 							<td>
 							{% if row['RAG'] is defined and row['RAG'] == 'green' %}
 								<img src="{{ asset("images/green_RAG.png") }}">
 							{% elseif row['RAG'] is defined and row['RAG'] == 'red' %}
 								{% set action = 1 %}
 								<img src="{{ asset("images/red_RAG.png") }}">
+							{% elseif row['RAG'] is defined and row['RAG'] == 'yellow' %}
+								<img src="{{ asset("images/yellow_RAG.png") }}">								
 							{% else %}
 								<img src="{{ asset("images/na_RAG.png") }}">
 							{% endif %}
@@ -51,13 +53,13 @@
 							{% else %}
 								<td>N/A</td>
 								<td>N/A</td>									
-							{% endif %}																				
-							</tr>	
-							<input type="hidden" name="ProjectIDHidden" id="ProjectIDHidden_{{ loop.index }}" value="{{ row['PROJECTNAME'] }}">
-						
+							{% endif %}	
+							</tr>
+							
+							<input type="hidden" name="ProjectIDHidden" id="ProjectIDHidden_{{ loop.index }}" value="{{ row['PROJECTID'] }}">
 						{% endfor %}						
 					{% else %}
-						<tr><td class="text-primary div-center" colspan="10">No data available !!!</td></tr>
+						<tr><td class="text-primary div-center" colspan="8">N/A</td></tr>
 					{% endif %}
 		    	{% endfor %}
 		    {% else %}

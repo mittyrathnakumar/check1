@@ -3,7 +3,7 @@
 {% block content %}
 
 <div class="row">
-    <div class="col-sm-12">
+    <div class="row col-sm-12">
         <ol class="breadcrumb">        
             <li class="active">Details for KPI - <strong>{{ KPI }}</strong></li>
         </ol>
@@ -16,10 +16,22 @@
 	{{ include ('Dashboard/ViewP1P2KPI.html.twig') }}
 {% elseif KPIID == 7 %}		
 	{{ include ('Dashboard/ViewP3P4KPI.html.twig') }}
+{% elseif KPIID == 8 %}		
+	{{ include ('Dashboard/ViewTDCE.html.twig') }}
+{% elseif KPIID == 9 %}		
+	{{ include ('Dashboard/ViewAutomation.html.twig') }}	
+{% elseif KPIID == 10 %}		
+	{{ include ('Dashboard/ViewReusability.html.twig') }}	
 {% elseif KPIID == 11 %}		
 	{{ include ('Dashboard/ViewIntakeProcess.html.twig') }}	
 {% elseif KPIID == 12 %}		
 	{{ include ('Dashboard/ViewQualityEstimation.html.twig') }}
+{% elseif KPIID == 13 %}		
+	{{ include ('Dashboard/ViewSTAutoamtion.html.twig') }}	
+{% elseif KPIID == 14 %}		
+	{{ include ('Dashboard/ViewProductionTestAccounts.html.twig') }}
+{% elseif KPIID == 15 or  KPIID == 16 %}
+	{{ include ('Dashboard/ViewDocumentation.html.twig') }}	
 {% elseif KPIID == 17 %}
 	{{ include ('Dashboard/ViewP1P260.html.twig') }}
 {% elseif KPIID == 18 %}
@@ -29,9 +41,10 @@
 {% elseif KPIID == 20 %}
 	{{ include ('Dashboard/ViewP3P4365.html.twig') }}
 {% elseif KPIID == 1 or  KPIID == 2 or KPIID == 3 or KPIID == 4 %}
-	{{ include ('Dashboard/ViewQCKPI.html.twig') }} 	
-	 	
+	{{ include ('Dashboard/ViewQCKPI.html.twig') }}	
 {% endif %}
+
+<input type="hidden" id="KPIHidden" value="{{ KPIID }} ">
 
 {% endblock %}
 
@@ -39,17 +52,13 @@
 	{{ parent() }}
 	<script src="{{ asset('js/Dashboard/Dashboard_common.js') }}"></script>		
 	<script>
-		{# loadDataTable_Export('KPIResults'); #}
-		{# OnTDBlurEditValues(); #}		
-		
-		DashboardGeneralFunctions();
-		
+		DashboardGeneralFunctions();		
 	</script>	
 {% endblock %}
 
 {% block documentready %}
 	<script>			
-		$.fn.editable.defaults.mode = 'popup';		
+		$.fn.editable.defaults.mode = 'inline';		
 		
 		$('[data-toggle="tooltip"]').tooltip({
 			html: true,			

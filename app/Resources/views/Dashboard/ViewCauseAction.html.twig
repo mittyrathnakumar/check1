@@ -1,0 +1,39 @@
+{% extends 'layout.html.twig' %}
+{% block content %}
+ 
+<div class="col-md-12">		
+		<form class="form-horizontal" role="form" id="frmCauseActionSubmit"> {# method="Post" action="{{ path('CauseActionSubmit') }}" #} 
+			<div class="form-group">
+				<label for="cause">Cause : </label>	
+				<textarea name="cause" id="cause" rows="4" class="form-control" required>
+					{% if resultArr['CAUSE'] is defined %}{{ resultArr['CAUSE']|trim }} {% endif %}
+				</textarea>
+			</div>
+			<div class="form-group">			
+				<label for="action">Action : </label>	
+				<textarea name="action" id="action" rows="4" class="form-control" required>
+					{% if resultArr['ACTION'] is defined %}{{ resultArr['ACTION']|trim }} {% endif %}
+				</textarea>
+			</div>
+			<div class="form-group">
+				<button id="causeaction_submit" type="button" class="btn btn-primary">Submit</button>
+				<button id="reset" type="reset" class="btn btn-primary">Reset</button>
+			</div>
+			
+			<input type="text" name="kpiid" id="kpiid" value="">	
+			<input type="text" name="month" id="month" value="">
+			
+		</form>		
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+	{{ parent() }}
+	<script src="{{ asset('js/Dashboard/Dashboard_common.js') }}"></script>	
+	<script>	
+		DashboardGeneralFunctions();
+	</script>
+	
+{% endblock %}	

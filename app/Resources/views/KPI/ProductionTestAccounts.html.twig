@@ -1,0 +1,110 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Production Test Accounts</h1>
+        <ol class="breadcrumb">
+            <li><a href="{{ path('ViewProdTestAccounts') }}">KPI</a></li>
+            <li class="active">Production Test Accounts</li>
+        </ol>
+    </div>
+</div>
+{% if msg is defined and msg is not empty %}
+	<div class="bg-info">{{ msg }}</div>
+{% endif %}
+<form class="form-horizontal" role="form" id="ProdTestAccounts" method="post" action="{% if rowId is defined %} {{ path('UpdateProdTestAccounts') }} {% else %} {{ path('AddProdTestAccounts') }} {% endif %}  ">
+<div class="container-fluid col-sm-10">
+<div class="panel panel-default">
+  		<div class="panel-heading">
+  			<div class="row">
+  			<div class="col-sm-8"><label for="month">Month: </label>
+			<input type="text" id="month" name="month" class="monthPicker" value="{% if ProdTestAccountsEntity is defined %}{{ProdTestAccountsEntity.getMonth|trim}}{% endif %}" required /> </div>
+  			<input type= "hidden" id="rowId" name="rowId" value="{% if ProdTestAccountsEntity is defined %}{{ProdTestAccountsEntity.getRowId|trim}}{% endif %}">
+  			 <div class="col-sm-2"><h3 class="panel-title"><center>TCS</center></h3></div>
+            <div class="col-sm-2"><h3 class="panel-title"><center>Online Store(TCS)</center></h3</div>
+  			</div>
+		</div>
+</div>
+	<div class="panel panel-default">
+  		<div class="panel-heading">
+  			<div class="row">
+   		    <div class="col-sm-8"><h3 class="panel-title">KPI on Customer Accounts</h3></div>
+  			</div>
+		</div>
+		<div class="panel-body">
+			<div class="row">
+	   		    <div class="col-sm-8"><h5>Total number of Customer Accounts used<h5></div>
+	            <div class="col-sm-2"><input type="number" name="custAccounts" id="custAccounts" class="form-control" value="{% if ProdTestAccountsEntity is defined %}{{ProdTestAccountsEntity.getCustAccounts|trim}}{% endif %}" required></div>
+	            <div class="col-sm-2"><input type="number" name="onlineCustAccounts" id="onlineCustAccounts" class="form-control" value="{% if ProdTestAccountsEntity is defined %}{{ProdTestAccountsEntity.getOnlineCustAccounts|trim}}{% endif %}" required></div>
+  			</div>
+  			<div class="row">
+	   		    <div class="col-sm-8"><h5>No. of Customer Account Address not compliant</h5></div>
+	            <div class="col-sm-2"><input type="number" name="custAddrAccounts" id="custAddrAccounts" class="form-control" value="{% if ProdTestAccountsEntity is defined %}{{ProdTestAccountsEntity.getCustAddrAccounts|trim}}{% endif %}" required></div>
+	            <div class="col-sm-2"><input type="number" name="onlineCustAddrAccounts" id="onlineCustAddrAccounts" class="form-control" value="{% if ProdTestAccountsEntity is defined %}{{ProdTestAccountsEntity.getOnlineCustAddrAccounts|trim}}{% endif %}" required></div>
+	  		</div>
+  			<div class="row">
+	   		    <div class="col-sm-8"><h5>No. of Customer Account Name not compliant</h5></div>
+	            <div class="col-sm-2"><input type="number" name="nameAccounts" id="nameAccounts" class="form-control" value="{% if ProdTestAccountsEntity is defined %}{{ProdTestAccountsEntity.getNameAccounts|trim}}{% endif %}" required></div>
+	            <div class="col-sm-2"><input type="number" name="onlineCustNameAccounts" id="onlineCustNameAccounts" class="form-control" value="{% if ProdTestAccountsEntity is defined %}{{ProdTestAccountsEntity.getOnlineCustNameAccounts|trim}}{% endif %}" required></div>
+  			</div>
+  		</div>
+  		<div class="panel-heading">
+  			<div class="row">
+   		    <div class="col-sm-8"><h3 class="panel-title">KPI on Billing Account</h3></div>
+   		   </div>
+		</div>
+		<div class="panel-body">
+			<div class="row">
+	   		    <div class="col-sm-8"><h5>Total Number of Billing Account used<h5></div>
+	            <div class="col-sm-2"><input type="number" name="billAccounts" id="billAccounts" class="form-control" value="{% if ProdTestAccountsEntity is defined %}{{ProdTestAccountsEntity.getBillAccounts|trim}}{% endif %}" required></div>
+	            <div class="col-sm-2"><input type="number" name="onlineBillAccounts" id="onlineBillAccounts" class="form-control" value="{% if ProdTestAccountsEntity is defined %}{{ProdTestAccountsEntity.getOnlineBillAccounts|trim}}{% endif %}" required></div>
+	  			</div>
+  			<div class="row">
+	   		    <div class="col-sm-8"><h5>No. of Billing Account Address not compliant</h5></div>
+	            <div class="col-sm-2"><input type="number" name="billAddrAccounts" id="billAddrAccounts" class="form-control" value="{% if ProdTestAccountsEntity is defined %}{{ProdTestAccountsEntity.getBillAddrAccounts|trim}}{% endif %}" required></div>
+	            <div class="col-sm-2"><input type="number" name="onlineBillAddrAccounts" id="onlineBillAddrAccounts" class="form-control" value="{% if ProdTestAccountsEntity is defined %}{{ProdTestAccountsEntity.getOnlineBillAddrAccounts|trim}}{% endif %}" required></div>
+	  			</div>
+  			<div class="row">
+	   		    <div class="col-sm-8"><h5>No. of Biiling Account with an incorrect Bill Profile (ie. bill should be suppressed to avoid issuing paper invoice)</h5></div>
+	            <div class="col-sm-2"><input type="number" name="incorrectBillAccounts" id="incorrectBillAccounts" class="form-control" value="{% if ProdTestAccountsEntity is defined %}{{ProdTestAccountsEntity.getIncorrectBillAccounts|trim}}{% endif %}" required></div>
+	            <div class="col-sm-2"><input type="number" name="onlineIncorrectBillAccounts" id="onlineIncorrectBillAccounts" class="form-control" value="{% if ProdTestAccountsEntity is defined %}{{ProdTestAccountsEntity.getOnlineIncorrectBillAccounts|trim}}{% endif %}" required></div>
+	  		</div>
+  			<div class="row">
+	   		    <div class="col-sm-8"><h5>No. of Billing Account details not shared with Test Data team (this allow billing account to be adjusted in a timely manner and advoiding it getting into collection)</h5></div>
+	            <div class="col-sm-2"><input type="number" name="notSharedAccounts" id="notSharedAccounts" class="form-control" value="{% if ProdTestAccountsEntity is defined %}{{ProdTestAccountsEntity.getNotSharedAccounts|trim}}{% endif %}" required></div>
+	            <div class="col-sm-2"><input type="number" name="onlineNotSharedAccounts" id="onlineNotSharedAccounts" class="form-control" value="{% if ProdTestAccountsEntity is defined %}{{ProdTestAccountsEntity.getOnlineNotSharedAccounts|trim}}{% endif %}" required></div>
+  			</div>
+  		</div>
+  		<div class="panel-heading">
+  			<div class="row">
+   		    <div class="col-sm-8"><h3 class="panel-title">KPI on Orders Created</h3></div>
+  			</div>
+		</div>
+		<div class="panel-body">
+			<div class="row">
+	   		    <div class="col-sm-8"><h5>No. of orders created with Devices<h5></div>
+	            <div class="col-sm-2"><input type="number" name="deviceOrders" id="deviceOrders" class="form-control" value="{% if ProdTestAccountsEntity is defined %}{{ProdTestAccountsEntity.getDeviceOrders|trim}}{% endif %}" required></div>
+	            <div class="col-sm-2"><input type="number" name="onlineDeviceOrders" id="onlineDeviceOrders" class="form-control" value="{% if ProdTestAccountsEntity is defined %}{{ProdTestAccountsEntity.getOnlineDeviceOrders|trim}}{% endif %}" required></div>
+  			</div>
+  		</div>
+	</div>
+</div>
+ <div class="form-group">
+	    <center>
+	      <button type="submit" name="submit" id="submit" class="btn btn-primary">Submit</button>
+	      <button type="reset" name="reset" id="reset" class="btn btn-primary">Reset</button>
+	    </center>
+	  </div>	
+	 
+</form>
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	<script src="{{ asset('js/KPI/ProdTestAccounts.js') }}"></script>	
+{% endblock %}
+
+{% block documentready %}
+{% endblock %}

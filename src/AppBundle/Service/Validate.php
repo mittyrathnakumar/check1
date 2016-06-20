@@ -5,13 +5,15 @@ namespace AppBundle\Service;
 class Validate
 {
 	
-	// Functiont to render value to display
+	/* Functiont to render value to display */
+	
 	public function rv($name){
 		if (isset($_REQUEST[$name])) {
-		    return $_REQUEST[$name];
-		}
-		  
-		return false;
+		    return trim($_REQUEST[$name]);
+		} else if (isset($_POST[$name])) {
+			return trim($_POST[$name]);
+		} else 
+			return '';		
 		
 	}
 	

@@ -7,9 +7,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-//use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
 use AppBundle\Repository\ProjectRepository;
+use AppBundle\Repository\DashboardRepository;
 
 
 
@@ -27,7 +27,68 @@ class ProjectController extends Controller{
 		
 		public function __construct(){
 			$this->projectRepository = new ProjectRepository();		
-		}	
+		}
+		
+		
+		/**
+		 * @Route("/Projects/ViewProjects", name="ViewProjects")
+		 * @Method({"GET","POST"})
+		 */
+		
+		public function renderProjectsAction(Request $request) {
+				
+			/* USER AUTHENTICATION */
+		
+			$session = new Session();
+			$userID = $session->get('UserID');
+			
+			if(empty($userID)){
+				$referrer = $request->attributes->get('_route');
+				$parameters = array();
+				$parameters['referrer'] = $referrer;
+				return $this->redirectToRoute('Login', $parameters);
+			}
+			
+			/* === */
+				
+			$ProjectRepository = new ProjectRepository();
+			$dashboardRepository = new DashboardRepository();
+				
+			$postData = $request->request->all();
+				
+			if(!empty($request->query->all()['status']))
+				$msg = $request->query->all()['status'];
+				else
+					$msg = "";
+						
+			if(!empty($request->query->all()['Month']))
+				$Month = $request->query->all()['Month'];
+			else
+				$Month = "";
+					
+			if(!empty($postData)){
+				if(!empty($postData['Month']))
+					$Month = $postData['Month'];
+				else
+					$Month = '';
+			}
+				
+
+			if(!empty($postData['ShowAll']) && $postData['ShowAll'] == 1){
+				return $this->redirectToRoute('ViewProjects');
+			}
+				
+			$ProjectDetails = $ProjectRepository->getProjectDetails("", $Month);
+			$monthYearArray = $dashboardRepository->getmonthYearArray();		
+				
+			return $this->render('Projects/ViewProjects.html.twig', [
+					"ProjectDetails" => $ProjectDetails,
+					"monthYearArray" => $monthYearArray,
+					"postData" => $postData,
+					"Month" => $Month,
+					"msg" => $msg
+			]);
+		}
 		
 		/**
 		 * @Route("/Projects/AddProject", name="AddProject")
@@ -36,68 +97,60 @@ class ProjectController extends Controller{
 		
 		public function renderAddProjectAction(Request $request) {		
 			
+			/* USER AUTHENTICATION */
+		
 			$session = new Session();
 			$userID = $session->get('UserID');
 			
 			if(empty($userID)){
-				return $this->redirectToRoute('Login');
-			
+				$referrer = $request->attributes->get('_route');
+				$parameters = array();
+				$parameters['referrer'] = $referrer;
+				return $this->redirectToRoute('Login', $parameters);
 			}
+			
+			/* === */
 			
 			return $this->render('Projects/AddEditProject.html.twig');
 		}
+		
+		
 		
 		/**
 		 * @Route("/Projects/AddProject", name="AddProjectPost")
 		 * @Method({"POST","HEAD"})
 		 */
 		
-		public function renderAddProjectPostAction(Request $request) {
-		
-			
-			//$ProjectDetails = $this->projectRepository->getProjectDetails();
+		public function renderAddProjectPostAction(Request $request) {	
+
 			$postData = $request->request->all();
+			$ProjectRepository = new ProjectRepository();
 			
-			$status = $this->projectRepository->addEditProject($postData);
+			$response = 1;
+				
+			if(!empty($postData['Domain']) && !empty($postData['QCProjectName'])){				
+				$response = $ProjectRepository->checkValidQCTableName($postData['QCProjectName'], $postData['Domain']);
+			}			
+
 			
-			/*return $this->render('Admin/Users.html.twig', [
-					"UserDetails" => $UserDetails,
-					"status" => $status
-			]);*/
-			$response = array("status" => $status);
+			if($response == 0){
+				$status = "Invalid QC Project Name OR Domain !!!";		
+				$ProjectDetails = $postData;				
+	
+				return $this->render('Projects/AddEditProject.html.twig', [
+						"msg" => $status,
+						"ProjectDetails" => $ProjectDetails
+				]);
+				
+			} else {
+               $status = $ProjectRepository->addEditProject($postData);
+               $response = array("status" => $status);
+               
+               return $this->redirectToRoute('ViewProjects', $response);
+            } 
 			
-			return $this->redirectToRoute('ViewProjects', $response);
-		}
+		}		
 		
-		
-		/**
-		 * @Route("/Projects/ViewProjects", name="ViewProjects")
-		 * @Method({"GET","HEAD"})
-		 */
-		
-		public function renderProjectsAction(Request $request) {
-			
-			$session = new Session();
-			$userID = $session->get('UserID');
-			
-			if(empty($userID)){
-				return $this->redirectToRoute('Login');
-			
-			}
-			
-			if(!empty($request->query->all()['status']))
-				$msg = $request->query->all()['status'];
-			else 
-				$msg = "";
-			
-			$ProjectDetails = $this->projectRepository->getProjectDetails();
-			//echo "<pre>";print_r($ProjectDetails);exit;
-			
-			return $this->render('Projects/ViewProjects.html.twig', [
-					"ProjectDetails" => $ProjectDetails,
-					"msg" => $msg
-			]);
-		}
 		
 		/**
 		 * @Route("/Projects/EditProject/{ProjectID}", name="EditProject")
@@ -106,17 +159,23 @@ class ProjectController extends Controller{
 		
 		public function renderEditProjectAction(Request $request, $ProjectID) {
 			
+			/* USER AUTHENTICATION */
+		
 			$session = new Session();
 			$userID = $session->get('UserID');
 			
 			if(empty($userID)){
-				return $this->redirectToRoute('Login');
-			
+				$referrer = $request->attributes->get('_route');
+				$parameters = array();
+				$parameters['referrer'] = $referrer;
+				return $this->redirectToRoute('Login', $parameters);
 			}
 			
-			$ProjectDetails = $this->projectRepository->getProjectDetails($ProjectID);
-		
-			//echo "<pre>";print_r($ProjectDetails);exit;
+			/* === */
+			
+			$ProjectRepository = new ProjectRepository();
+			$ProjectDetails = $ProjectRepository->getProjectDetails($ProjectID);
+
 			
 			return $this->render('Projects/AddEditProject.html.twig', [
 					"ProjectDetails" => $ProjectDetails,
@@ -127,19 +186,110 @@ class ProjectController extends Controller{
 		/**
 		 * @Route("/Projects/EditProject", name="EditProjectPost")
 		 * @Method({"POST","HEAD"})
+		 */		
+		
+		public function renderEditProjectPostAction(Request $request) {
+		
+			$postData = $request->request->all();
+				
+			if(isset($postData['Month']))
+				$Month = $postData['Month'];
+			else
+				$Month = '';
+		
+			$ProjectRepository = new ProjectRepository();
+			$response = 1;
+
+			if(!empty($postData['QCProjectName']) && !empty($postData['Domain'])){
+				$response = $ProjectRepository->checkValidQCTableName($postData['QCProjectName'], $postData['Domain']);
+			}
+
+			if($response == 0){
+				$status = "Invalid QC Project Name OR Domain !!!";
+				$ProjectDetails = $postData;
+
+				return $this->render('Projects/AddEditProject.html.twig', [
+						"msg" => $status,
+						"ProjectDetails" => $ProjectDetails						
+				]);
+			}
+			else {
+				$status = $ProjectRepository->addEditProject($postData);
+				$response = array("Month" => $Month);
+				return $this->redirectToRoute('ViewProjects', $response);
+
+			}
+
+		}
+		
+		/**
+		 * @Route("/Projects/EditProject/{ProjectID}/{Month}", name="EditProjectMonth")
+		 * @Method({"GET","POST"})
 		 */
 		
-		public function renderEditProjectPostAction(Request $request) {	
+		public function renderEditProjectMonthAction(Request $request, $ProjectID, $Month) {
+				
+			/* USER AUTHENTICATION */
 		
-			//$ProjectDetails = $this->projectRepository->getProjectDetails();
+			$session = new Session();
+			$userID = $session->get('UserID');
+			
+			if(empty($userID)){
+				$referrer = $request->attributes->get('_route');
+				$parameters = array();
+				$parameters['referrer'] = $referrer;
+				return $this->redirectToRoute('Login', $parameters);
+			}
+			
+			/* === */
+			
 			$postData = $request->request->all();
-			//$ProjectDetails = $this->projectRepository->getProjectDetails();
-			$status = $this->projectRepository->addEditProject($postData);	
+			$ProjectRepository = new ProjectRepository();
 			
-			$response = array("status" => $status);
-				
-			return $this->redirectToRoute('ViewProjects', $response);			
+			/* Edit Form Submit */
 			
-		}
+			if(!empty($postData)){	
 				
+				$response = 1;
+				
+				if(!empty($postData['QCProjectName']) && !empty($postData['Domain'])){
+					$response = $ProjectRepository->checkValidQCTableName($postData['QCProjectName'], $postData['Domain']);
+				}
+				
+				if($response == 0){
+					$status = "Invalid QC Project Name OR Domain !!!";				
+					$ProjectDetails = $postData;
+				
+					return $this->render('Projects/AddEditProject.html.twig', [
+							"msg" => $status,
+							"ProjectDetails" => $ProjectDetails,
+							"Month" => $Month,
+							"ProjectID" => $postData['ProjectID']
+					]);
+				} 
+				else {		
+					
+					$status = $ProjectRepository->addEditProject($postData);					
+					$response = array("status" => $status, "Month" => $Month);				
+					return $this->redirectToRoute('ViewProjects', $response);
+					
+				}
+				
+			} 
+			
+			/* Edit Form Show */
+			
+			else {
+				
+				$ProjectDetails = $ProjectRepository->getProjectDetails($ProjectID);
+			
+				return $this->render('Projects/AddEditProject.html.twig', [
+						"ProjectDetails" => $ProjectDetails,
+						"Month" => $Month,
+						"ProjectID" => $ProjectID
+				]);
+			}
+		}		
+		
+		//echo "<pre>";print_r($ProjectDetails);exit;				
 }

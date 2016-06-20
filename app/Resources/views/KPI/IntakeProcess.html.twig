@@ -48,7 +48,7 @@
 				<th>Status</th>
 				<th>Request Date</th>
 				<th>Submission Date</th>
-				<th>Value</th>
+				<th>Diff in Dates</th>
 				<th>Delete</th>
 			</tr>
 		</thead>
@@ -58,8 +58,8 @@
 				{% for row in ProcessDetails %}
 					<tr>
 					<td>{{ loop.index }}</td>	
-					<td>{{ row['PROGRAMME'] }}</td>
-					<td><a title="Edit details" href="{{ path('EditIntakeProcess', { IntakeID : row['INTAKEID'] } ) }}">{{ row['PROJECT_NAME'] }}</a></td>
+					<td><a title="Edit details" href="{{ path('EditIntakeProcess', { IntakeID : row['INTAKEID'] } ) }}">{{ row['PROGRAMME'] }}</a></td>
+					<td>{{ row['PROJECT_NAME'] }}</td>
 					<td>{{ row['PROPOSAL_TYPE'] }}</td>
 					<td>{{ row['SOLUTION_COMPONENT'] }}</td>
 					<td>{{ row['PROJ_PROG_MGR'] }}</td>
@@ -67,7 +67,7 @@
 					<td>{{ row['STATUS'] }}</td>
 					<td>{{ row['REQUEST_DATE'] }}</td>
 					<td>{{ row['SUBMISSION_DATE'] }}</td>
-					<td>{{ row['VALUE'] }}</td>					
+					<td>{{ row['DIFF_DATES'] }}</td>					
 					<td align="center"><input type="image" onclick="deleteIntakeProcess(this.id);" class="delete" src="{{ asset('images/delete.png') }}" id="{{ row['INTAKEID'] }}" title="Delete these details" /></td>
 					</tr>
 		    	{% endfor %}

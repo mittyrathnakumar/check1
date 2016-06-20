@@ -1,47 +1,65 @@
-<div class="text-primary pull-left">This result shows data for <strong>{{ Month }}</strong>.</div><br><br>
-<div class="text-primary"><strong>Target for this KPI ( {{ KPIData['OPERATOR'] }}{{ KPIData['SLA_VALUE'] }} )</strong>
+<div class="text-primary pull-left">This result shows data for <strong>{{ Month }}</strong>.</div><br>
+<div class="text-primary"><strong>KPI Definition</strong> - {{ KPIData['SLA_DESC'] }}</div>
+<div class="text-primary">Target for this KPI <strong>( {{ KPIData['OPERATOR'] }}{{ KPIData['SLA_VALUE'] }}% )</strong>
 </br>(<strong>Note : </strong>The details on final result obtained for each Project for this KPI can be viewed when mouse hover on KPI result.)
 </div></br>
 
-<div class="row col-sm-12">
+<div class="row col-sm-10">
 	<table id="dataTable" class="table-bordered table-condensed">
 		<thead>
 			<tr>					
 				<th>S.No.</th>
-				<th>Projects</th>			
+				<th>Projects</th>				
+				<th>{{ KPIData['NUMERATOR'] }}</th>
+				<th>{{ KPIData['DENOMINATOR'] }}</th>
 				<th>{{ KPI }}</th>
-				<th>RAG</th>				
+				<th>RAG</th>								
+				<th>Cause</th>
+				<th>Action</th>				
 			</tr>					
 		</thead>
-		<tbody>					
+		<tbody>		
+			{# {{ dump(KPIResults) }} #}
+			
 			{% if KPIResults|length > 0 %}				
 				{% for row in KPIResults %}		
 				{% set action = '' %}	
 				{% set RAG = '' %}
-					<tr>
-						<td>{{ loop.index }}</td>						
-						<td>{{ row['Project'] }}</td>					
+				
 						{% if row['Actual'] == 'N/A' %}
+							{% set naClass = 'bg_grey' %}
+						{% else %}
+							{% set naClass = '' %}
+						{% endif %}
+							
+						<tr class="{{ naClass }}">
+					
+						<td>{{ loop.index }}</td>						
+						<td>{{ row['Project'] }}</td>
+						<td>{{ row['NumeratorValue'] }}</td>						
+						<td>{{ row['DenominatorValue'] }}</td>	
+																
+						{% if row['Actual'] == 'N/A' and row['Actual'] is not empty %}						
 							{% set action = "" %}
 							<td style="cursor:help" data-toggle="tooltip" data-html="true" title="{{ row['Formula']}}">{{ row['Actual'] }}</td>
 						{% else %}
 							{% if row['Operator'] == '<=' %}
 								{% if row['Actual'] <= row['Target'] %}
 									{% set RAG = 'green' %}		
-									<td style="cursor:help" data-toggle="tooltip" data-html="true" title="{{ row['Formula']}}" class="bg-success">{{ row['Actual'] }}%</td>						
+									<td style="cursor:help" data-toggle="tooltip" data-html="true" title="{{ row['Formula']}}">{{ row['Actual'] }}%</td>						
 								{% else %}
 									{% set action = 1 %}
 									{% set RAG = 'red' %}
-									<td style="cursor:help" data-toggle="tooltip" data-html="true" title="{{ row['Formula']}}" class="bg-danger">{{ row['Actual'] }}%</td>
+									<td style="cursor:help" data-toggle="tooltip" data-html="true" title="{{ row['Formula']}}">{{ row['Actual'] }}%</td>
 								{% endif %}						
 							{% elseif row['Operator'] == '>=' %}
 								{% if row['Actual'] >= row['Target'] %}
 									{% set RAG = 'green' %}		
-									<td style="cursor:help" data-toggle="tooltip" data-html="true" title="{{ row['Formula']}}" class="bg-success">{{ row['Actual'] }}%</td>						
+									<td style="cursor:help" data-toggle="tooltip" data-html="true" title="{{ row['Formula']}}">{{ row['Actual'] }}%</td>						
 								{% else %}
 									{% set action = 1 %}
 									{% set RAG = 'red' %}
-									<td style="cursor:help" data-toggle="tooltip" data-html="true" title="{{ row['Formula']}}" class="bg-danger">{{ row['Actual'] }}%</td>
+									<td style="cursor:help" data-toggle="tooltip" data-html="true" title="{{ row['Formula']}}">{{ row['Actual'] }}</td>
 								{% endif %}				
 							{% endif %}
 						{% endif %}
@@ -55,15 +73,18 @@
 								<img src="{{ asset("images/na_RAG.png") }}">
 							{% endif %}
 						</td>		
-						{#
-						{% if action is defined and action == 1 %}					
-							<td class="col-md-5"><span class="cause" title="Click to enter Cause" column="cause" style="cursor:pointer" data-type="textarea" id="cause_{{ loop.index }}">{{ row['Cause'] }}</span>
-							<td class="col-md-5"><span class="action" title="Click to enter Action" column="action" style="cursor:pointer" data-type="textarea" id="action_{{ loop.index }}">{{ row['Action'] }}</span>
+						
+						{% if action is defined and action == 1 %}
+							
+												
+							<td><span class="cause" title="Click to enter Cause" column="CAUSE" style="cursor:pointer" data-type="textarea" id="cause_{{ loop.index }}">{{ row['Cause'] }}</span></td>
+							<td><span class="action" title="Click to enter Action" column="ACTION" style="cursor:pointer" data-type="textarea" id="action_{{ loop.index }}">{{ row['Action'] }}</span></td>
+							
 						{% else %}						
 							<td>N/A</td>						
 							<td>N/A</td>			
 						{% endif %}
-						#}
+						
 						
 						<input type="hidden" name="KPIHidden" id="KPIHidden" value="{{ KPIData['KPI_ID'] }}">
 						<input type="hidden" name="ProjectIDHidden" id="ProjectIDHidden_{{ loop.index }}" value="{{ row['ProjectID'] }}">					

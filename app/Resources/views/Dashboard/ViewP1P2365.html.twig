@@ -1,4 +1,7 @@
-<div class="row col-md-10">		
+<div class="text-primary pull-left">This result shows data for <strong>{{ Month }}</strong>.</div><br>
+<div class="text-primary"><strong>KPI Definition</strong> - {{ KPIData['SLA_DESC'] }}</div>
+<div class="text-primary">Target for this KPI <strong>( {{ KPIData['OPERATOR'] }}{{ KPIData['SLA_VALUE'] }}% )</strong></div><br>
+<div class="row col-md-6">		
 	<table class="table-bordered table-condensed" id="dataTable">
 		<thead>
 			<tr>					
@@ -11,13 +14,13 @@
 			
 			{% if KPIResults|length > 0 %}
 				{% for month, resultArr in KPIResults %}
-					<tr><td class="text-primary" colspan="8"><strong>{{ month }}</strong></td></tr>
+				<tr><td class="text-primary" colspan="8"><strong>{{ month }}</strong></td></tr>					
 					{% if resultArr|length > 0 %}
 						{% for row in resultArr %}
 							<tr>
 							<td>{{ loop.index }}</td>	
 							<td>{{ row['PROJECTNAME'] }}</td>
-							<td>{# {{ row['P1_P2_365'] }} #}</td>
+							<td>{{ row['P1_P2'] }} </td>
 							</tr>
 						{% endfor %}						
 					{% else %}

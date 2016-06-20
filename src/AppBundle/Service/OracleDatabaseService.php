@@ -68,7 +68,6 @@ class OracleDatabaseService
 			
 			case 'KPIDASHBOARD':				
 				
-				
 				$HOSTNAME = 'localhost';
 				$PORT = '1521';
 				$SERVICE_NAME = 'orcl';

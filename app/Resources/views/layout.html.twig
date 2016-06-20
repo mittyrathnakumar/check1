@@ -2,7 +2,16 @@
 
 {% block body %}
 	<div class="wrapper">
-		{{ include('navbar.html.twig') }}		
+	{% set currentPage = app.request.attributes.get('_route') %}
+	{#
+	{% if currentPage == 'KPIList' %}
+		{{ include('navbar_side.html.twig') }}
+	{% else %}
+		{{ include('navbar.html.twig') }}
+	{% endif %}
+	#}	
+				
+	{{ include('navbar.html.twig') }}
 		 <div class="container-fluid">		
 			<!-- Page Content -->
 			<div class="content main">

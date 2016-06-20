@@ -22,6 +22,13 @@ class Projects
 	 * @var string
 	 */
 	private $qc_projectname;
+	
+	/**
+	 * @var string
+	 */
+	private $qc_tablename;	
+	
+	
 	/**
 	 * @var string
 	 */
@@ -80,6 +87,16 @@ class Projects
 	 */
 	private $uatApplicable;
 	
+	/**
+	 * @var string
+	 */
+	private $projectAddedBy;
+	
+	/**
+	 * @var string
+	 */
+	private $projectEditedBy;
+	
 	
 	
 
@@ -113,7 +130,15 @@ class Projects
 	public function getQCProjectName(){
 		return $this->qc_projectname;
 	}
-		
+	
+	public function setQCTableName($qc_tablename){
+		$this->qc_tablename = $qc_tablename;
+	}
+	
+	public function getQCTableName(){
+		return $this->qc_tablename;
+	}
+	
 	
 	public function setPOC($poc){
 		$this->poc = $poc;
@@ -199,5 +224,22 @@ class Projects
 	public function getUatApplicable(){
 		return $this->uatApplicable;
 	}
+	
+	public function setProjectAddedBy($projectAddedBy){
+		$this->projectAddedBy = $projectAddedBy;
+	}
+	
+	public function getProjectAddedBy(){
+		return $this->projectAddedBy;
+	}
+	
+	public function setProjectEditedBy($projectEditedBy){
+		$this->projectEditedBy = $projectEditedBy;
+	}
+	
+	public function getProjectEditedBy(){
+		return $this->projectEditedBy;
+	}
+
 
 }

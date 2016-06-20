@@ -10,7 +10,6 @@ function ITSMDefectsFunctions(){
 		
 		var column = $(this).closest('td').children('span').attr('column');		
 		var value = $('.input-mini').val();
-		alert(value);
 		
 		if(column != ""){											
 			UpdateITSMDefects(column, value, projectID);				

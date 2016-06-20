@@ -26,7 +26,7 @@
 </div>
 </br></br>
 <div class="row col-md-8">		
-	<table class="table table-bordered table-hover" id="dataTable">
+	<table class="table-bordered table-condensed table-hover" id="dataTable">
 		<thead>
 			<tr class="bg_grey">					
 				<th>No.</th>
@@ -37,17 +37,21 @@
 			</tr>
 		</thead>
 		<tbody>		
-			{% for row in DeliverySlippages %}
-				<tr>
-				<td>{{ loop.index}}</td>
-				<td>{{ row.getProjectName}}</td>
-				<td><span class="estimatedProdLiveDate" id="estimatedProdLiveDate_{{ loop.index }}" data-type="date" data-pk="1" data-title="Select date" style="text-transform: uppercase">{{ row.getEstimatedProdLiveDate|upper}}</span></td>
-				<td><span class="deliveryDate_" id="deliveryDate_{{ loop.index }}" data-type="date" data-pk="1" data-title="Select date" style="text-transform: uppercase">{{ row.getDeliveryDate|upper}}</span></td>
-				<td><span class="DifferenceInDate_{{ loop.index }}">{{ row.getDifferenceInDate}}</span></td>
-				<input type="hidden" id="ProjectIDHidden_{{ loop.index }}" value="{{ row.ProjectId }}">
-				</tr>
-				
-	    	{% endfor %}
+			{% if DeliverySlippages|length > 0 %}
+				{% for row in DeliverySlippages %}
+					<tr>
+					<td>{{ loop.index}}</td>
+					<td>{{ row.getProjectName}}</td>
+					<td><span class="estimatedProdLiveDate" id="estimatedProdLiveDate_{{ loop.index }}" data-type="date" data-pk="1" data-title="Select date" style="text-transform: uppercase">{{ row.getEstimatedProdLiveDate|upper}}</span></td>
+					<td><span class="deliveryDate_" id="deliveryDate_{{ loop.index }}" data-type="date" data-pk="1" data-title="Select date" style="text-transform: uppercase">{{ row.getDeliveryDate|upper}}</span></td>
+					<td><span class="DifferenceInDate_{{ loop.index }}">{{ row.getDifferenceInDate}}</span></td>
+					<input type="hidden" id="ProjectIDHidden_{{ loop.index }}" value="{{ row.ProjectId }}">
+					</tr>
+					
+		    	{% endfor %}
+		    {% else %}
+		    	<tr><td colspan="5">No data available !!!</td></tr>
+		    {% endif %}
 		</tbody>
 	</table>			
 </div>

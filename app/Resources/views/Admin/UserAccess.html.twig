@@ -1,0 +1,44 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+
+<h1 class="page-header">User Access Management</h1>
+<ol class="breadcrumb">
+    <li><a href="">Admin</a></li>
+    <li class="active">User Access Management</li>  
+</ol>
+
+{% if status is defined %}
+	<p class="bg-info">{{ status }}</p>
+{% endif %}
+
+<div class="col-md-10">		
+	<table class="table-bordered table-condensed table-hover" id="dataTable">
+		<thead>
+			<tr class="bg_grey">					
+				<th>No.</th>				
+				<th>Role Name</th>
+				<th>Active Rights</th>
+			</tr>
+		</thead>
+		<tbody>		
+			{% for row in UserDetails %}
+				<tr>
+				<td>{{ loop.index}}</td>				
+				<td><a href="{{ path('EditUserAccess', { RoleID : row.getUserRoleID() }, true) }}" title="Edit Access Details">{{ row.getUserRole() }}</a></td>		
+				<td>{{ row.getModuleAccess() }}</td>				
+				</tr>
+	    	{% endfor %}
+		</tbody>
+	</table>			
+</div>
+<div id="dialog" title="Result Action" class="modal_dialog"></div>
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	<script src="{{ asset('js/Admin/Admin_common.js') }}"></script>
+	<script>
+		{# UsersOnStatusChange(); #}						
+	</script>
+{% endblock %}

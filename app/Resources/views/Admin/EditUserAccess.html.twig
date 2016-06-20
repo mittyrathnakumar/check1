@@ -1,0 +1,70 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+
+{% set sessionUID = app.session.get('UserID') %}
+{% set username = app.session.get('UserName') %}	
+{% set sessionUserRole = app.session.get('UserRole') %}	
+
+	
+
+<h1 class="page-header">User Access Details</h1>
+ <ol class="breadcrumb">
+    <li><a href="">Admin</a></li>
+    <li><a href="{{ path('UserAccess') }}">All User Access Details</a></li>
+</ol>
+
+<form class="form-horizontal" role="form" id="frmEditUser" method="post" action="{{ path('EditUserAccess', { RoleID : RoleID } ) }}"> 
+ {#
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="FirstName">First Name:</label>
+    <div class="col-sm-4">
+      <input readonly type="text" name="FirstName" class="form-control" id="FirstName" value="{% if UserDetails is defined %} {{ UserDetails.getFirstName() }} {% endif %}">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="lastname">Last Name:</label>
+    <div class="col-sm-4">
+      <input readonly type="text" name="LastName" class="form-control" id="LastName" value="{% if UserDetails is defined %} {{ UserDetails.getLastName() }} {% endif %}" >
+    </div>
+  </div>
+  #}
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="Role">Role:</label>
+    <div class="col-sm-4">
+      <input readonly type="text" name="Role" class="form-control" id="Role" value="{% if UserDetails is defined %} {{ UserDetails.getUserRole() }} {% endif %}">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="RoleID">Active Modules:</label>
+    <div class="col-sm-3">    
+     {% for row in UserDetails.getModuleArr() %}    	
+		{% if UserDetails.getModuleAccess() is defined %}					
+			 {% if  row['ID'] in UserDetails.getModuleAccess() %} 
+				{% set checkedcondition = "checked = 'checked'" %}
+			{% else %}
+				{% set checkedcondition = '' %}
+			{% endif %}
+		{% endif %}
+ 		<input type="checkbox" name="moduleArr[]" value="{{ row['ID'] }}" {{ checkedcondition }}> {{ row['MODULE'] }}<br>    		
+     {% endfor %}
+     </div>        
+   </div>
+   <div class="form-group">
+	    <div class="col-sm-offset-2 col-sm-10">
+	      <button type="submit" name="createuser" id="createuser" class="btn btn-primary">Submit</button>
+	      <button type="reset" name="createuser" id="createuser" class="btn btn-primary">Reset</button>
+	    </div>
+	  </div>	 
+  <div id="dialog" title="Result Action" class="modal-dialog"></div>
+  <input type="hidden" name="RoleID" value="{% if UserDetails is defined %} {{ UserDetails.getUserRoleID() }} {% endif %}" >
+</form>
+
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	<script src="{{ asset('js/Admin/Admin_common.js') }}"></script>
+	<script>	 	 
+	</script>
+{% endblock %}

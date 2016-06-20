@@ -314,6 +314,13 @@ body.loading .modal {
 	border-radius: 4px;
     border: 1px solid #D8D8D8;   	 
 }
+.bg-danger{
+	font-family: inherit;
+	font-weight : bold;
+	padding: 11px;
+	border-radius: 4px;
+    border: 1px solid #D8D8D8;   	 
+}
 .div-xml{
 	font-style: italic;
 	overflow: scroll;
@@ -332,15 +339,27 @@ body.loading .modal {
 	width : 980px;
 }
 .bg_grey{
-	background-color: #c9dae8;
+	///background-color: #c9dae8;
+	background-color: #f5f5f5;
+	
 }
 .strong{
 	font-weight: bold;
 }
-.datepicker {
+.datepicker, .monthPicker {
   text-transform: uppercase;
 }
-.ui-datepicker { font-size: 10pt !important; }
+
+/* .ui-datepicker-calendar {
+    display: none;
+ }
+ */
+ 
+.ui-widget {
+    font-size: .9em !important;
+}
+
+
 .ui-autocomplete-loading {
 	background: white url("images/ui-loading.gif") right center no-repeat;
 }
@@ -358,14 +377,15 @@ body.loading .modal {
 	font-weight: bold;
 }
 .margin-left{
-	margin-left: 5px;
+	margin-left: 10px;
 }
-
 .compact-table, tr, th, td {
-	padding : 2px;			
+	padding : 2px;
+	font-size: 14px;
 }
 .compact-table > thead > tr > th {
-	background-color: #c9dae8;				
+	background-color: #c9dae8;
+	 font-size: 14px;				
 }
 .div-jquery-popup{
   font-family: calibri;
@@ -373,4 +393,13 @@ body.loading .modal {
 }
 .table-condensed > thead > tr > th {
 	background-color: #c9dae8;				
+}
+.bg_na{
+	background-color: #dbd4d4;
+}
+.div-less-padding{
+	padding : 2px;
+}
+.small-text-form-control{
+	width : 5px;
 }

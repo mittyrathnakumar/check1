@@ -72,7 +72,7 @@ $(function() {
 			dataType : 'JSON',
 			data : Data,
 			success : function(data) {
-				var split = data.split("-");
+				var split = data.split("_");
 				var data2 =split[0]; 
 				var data3=split[1];
 				$( "#dialog" ).dialog({

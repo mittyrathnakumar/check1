@@ -7,161 +7,308 @@
     </div>
 </div>
 <form class="form-inline" role="form" id="frmMonthSearch" method="Post" action="">
-<div class="row col-md-12">	
+<div class="row col-md-12">
+
+	{#
     <div class="row col-md-3">
-	    {% if postData.Month is defined %}
+	    {% if postData.Month is defined and postData.Month is not empty %}
 			{% set Month = postData.Month %}
 		{% else %}
 			{% set Month = "now"|date("F-y") %}
-		{% endif %}
+		{% endif %}		
 	     <label for="Month">Month-Year : </label>	    
 	     <select name="Month" id="Month" class="form-control">
 	       	<option value="">--Select--</option>       		       	
 	       	{% for row in monthYearArray %}
 	       		<option value="{{ row }}" {% if Month is defined and Month == row %} selected {% endif %}>{{ row }}</option>
 	       	{% endfor %}
-		 </select>
+		 </select>		 
+    &nbsp;<input type="checkbox" value="1" name="Weekly" {% if postData.Weekly is defined and postData.Weekly == 1%}checked{% endif %}><label for="Month">Weekly</label>
     </div>
+    #}
+    
+    <div class="row col-sm-4">
+	    {% if postData.Month is defined and postData.Month is not empty %}
+			{% set Month = postData.Month|upper %}
+		{% else %}
+			{% set Month = "now"|date("M-y") %}
+		{% endif %}
+				
+	    <label for="Month">Month-Year : </label>     
+	    <input type="text" size="10" name="Month" class="form-control monthPicker" id="Month" placeholder="Month/Year" value="{% if Month is defined %}{{ Month|upper }}{% endif %}" >
+    	&nbsp;<input type="checkbox" value="1" name="Weekly" {% if postData.Weekly is defined and postData.Weekly == 1%}checked{% endif %}><label for="Month">Weekly</label>
+    </div>
+    
     <div class="col-md-2 text-left">
       <button type="submit" name="Search" valuw="1" class="btn btn-primary">Search</button> 
 	  <button type="submit" name="ShowAll" value="1" class="btn btn-primary">Refresh</button>
     </div>
-     <div class="col-md-2 text-right">
-     <button id="Export" class="btn btn-primary">Export</button>	 
+     <div class="col-md-1 text-right">
+     	<button type="button" id="Export" class="btn btn-primary">Export</button>     	 
     </div>    
+    <div class="col-md-1 text-left">     
+    	<button id="kpidata_inputs" type="button" class="btn btn-primary">KPI List</button>          	 
+    </div>
+    <div id="KPIListPath" data-path="{{ path('KPIList') }}"></div>
 </div>
 </form>
 <br><br>
 {% if Month is defined and Month is not empty %}
-	<div class="text-primary pull-left">This result shows data for <strong>{{ Month }}</strong>.</div><br><br>
-{% else %}
-	<div class="text-primary">(Default list shows results from current month. Pls make a search to find out other projects.)</div><br>
+	<div class="text-primary pull-left">This result shows data for <strong>{{ Month }}</strong>.</div><br>
 {% endif %}
-<div class="row col-sm-10">
-	<table id="dataTable" class="table-bordered compact-table">
-		<thead>
-			<tr>				
-				<th>S.No.</th>
-				<th>KPI</th>
-				<th>Target</th>
-				<th>Actual</th>		
-				<th>RAG</th>
-				<th>Cause</th>
-				<th>Action</th>
-			</tr>
-		</thead>
-		<tbody>		
-		{% for row in KPIResults %}
-			{% set RAG = '' %}
-			<tr>				
-				<td>{{ loop.index }}</td>
-				<td>
-				{% if Month is defined and Month is not empty %}					
-					<a style="cursor:pointer" onClick="window.open('{{ path('KPIProjectsSearch', { KPIID : row['KPIID'], Month : Month } ) }}','','width=1800');" data-toggle="tooltip" data-html="true" title="{{ row['Caption']}}"  value="{{ row['KPI'] }}">{{ row['KPI'] }}</a>
-				{% else %}
-					{# <a data-toggle="modal" data-target="#dialog" href="{{ path('KPIProjects', { KPIID : row['KPIID'] } ) }}" data-toggle="tooltip" title="KPI Details to come !!"  title="See project details for this KPI" alt=See project details for this KPI" value="{{ row['KPI'] }}">{{ row['KPI'] }}</a> #}
-				
-					<a style="cursor:pointer" onClick="window.open('{{ path('KPIProjects', { KPIID : row['KPIID'] } ) }}','','width=1800');" data-toggle="tooltip" data-html="true" title="{{ row['Caption']}}"  value="{{ row['KPI'] }}">{{ row['KPI'] }}</a>
-								
-					{# onClick="window.open('{{ path('KPIProjects', { KPIID : row['KPIID'] } ) }}','','width=2000');" #}
-				{% endif %}				
-				</td>	
-							
-				<td align="center">
-				{% if row['Operator'] is not empty %}
-					{{ row['Operator'] }}{{ row['Target'] }}%
-				{% else %}
-					{{ row['Target'] }}%
-				{% endif %}
-				</td>								
-				
-				{% if row['Actual'] == 'N/A' %}
-					{# <td align="center" style="background-color:#f5f5f5">N/A</td> #}
-					<td align="center">N/A</td>
-				{% else %}
-					{% if row['Operator'] == '<=' %}
-						{% if row['Actual'] <= row['Target'] %}
-							{% set RAG = 'green' %}							
-							{# <td align="center" style="background-color:#dff0d8">{{ row['Actual'] }}%</td> #}
-							<td align="center">{{ row['Actual'] }}%</td>							 
-						{% else %}				
-							{% set RAG = 'red' %}
-							{# <td align="center" style="background-color:#f2dede">{{ row['Actual'] }}%</td> #}										
-							<td align="center">{{ row['Actual'] }}%</td>
-						{% endif %}						
-					{% elseif row['Operator'] == '>=' %}
-						{% if row['Actual'] >= row['Target'] %}
-							{% set RAG = 'green' %}							
-							<td align="center">{{ row['Actual'] }}%</td>						
-						{% else %}
-							{% set RAG = 'red' %}							
-							<td align="center">{{ row['Actual'] }}%</td>				
-						{% endif %}
-					{% endif %}
-				{% endif %}		
-				
-				<td align="center">
-				{% if RAG is defined and RAG == 'green' %}
-					<img src="{{ asset("images/green_RAG.png") }}">
-				{% elseif RAG is defined and RAG == 'red' %}
-					<img src="{{ asset("images/red_RAG.png") }}">
-				{% else %}
-					<img src="{{ asset("images/na_RAG.png") }}">
-				{% endif %}
-				</td>	
-				<td><span class="cause" title="View/Enter Cause" style="cursor:pointer" data-type="textarea" id="cause_{{ row['KPIID'] }}_{{ Month }}">View</span></td>
-				<td><span class="action" title="View/Enter Action" style="cursor:pointer" data-type="textarea" id="action_{{ row['KPIID'] }}_{{ Month }}">View</span></td>	
-			</tr>
-		{% endfor %}
-		 <div id="dialog" title="KPI Project Details" class="modal_dialog"></div>		
-		</tbody>
-	</table>
-	
-	{# HIDDEN TABLE FOR EXPORT TO EXCLUDE A(ANCHOR) TAGS #}	
-	<table id="dataTable1" class="table_hidden">
-		<thead class="thead-inverse">
-			<tr>				
-				<th class="bg_grey">KPI</th>
-				<th class="bg_grey">Target</th>
-				<th class="bg_grey">Actual</th>				
-			</tr>
-		</thead>
-		<tbody>		
-		{% for row in KPIResults %}
-			<tr>				
-				<td>{{ row['KPI'] }}</td>				
-				<td>
-				{% if row['Operator'] is not empty %}
-					{{ row['Operator'] }}{{ row['Target'] }}%
-				{% else %}
-					{{ row['Target'] }}%
-				{% endif %}
-				</td>								
-				
-				{% if row['Actual'] == 'N/A' %}
-					<td style="background-color:#f5f5f5">N/A</td>
-				{% else %}
-					{% if row['Operator'] == '<=' %}
-						{% if row['Actual'] <= row['Target'] %}							
-							<td style="background-color:#dff0d8">{{ row['Actual'] }}%</td>							 
-						{% else %}							
-							<td style="background-color:#f2dede">{{ row['Actual'] }}%</td>
-						{% endif %}						
-					{% elseif row['Operator'] == '>=' %}
-						{% if row['Actual'] >= row['Target'] %}							
-							<td style="background-color:#dff0d8">{{ row['Actual'] }}%</td>						
-						{% else %}							
-							<td style="background-color:#f2dede">{{ row['Actual'] }}%</td>				
-						{% endif %}
-					{% endif %}
-				{% endif %}						
-			</tr>
-		{% endfor %}				
-		</tbody>
-	</table>
-	{# #}		
-</div>
 
+{% if Month is defined and Month == "now"|date("M-y") %}
+	<div class="text-primary">(Default list shows results from current month.)</div><br>
+{% else %}
+	<br>
+{% endif %}
+
+<div class="row">
+	<div class="col-xs-10">
+		<table id="dataTable" class="table-bordered compact-table">
+			<thead>
+				<tr>								
+					<th>KPI</th>
+					<th>Target</th>
+					<th>Actual</th>		
+					<th>RAG</th>
+					{#
+					<th>Cause/Action</th>
+					#}				
+				</tr>
+			</thead>
+			<tbody>		
+			{# {{ dump(KPIResults) }} #}
+			{% for row in KPIResults %}
+				{% set RAG = '' %}
+				<tr>								
+					<td>									
+						<a target="_blank" style="cursor:pointer" href="{{ path('KPIProjectsSearch', { KPIID : row['KPIID'], Month : Month } ) }}" data-toggle="tooltip" data-html="true" title="{{ row['Caption']}}"  value="{{ row['KPI'] }}">{{ row['KPI'] }}</a>
+						{# onClick="window.open('{{ path('KPIProjectsSearch', { KPIID : row['KPIID'], Month : Month } ) }}','','width=1800');" #}
+						{# href="{{ path('KPIProjectsSearch', { KPIID : row['KPIID'], Month : Month } ) }}" #}			
+																
+					</td>						
+					
+					
+					
+					{# {{ row['KPI'] }}=={{ row['Actual'] }}<br> #} 
+					{% if row['Operator'] is not empty %}	
+					
+						<td align="center">{{ row['Operator'] }}{{ row['Target'] }}%</td>
+						
+						{% if '%' in row['Actual'] %}
+							
+							{% if row['Operator'] == '<=' %}
+							{# {{ row['Actual']|trim('%') }} == {{ row['Target'] }}<br> #}
+								{% if row['Actual']|trim('%') <= row['Target'] %}
+									{% set RAG = 'green' %}
+								{% elseif row['Actual']|trim('%') != 'Unknown' %}
+									{% set RAG = 'red' %}							
+								{% elseif row['Actual'] == 'Unknown' %}
+									{% set RAG = 'yellow' %}							
+								{% endif %}													
+							
+							{% elseif row['Operator'] == '>=' %}
+								{% if row['Actual']|trim('%') >= row['Target'] %}
+									{% set RAG = 'green' %}							
+								{% elseif row['Actual']|trim('%') != 'Unknown' %}
+									{% set RAG = 'red' %}							
+								{% elseif row['Actual'] == 'Unknown' %}
+									{% set RAG = 'yellow' %}
+								{% else %}
+									{% set RAG = 'n/a' %}							
+								{% endif %}
+	
+							{% endif %}					
+							
+							<td align="center">{% if row['Actual'] is not empty %}{{ row['Actual'] }}{% endif %}</td>							
+							
+						{% else %}
+							{# {{ row['KPI'] }}=={{ row['Actual'] }}<br> #}
+							{% if row['Actual']|trim('%') == 'Unknown' %}
+								{% set RAG = 'yellow' %}							
+							{% elseif row['Actual'] == 'N/A' %}
+								{% set RAG = 'n/a' %}	
+							{% else %}
+								{% set RAG = 'n/a' %}
+							{% endif %}
+							
+							<td align="center">{{ row['Actual'] }}</td>
+	
+						{% endif %}					
+												
+					{% else %}
+						 {# {{ row['KPI'] }}=={{ row['Actual']|trim('%') }} == {{ row['Target'] }}<br> #}
+						<td align="center">{{ row['Target'] }}%</td>					
+						{% if row['Target'] == row['Actual']|trim('%') %}
+							{% set RAG = 'green' %}														 						 
+						{% elseif row['Actual']|trim('%') != row['Target'] and row['Actual']|trim('%') != 'N/A' 
+							and row['Actual']|trim('%') != 'Unknown' %}				
+							{% set RAG = 'red' %}	
+						{% elseif row['Actual'] == 'Unknown' %}
+							{% set RAG = 'yellow' %}
+						{% else %}
+							{% set RAG = 'N/A' %}							
+						{% endif %}		
+						
+						<td align="center">{% if row['Actual'] is not empty %}{{ row['Actual'] }}{% endif %}</td>
+					{% endif %}
+					
+					
+					<td align="center">
+					
+						{% if RAG is defined and RAG == 'green' %}
+							<img src="{{ asset("images/green_RAG.png") }}">
+						{% elseif RAG is defined and RAG == 'red' and RAG != ''%}
+							<img src="{{ asset("images/red_RAG.png") }}">
+						{% elseif RAG is defined and RAG == 'yellow' and RAG != ''%}
+							<img src="{{ asset("images/yellow_RAG.png") }}">					
+						{% elseif RAG is defined and RAG == 'n/a' %}
+							<img src="{{ asset("images/na_RAG.png") }}">
+						{% else %}
+							'N/A'
+						{% endif %}				
+
+					</td>
+								
+					
+					{# {{ Month }}=={{ row['KPIID']}}=={{ row['CAUSE'] }}=={{ row['ACTION'] }}<BR> #}
+					
+					
+					<input type="hidden" class="cause_hidden" value="{{ row['CAUSE'] }}">
+					<input type="hidden" id="action_hidden" value="{{ row['ACTION'] }}">
+					<input type="hidden" id="kpiid_hidden" value="{{ row['KPIID'] }}">
+					<input type="hidden" id="month_hidden" value="{{ Month }}">
+										
+									
+					{# JQUERY POPUP FOR CAUSE/ACTION #}
+					
+					<div style="display:none;" id="dialog" title="KPI Project Details" class="modal_dialog">		 	
+			 			{# {{ include('Dashboard/ViewCauseAction.html.twig') }} #}
+			 		</div>
+			 		
+			 		{# #}		
+					
+				</tr>
+			{% endfor %}
+			
+			</tbody>
+		</table>
+		
+		{# HIDDEN TABLE FOR EXPORT TO EXCLUDE A(ANCHOR) TAGS #}	
+		<table id="dataTable1" class="table_hidden">
+			<thead class="thead-inverse">
+				<tr>				
+					<th class="bg_grey">KPI</th>
+					<th class="bg_grey">Target</th>
+					<th class="bg_grey">Actual</th>				
+				</tr>
+			</thead>
+			<tbody>		
+			{% for row in KPIResults %}
+				{% set bgcolor = '' %}
+				<tr>								
+					<td>{{ row['KPI'] }}</td>			
+ 
+					{% if row['Operator'] is not empty %}	
+					
+						<td align="center">{{ row['Operator'] }}{{ row['Target'] }}%</td>
+						
+						{% if '%' in row['Actual'] %}
+							
+							{% if row['Operator'] == '<=' %}
+							{# {{ row['Actual']|trim('%') }} == {{ row['Target'] }}<br> #}
+								{% if row['Actual']|trim('%') <= row['Target'] %}
+									{% set bgcolor = '#dff0d8' %}
+								{% elseif row['Actual']|trim('%') != 'Unknown' %}
+									{% set bgcolor = '#f2dede' %}							
+								{% elseif row['Actual'] == 'Unknown' %}
+									{% set bgcolor = '#fee383' %}							
+								{% endif %}													
+							
+							{% elseif row['Operator'] == '>=' %}
+								{% if row['Actual']|trim('%') >= row['Target'] %}
+									{% set bgcolor = '#dff0d8' %}							
+								{% elseif row['Actual']|trim('%') != 'Unknown' %}
+									{% set bgcolor = '#f2dede' %}					
+								{% elseif row['Actual'] == 'Unknown' %}
+									{% set bgcolor = '#fee383' %}
+								{% else %}
+									{% set bgcolor = '#bfbfbf' %}							
+								{% endif %}
+	
+							{% endif %}
+							
+							<td align="center" style="background-color:{{ bgcolor }}">{% if row['Actual'] is not empty %}{{ row['Actual'] }}{% endif %}</td>
+							
+						{% else %}
+							{# {{ row['KPI'] }}=={{ row['Actual'] }}<br> #}
+							{% if row['Actual']|trim('%') == 'Unknown' %}
+								{% set bgcolor = '#fee383' %}							
+							{% elseif row['Actual'] == 'N/A' %}
+								{% set bgcolor = '#bfbfbf' %}		
+							{% else %}
+								{% set bgcolor = '#bfbfbf' %}	
+							{% endif %}
+							
+							<td align="center" style="background-color:{{ bgcolor }}">{{ row['Actual'] }}</td>
+	
+						{% endif %}					
+												
+					{% else %}
+						 
+						<td align="center">{{ row['Target'] }}%</td>					
+						{% if row['Target'] == row['Actual']|trim('%') %}
+							{% set bgcolor = '#dff0d8' %}													 						 
+						{% elseif row['Actual']|trim('%') != row['Target'] and row['Actual']|trim('%') != 'N/A' 
+							and row['Actual']|trim('%') != 'Unknown' %}				
+							{% set bgcolor = '#f2dede' %}	
+						{% elseif row['Actual'] == 'Unknown' %}
+							{% set bgcolor = '#fee383' %}	
+						{% else %}
+							{% set bgcolor = '#bfbfbf' %}						
+						{% endif %}		
+						
+						<td align="center" style="background-color:{{ bgcolor }}">{% if row['Actual'] is not empty %}{{ row['Actual'] }}{% endif %}</td>
+					{% endif %}					
+					
+			
+											
+				</tr>
+			{% endfor %}
+				
+							
+			</tbody>
+		</table>
+		{# #}		
+	</div>
+</div>
+<br>
+<div class="row">	
+	<div class="row">	
+			<div class="col-xs-1 text-right div-less-padding">
+				<img src="{{ asset("images/green_RAG.png") }}">
+			</div>
+			<div class="col-xs-1 text-left div-less-padding">SLA met</div>
+			
+			<div class="col-xs-1 text-right div-less-padding">
+				<img src="{{ asset("images/red_RAG.png") }}">
+			</div>
+			<div class="col-xs-1 text-left div-less-padding">SLA not met</div>		
+	</div>
+	<div class="row">
+			<div class="col-xs-1 text-right div-less-padding">
+				<img src="{{ asset("images/na_RAG.png") }}">
+			</div>
+			<div class="col-xs-1 text-left div-less-padding">Not Applicable</div>
+						
+			<div class="col-xs-1 text-right div-less-padding">
+				<img src="{{ asset("images/yellow_RAG.png") }}">
+			</div>
+			<div class="col-xs-4 text-left div-less-padding">Data yet to receive from Concerned Teams</div>	
+			
+		</div>
+</div>
 {% endblock %}
 
 {% block documentready %}
@@ -169,7 +316,8 @@
 		$('[data-toggle="tooltip"]').tooltip({
 			html: true,			
     		max-width:none;
-		});
+		});		
+			
 	</script>
 {% endblock %}
 
@@ -177,16 +325,14 @@
 {% block javascripts %}
 	{{ parent() }}
 	<script src="{{ asset('js/Dashboard/Dashboard_common.js') }}"></script>		
-	<script>	
-		
-		{# loadDataTable_Export('KPIResults'); #}	
+	<script>		
 		
 		$.fn.editable.defaults.mode = 'popup';
 				
 		DashboardGeneralFunctions();
 		
 		$("#Export").on('click', function(){
-			tableToExcel('dataTable1', 'Execution Results');			
+			tableToExcel('dataTable1', 'KPI Dashboard');			
 		});	
 		
 		 var tableToExcel = (function() {

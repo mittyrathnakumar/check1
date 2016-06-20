@@ -24,7 +24,6 @@ class DefaultController extends Controller
     	
     	return $this->render('Home.html.twig');
     }
-    
    
    
 }

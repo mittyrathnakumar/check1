@@ -1,6 +1,13 @@
 {% extends 'layout.html.twig' %}
 
-{% block content %}	
+{% block content %}
+
+{% set sessionUID = app.session.get('UserID') %}
+{% set username = app.session.get('UserName') %}	
+{% set sessionUserRole = app.session.get('UserRole') %}	
+
+
+	
 
 <h1 class="page-header">User Details</h1>
  <ol class="breadcrumb">
@@ -12,6 +19,7 @@
     	<li class="active">Add User</li>
     {% endif %}
 </ol>
+{# {{ sessionUserRole }}=={{ DASHBOARD_ID }} #}
 
 <form class="form-horizontal" role="form" id="frmEditUser" method="post" action="{% if UserID is defined %} {{ path('EditUserPost') }} {% else %} {{ path('AddUserPost') }} {% endif %}">
   <div class="form-group">
@@ -43,10 +51,12 @@
     <div class="col-sm-2">
       <select name="RoleID" id="RoleID" class="form-control" placeholder="User Role" required>
 	      <option value="">--Select Role--</option>
-	      <option value="1" {% if UserDetails is defined and UserDetails.getUserRoleID() == 1%} selected {% endif %} >Admin</option>
-	      <option value="2" {% if UserDetails is defined and UserDetails.getUserRoleID() == 2%} selected {% endif %}>Super Admin</option>
-	      <option value="3" {% if UserDetails is defined and UserDetails.getUserRoleID() == 3%} selected {% endif %}>Test Manager</option>
-	      <option value="4" {% if UserDetails is defined and UserDetails.getUserRoleID() == 4%} selected {% endif %}>Misc.</option>
+	      <option value="1" {% if UserDetails is defined and UserDetails.getUserRoleID() == 1 %} selected {% endif %}>Admin</option>
+	      <option value="2" {% if UserDetails is defined and UserDetails.getUserRoleID() == 2 %} selected {% endif %}>Manager</option>  
+	      <option value="3" {% if UserDetails is defined and UserDetails.getUserRoleID() == 3 %} selected {% endif %}>Delivery Manager</option>
+	      <option value="4" {% if UserDetails is defined and UserDetails.getUserRoleID() == 4 %} selected {% endif %}>PMO</option>
+	      <option value="5" {% if UserDetails is defined and UserDetails.getUserRoleID() == 5 %} selected {% endif %}>Manager - Production Test Accounts</option>
+     	  <option value="6" {% if UserDetails is defined and UserDetails.getUserRoleID() == 6 %} selected {% endif %}>Stakeholder</option>
       </select>
     </div>    
   </div>

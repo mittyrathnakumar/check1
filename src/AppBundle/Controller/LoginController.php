@@ -23,22 +23,24 @@ class LoginController extends Controller
 	 */
 	public function loginAction(Request $request) {	
 		
-		//echo "<pre>";print_r($request);exit;
+		if(isset($request->query->all()['referrer']))
+			$referrer = $request->query->all()['referrer'];//exit;
 		
 		$session = new Session();
 		$userID = $session->get('UserID');
 		
-		if(empty($userID)){			
-			return $this->render('index.html.twig');
+		if(empty($userID)){		
+			if(isset($referrer)){
+				$parameteres = array();
+				$parameteres['referrer'] = $referrer;
+			} else 
+				$parameteres['referrer'] = '';
+			
+			return $this->render('index.html.twig', [
+					"para" => $parameteres
+			]);			
 		}
 		
-		/*if(!empty($request->query->all())){
-			echo $request->query->all()[0];exit;
-			return $this->redirectToRoute('Dashboard');
-		}
-		else {
-			return $this->redirectToRoute('Dashboard');
-		}*/
 		return $this->redirectToRoute('Home');
 		
 	}
@@ -48,14 +50,13 @@ class LoginController extends Controller
 	 * @Method({"POST"})
 	 */
 	
-	// Handles Login form submission
+	/* Handles Login form submission */
 	
-	public function loginPostAction(Request $request) {		
-		
-		// Check in the database for a valid user - Repository / Entity
+	public function loginPostAction(Request $request) {
 		
 		$email = $request->request->get('email');
 		$password = $request->request->get('password');
+		$referrer = $request->request->get('referrer');
 		
 		$userDetail = new UserRepository();
 		$userDetails = $userDetail->fetchUserDetails($email, $password);
@@ -68,27 +69,38 @@ class LoginController extends Controller
 			$response = array();
 			
 			$UserID = $userDetails->getUserID();
-			$UserName = $userDetails->getFirstName();
+			$UserFirstName = $userDetails->getFirstName();
+			$UserLastName = $userDetails->getLastName();			
 			$UserRole = $userDetails->getUserRole();
-			
-			
+			$UserModuleIDsTemp = $userDetails->getModuleIDs();	
+			$UserModuleIDs = explode(",", $UserModuleIDsTemp);
+			$UserHomePage = $userDetails->getUserHomePage();			
+		
 			$session = new Session();
-			//$session->start();
 			
-			// If user is valid - store the data into session and navigate to Dashboard page.
+			/* If user is valid - store the data into session. */
 				
 			$session->set('UserID', $UserID);
-			$session->set('UserName', $UserName);
+			$session->set('UserName', $UserFirstName." ".$UserLastName);
 			$session->set('UserRole', $UserRole);
+			$session->set('UserModuleIDAccess', $UserModuleIDs);
+			
+			/* === */
 					
-			$response['status'] = 1;			
+			$response['status'] = 1;
+			$response['referrer'] =  $referrer;
+			
+			/* Set the default homepage from DB only if the referred URL is blank */
+			
+			if(empty($referrer))
+				$response['home_page'] = $UserHomePage;					
+			
 		}
 		
 		else 
 			$response['status'] = $invalid;
 		
 		return new JsonResponse($response);	 
-
 		 
 	}	
 	

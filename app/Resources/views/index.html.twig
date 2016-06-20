@@ -13,10 +13,18 @@
 				</div>
 			</div>
 		</div>
-	</header>		
-	{{ include('login.html.twig') }}
-		
-	<div id="AfterLoginPath" post-url="{{ path('Home') }}"></div>
+	</header>	
+			
+	{{ include('login.html.twig') }}	
+	<input type="hidden" id="referrer" value="{% if para['referrer'] is defined %}{{ para['referrer'] }}{% endif %}">
+	
+	{% if para['referrer'] is defined and para['referrer'] is not empty %}
+		{% set posturl = path(para['referrer']) %}		
+	{% else %}
+		{% set posturl = '' %}
+	{% endif %}
+	
+	<div id="AfterLoginPath" post-url="{{ posturl }}"></div>
 		
 {% endblock %}
 

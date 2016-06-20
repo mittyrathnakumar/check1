@@ -104,7 +104,7 @@ class KPI
 	}
 	
 	public function setSLAValue($sla_value){
-		$this->sla_value = $sla_value;
+		$this->sla_value = floatval($sla_value);
 	}
 	
 	public function getSLAValue(){

@@ -25,7 +25,7 @@
 </div>
 </br></br></br>
 <div class="row col-md-8">		
-	<table class="table table-bordered table-hover" id="dataTable">
+	<table class="table-bordered table-condensed table-hover" id="dataTable">
 		<thead>
 			<tr class="bg_grey">					
 				<th>No.</th>
@@ -42,10 +42,13 @@
 				<td>{{ row.getProjectName}}</td>
 				<td><span id="stAutomatedTestCases_{{ loop.index }}" data-type="textarea" class="stAutomatedTestCases">{{ row.getSTAutomatedTestCases|upper}}</span></td>
 				<td><span id="stTotalTestCases_{{ loop.index }}" data-type="textarea" data-pk="1" class="stTotalTestCases" style="text-transform: uppercase">{{ row.getSTTotalTestCases|upper}}</span></td>
-				<td><span class="stAutomation_{{ loop.index }}">{{ row.getSTAutomation}}%</span></td>
-				<input type="hidden" id="ProjectIDHidden_{{ loop.index }}" value="{{ row.ProjectId }}">
-				</tr>
+				<td>
+				{% if row.getSTAutomation is not null and row.getSTAutomation != 'N/A'%}{{ row.getSTAutomation }}% {% else %}
+				{{ row.getSTAutomation() }}{% endif %}
+				</td>
 				
+				<input type="hidden" id="ProjectIDHidden_{{ loop.index }}" value="{{ row.ProjectId }}">
+				</tr>				
 	    	{% endfor %}
 		</tbody>
 	</table>			

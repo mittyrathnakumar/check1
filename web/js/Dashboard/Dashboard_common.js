@@ -6,19 +6,186 @@ function DashboardGeneralFunctions(){
 		
 		var counterTemp = $(this).closest('td').children('span').attr('id');
 		var split = counterTemp.split("_");
-		var KPIID = split[1];
-		var Month = split[2];
-				
-		var value = $('.input-large').val();				
+		var counter = split[1];		
 		
-		if(value != ""){											
-			 AjaxUpdatePlanActionDetails(value, KPIID, Month);				
+		var column = $(this).closest('td').children('span').attr('column');
+				
+		var value = $('.input-large').val();	
+		
+		var KPIID = $("#KPIHidden").val();
+		
+		var ProjectID = $("#ProjectIDHidden_"+counter).val();
+		
+		if(value != ""){			
+			AjaxUpdatePlanActionDetails(column, value, KPIID, ProjectID);			
+		}
+	});	
+	
+	
+	/* Open a page to show KPI List from Dashboard */
+	
+	$("#kpidata_inputs").on('click', function(){
+		window.location.href =  $("#KPIListPath").attr("data-path");
+	});
+	
+	/* */
+	
+	
+	/* Loads the Cause Action Popup in a DIV */
+	
+	$(".viewcause").on('click', function(){	
+		
+		/*var KPID =  '';	
+		var Month = '';
+		var Cause = '';
+		var Action = '';
+		$("#cause_popup").val(Cause);
+		$("#action_popup").val(Action);
+		*/
+		
+		var tempValue = $(this).attr('id');
+		var split = tempValue.split("_");
+		var KPID =  split[0];	
+		var Month = split[1];
+		var Cause = split[2];
+		var Action = split[3];
+		
+		alert(KPID+"==="+Month);
+		
+		
+	
+		/*
+		$("#cause").val(Cause);
+		$("#action").val(Action);
+		*/
+		
+		$("#causeaction_dialog").css('display', '');
+		
+		
+		
+					
+		var path = $("#causeaction_dialog").attr("data-path");	
+		
+		$("#causeaction_dialog").load(path).dialog({
+			  modal : true,	
+		      width : 700,
+		      height : 600
+		});	
+		
+		$("#kpiid").val(KPID);
+		//$("#month").val(Month);
+		
+		
+		$("#cause").val();	
+		$("#action").val();	
+		
+		alert($("#kpiid").val());
+		//alert($("#month").val());
+		
+	});
+	
+	/*  */
+	
+	
+	/*$(document).ready(function(){
+		$("#frmCauseActionSubmit").validate();
+	});
+	
+	$.validator.setDefaults({
+		submitHandler: function() {				
+			submitKPICauseAction();
+			//location.reload();
 		}
 	});
+	*/
+	
+	
+	
+	$("#causeaction_submit").on('click', function(){		
+			
+		var cause = $("#cause").val();
+		var action = $("#action").val();
+		
+		var kpiid = $("#kpiid").val();	
+		var month = $("#month").val();
+		
+		alert(cause+"=="+action+"=="+kpiid+"==="+month)	
+		
+		var Data = { causeInsert : cause, actionInsert : action, kpiid : kpiid, month : month, action : 'updateMonthlyCauseAction' };		
+		
+		$.ajax({		
+			type : 'POST',
+			dataType: 'JSON',
+			data : Data, 
+			success: function(data) {				
+					alert(data);			
+					
+					$( "#dialog" ).dialog({
+						   modal: true,
+					       autoOpen: false,		
+					       height: 200,
+						   width: 400,
+					       buttons: {
+					          Ok : function(){
+					        	  $(this).dialog("close");
+					        	  $("#causeaction_dialog").dialog("close");
+					          }
+					       } 						       
+					 });
+					
+					htmltext = "<div class='small'>"+data+"</div>";
+					
+					$( "#dialog" ).html(htmltext);
+					$( "#dialog" ).dialog( "open" );
+					
+	        },
+	        error: function(jqXHR, textStatus, errorThrown) {
+	        	  console.log(textStatus, errorThrown);
+	        }
+		});
+	});
+	
+	
+	/* Datepicker for Darshboard Search */
+	
+	$("#Month").datepicker({
+		dateFormat: "M-y",
+		changeMonth: true,
+	    changeYear: true,
+	    showButtonPanel: true,	   
+	    onClose: function(dateText, inst) { 
+	       $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
+	    }
+		
+	});
+	
+	 $(".monthPicker").focus(function () {
+	      $(".ui-datepicker-calendar").hide();	        
+	 });
+	
+	/* === */ 
+	
+
 }
-function AjaxUpdatePlanActionDetails(value, KPIID, Month){
+function submitKPICauseAction(){
+	var cause = $("#cause_popup").val();
+	var action = $("#action_popup").val();
+	
+	var kpiid = $("#kpiid_popup").val();	
+	var month = $("#month_popup").val();
+	
+	alert(cause+"=="+action+"=="+kpiid+"==="+month)	
+}
+
+
+/*function AjaxUpdatePlanActionDetails(value, KPIID, Month){
 	
 	var Data = { newVal : Month, KPIID : KPIID, Month : Month, action : 'updateCauseAction' };
+	*/
+function AjaxUpdatePlanActionDetails(column, newVal, KPIID, ProjectID){
+	
+	var Data = { column : column, newVal : newVal, KPIID : KPIID, ProjectID : ProjectID, action : 'updateCauseAction' };
+	
 	
 	$.ajax({		
 		type : 'POST',
@@ -49,28 +216,6 @@ function AjaxUpdatePlanActionDetails(value, KPIID, Month){
 }
 
 /*
-function OnTDBlurEditValues(){	
-	
-	$("td[contenteditable=true]").blur(function(){		
-					
-		var id = $(this).attr("id");
-		
-		var split = id.split("_");	
-		var column = split[0];
-		var counter = split[1];
-		
-		var KPIID = $("#KPIHidden").val();
-		var newVal = $(this).text();		
-				
-		var ProjectID = $("#ProjectIDHidden_"+counter).val();		
-		
-		if(column != ""){											
-			 AjaxUpdatePlanActionDetails(column, newVal, KPIID, ProjectID);				
-		}
-		
-	});
-}
-
 
 function AjaxUpdatePlanActionDetails(column, value, KPIID, ProjectID){
 	

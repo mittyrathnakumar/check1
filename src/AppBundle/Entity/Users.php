@@ -47,6 +47,28 @@ class Users
 	 */
 	private $invalid;
 	
+	/**
+	 * @var string
+	 */
+	private $module_id;
+	
+	/**
+	 * @var string
+	 */
+	private $module_name;
+	
+	/**
+	 * @var string
+	 */
+	private $module_arr;
+	
+	/**
+	 * @var string
+	 */
+	private $user_home_page;
+	
+	
+	
 	
 	
 	public function setEmail($email){
@@ -114,8 +136,37 @@ class Users
 		return $this->invalid;
 	}
 	
+	public function setModuleIDs($module_id){
+		$this->module_id = $module_id;
+	}
 	
+	public function getModuleIDs(){
+		return $this->module_id;
+	}
 	
+	public function setModuleAccess($module_names){
+		$this->module_name = $module_names;
+	}
+	
+	public function getModuleAccess(){
+		return $this->module_name;
+	}
+	
+	public function setModuleArr($module_arr){
+		$this->module_arr = $module_arr;
+	}
+	
+	public function getModuleArr(){
+		return $this->module_arr;
+	}
+	
+	public function setUserHomePage($user_home_page){
+		$this->user_home_page = $user_home_page;
+	}
+	
+	public function getUserHomePage(){
+		return $this->user_home_page;
+	}
 	
 
 }

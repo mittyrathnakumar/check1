@@ -17,7 +17,7 @@
    <div class="form-group">
     <label class="control-label col-sm-2" for="Programme">Programme :</label>
     <div class="col-sm-4">
-    	<input type="text" name="Programme" id="Programme" placeholder="Programme" value="{% if ProcessDetails is defined %}{{ ProcessDetails[0]['PROGRAMME']|trim }}{% endif %}" class="form-control">       
+    	<input type="text" name="Programme" id="Programme" placeholder="Programme" value="{% if ProcessDetails is defined %}{{ ProcessDetails[0]['PROGRAMME']|trim }}{% endif %}" class="form-control" required>       
     </div>
   </div>
    <div class="form-group">
@@ -30,7 +30,7 @@
       	{% set readonly = '' %}
       	{% set autocomplete = 'autocomplete' %}
       {% endif %}  
-       <input {{ readonly }} type="text" name="ProjectName" id="ProjectName" class="form-control {{ autocomplete }}" value="{% if ProcessDetails is defined %}{{ProcessDetails[0]['PROJECT_NAME']|trim}}{% endif %}" required>   
+       <input type="text" name="ProjectName" id="ProjectName" class="form-control {{ autocomplete }}" value="{% if ProcessDetails is defined %}{{ProcessDetails[0]['PROJECT_NAME']|trim}}{% endif %}">   
     </div>
     <div id="AutoPath" data-ajaxurl="{{ path('AddIntakeProcess') }}"></div>
   </div>		 
@@ -64,6 +64,13 @@
     </div>
   </div>  
    <div class="form-group">
+    <label class="control-label col-sm-2" for="Status">Status:</label>
+    <div class="col-sm-3">
+    	<input type="text" name="Status" class="form-control" id="Status" placeholder="Status" value="{% if ProcessDetails is defined %}{{ ProcessDetails[0]['STATUS']|trim }}{% endif %}" required>
+     </div>
+  </div>  
+  {#
+   <div class="form-group">
     <label class="control-label col-sm-2" for="Scope">Status:</label>
     <div class="col-sm-2">
       <select name="Status" id="Status" class="form-control" placeholder="Status" required>
@@ -77,7 +84,8 @@
 	      <option value="ROM Submitted" {% if ProcessDetails is defined and ProcessDetails[0]['STATUS'] == 'ROM Submitted' %} selected {% endif %}>ROM Submitted</option>
       </select>
     </div>
-  </div>  
+  </div>
+  #}  
   <div class="form-group">
     <label class="control-label col-sm-2" for="RequestDate">Request Date:</label>
     <div class="col-sm-2">
@@ -92,13 +100,14 @@
       <a href="#" class="clearSubmissionDate">clear</a>
     </div>
   </div>
+  {#
   <div class="form-group">
     <label class="control-label col-sm-2" for="Value">Value(k):</label>
     <div class="col-sm-2">
       <input type="number" name="Value" class="form-control" id="Value" placeholder="Value" value="{% if ProcessDetails is defined %}{{ ProcessDetails[0]['VALUE']|trim }}{% endif %}" required>
     </div>
   </div>
- 
+ #}
    <div class="form-group">
 	   <div class="col-sm-offset-2 col-sm-10">
 	      <button type="submit" name="submit" id="submit" class="btn btn-primary">Submit</button>

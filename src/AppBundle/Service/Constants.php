@@ -210,23 +210,38 @@ class Constants
 	}
 	
 	public function getKPIQuery($kpi, $table_name, $cycle_ids, $queryno = ""){		
-		$queries = array();		
+		$queries = array();
+		
 		switch($kpi){
 			
 			// TEST_Rel_16_1_DB
 			
 			case "ETA" :	
 				
-				$queries['q1'] = "SELECT count(UNIQUE(AU_ENTITY_ID)) AS Rejected_or_Withdrawn_Defects 
+				/*$queries['q1'] = "SELECT count(UNIQUE(AU_ENTITY_ID)) AS Rejected_or_Withdrawn_Defects 
 						FROM ".$table_name.".AUDIT_LOG INNER JOIN ".$table_name.".AUDIT_PROPERTIES 
 						ON AU_ACTION_ID = AP_ACTION_ID 
 						AND AU_ENTITY_TYPE = 'BUG' INNER JOIN ".$table_name.".BUG 
 						ON AU_ENTITY_ID = BG_BUG_ID
  						AND bg_detected_in_rcyc in (".$cycle_ids.") 
-						AND BG_USER_05 NOT IN('Valid Defect','Production Behaviour')
+						AND BG_USER_05 NOT IN('Invalid Defect')
 						WHERE AP_NEW_VALUE IN ('Rejected','Withdrawn') 
-						OR AP_OLD_VAlUE IN ('Rejected','Withdrawn')";
+						OR AP_OLD_VAlUE IN ('Rejected','Withdrawn')";	
+				*/
 				
+				$queries['q1'] = "SELECT count(UNIQUE(AU_ENTITY_ID)) AS Rejected_or_Withdrawn_Defects
+				FROM ".$table_name.".AUDIT_LOG
+				INNER JOIN ".$table_name.".AUDIT_PROPERTIES
+				ON AU_ACTION_ID   =AP_ACTION_ID
+				AND AU_ENTITY_TYPE='BUG'
+						INNER JOIN ".$table_name.".BUG
+						ON AU_ENTITY_ID        =BG_BUG_ID
+						AND bg_detected_in_rcyc in (".$cycle_ids.")
+						AND BG_USER_05 IN('Invalid Defect')
+						WHERE AP_NEW_VALUE    IN ('Rejected','Withdrawn')
+						OR AP_OLD_VAlUE       IN ('Rejected','Withdrawn')";
+				
+			
 				$queries['q2'] = "SELECT COUNT(*) AS q2Count 
 						FROM ".$table_name.".BUG 
 						WHERE bg_detected_in_rcyc IN (".$cycle_ids.") ";			

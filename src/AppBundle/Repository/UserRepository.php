@@ -38,9 +38,8 @@ class UserRepository
 
 		$query = "SELECT * FROM KPI_USERS
 				WHERE EMAILID = :email				
-				AND ACTIVE = 1"; 
+				AND ACTIVE = 1";		
 		
-		//echo $query;exit;
 		$queryParse = oci_parse($conn, $query);		
 		oci_bind_by_name($queryParse, ':email', $email);				
 		
@@ -56,13 +55,49 @@ class UserRepository
 				$user->setEmail($row['EMAILID']);
 				$user->setFirstName($row['FIRSTNAME']);
 				$user->setLastName($row['LASTNAME']);
-				//$user->setUserRole($row['USERROLE']);
+				$user->setUserRole($row['ROLEID']);
 				$user->setUserID($row['USERID']);
-				$user->setUserActive($row['ACTIVE']);				
+				$user->setUserActive($row['ACTIVE']);
+				
+				$query = "SELECT HOME_PAGE FROM KPI_USERROLE
+						WHERE ROLEID = ".$row['ROLEID'];
+				$queryParse = oci_parse($conn, $query);
+				oci_execute($queryParse);
+				$result = oci_fetch_array($queryParse);
+				
+				//print_r($result);exit;
+				
+				$user->setUserHomePage($result['HOME_PAGE']);				
+				
+				date_default_timezone_set('Australia/Sydney');
+				
+				$query1 = "UPDATE KPI_USERS SET
+						LAST_LOGIN = '".date("d/M/Y h:i:s A") ."'
+						WHERE USERID = ".$row['USERID'];
+				
+				$query1Parse = oci_parse($conn, $query1);				
+				oci_execute($query1Parse);
+				
 				
 			} else {				
 				$user->setInvalid('Invalid Password !!!');
 			}			
+			
+			/* Get the Module access for the RoleID */
+			
+			$query = "SELECT MODULE_ID 
+					FROM KPI_USER_RIGHTS
+					WHERE ROLE_ID = ".$row['ROLEID'];
+			
+			$queryParse = oci_parse($conn, $query);			
+			
+			oci_execute($queryParse);
+			$row = oci_fetch_array($queryParse);
+			
+			$user->setModuleIDs($row['MODULE_ID']);
+			
+			
+			/* === */
 		} 
 		
 		if(empty($temp))
@@ -70,7 +105,23 @@ class UserRepository
 			
 		return $user;
 	}
-	
+
+	public function updateUserLogout($userID){
+		
+		$this->oracle->openConnection('KPIDASHBOARD');
+		$conn = $this->oracle->getConnection();
+		
+		date_default_timezone_set('Australia/Sydney');
+		
+		$query = "UPDATE KPI_USERS SET
+				LAST_LOGOUT = '".date("d/M/Y h:i:s A")."'
+				WHERE USERID = ".$userID;
+		
+		$queryParse = oci_parse($conn, $query);
+		$row = oci_execute($queryParse);
+		
+		return $row;
+	}
 	
 }
 

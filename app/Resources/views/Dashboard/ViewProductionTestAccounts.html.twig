@@ -1,0 +1,49 @@
+<div class="text-primary pull-left">This result shows data for <strong>{{ Month }}</strong>.</div><br>
+<div class="text-primary"><strong>KPI Definition</strong> - {{ KPIData['SLA_DESC'] }}</div>
+<div class="text-primary">Target for this KPI <strong>( {{ KPIData['OPERATOR'] }}{{ KPIData['SLA_VALUE'] }}% )</strong></div><br>
+<div class="row col-md-10">		
+	<table class="table-bordered table-condensed" id="dataTable">
+		<thead>
+			<tr>													
+				<th>Total No of Accounts</th>
+				<th>Consolidated No of Accounts</th>
+				<th>Compliance Percentage</th>
+				<th>RAG</th>
+			</tr>
+		</thead>
+		<tbody>	
+		
+	    	{% if KPIResults|length > 0 %}												
+					<tr>							
+						<td>{{ KPIResults['TOTAL_ACCOUNTS'] }}</td>
+						<td>{{ KPIResults['CONSOLIDATED_TOTAL'] }}</td>
+						<td>{{ KPIResults['PRODUCTION_TEST_ACCOUNTS'] }}%</td>								
+						
+						<td>
+						{% if KPIResults['RAG'] is defined and KPIResults['RAG'] == 'green' %}
+							<img src="{{ asset("images/green_RAG.png") }}">
+						{% elseif KPIResults['RAG'] is defined and KPIResults['RAG'] == 'red' %}							
+							<img src="{{ asset("images/red_RAG.png") }}">						
+						{% endif %}
+						</td>
+						
+						{#
+						{% if action is defined and action == 1 %}							
+							<td><span class="cause" title="Click to enter Cause" column="CAUSE" style="cursor:pointer" data-type="textarea" id="cause_{{ loop.index }}">{{ row['CAUSE'] }}</span></td>
+							<td><span class="action" title="Click to enter action" column="ACTION" style="cursor:pointer" data-type="textarea" id="action_{{ loop.index }}">{{ row['ACTION'] }}</span></td>
+						{% else %}
+							<td>N/A</td>
+							<td>N/A</td>									
+						{% endif %}
+						#}
+						
+					</tr>
+					{# <input type="hidden" name="ProjectIDHidden" id="ProjectIDHidden_{{ loop.index }}" value="{{ row['PROJECTID'] }}"> #}				
+		    	
+		    {% else %}
+		    	<tr><td class="text-primary div-center" colspan="8">No data available !!!</td></tr>
+		    {% endif %} 
+		    
+		</tbody>
+	</table>			
+</div>

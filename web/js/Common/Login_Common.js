@@ -4,18 +4,21 @@
 
 function checkUserLogin() {
 	var email = $("#Email").val();
-	var password = $("#Password").val();	
+	var password = $("#Password").val();
+	var referrer = $("#referrer").val();
+	
 	var htmltext;
 	
-	var data = {email : email, password : password};	
+	var data = { email : email, password : password, referrer : referrer };	
 	$.ajax({		
 		type: "POST",
 	    dataType: 'JSON',
 	    data : data,
 	    success: function(data) {
-	    	$.each(data, function(key, value){	    				    	
-		    	 
-				if(value != 1) {					
+	    	$.each(data, function(key, value){
+	    		
+	    		console.log(value);
+				if(key == 'status' && value != 1) {					
 					$( "#dialog" ).dialog({
 						   modal : true,
 					       autoOpen: false,		
@@ -34,13 +37,26 @@ function checkUserLogin() {
 					$( "#dialog" ).dialog( "open" );
 				}
 				else {	
+
 					/* Path is defined in index.html where login page is included */
-					var path = $("#AfterLoginPath").attr("post-url");				 
-					window.location.href = path;
+					var Path = $("#AfterLoginPath").attr("post-url");
+					
+					if(Path != ''){
+						//var Path = 'http://localhost/KPIDash/web/app_dev.php/'+value;
+						window.location.href = Path;
+					} 
+					
+					if(key == 'home_page' && value != ''){
+						var hostname = $(location).attr('hostname'); 
+						var pathname = $(location).attr('pathname');						
+						
+						var foldername = pathname.substring(0, pathname.length-5); /* This removes login from the end */ 
+						var Path = 'http://' + hostname + foldername + value /* Combines all values along with new Home Page */				
+						window.location.href = Path;
+					}
 				}
 								
-	    	});
-	    
+	    	});	    
 	    	
 	   },
 	    error: function(xhr, status, errorThrown) {

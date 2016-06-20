@@ -1,23 +1,33 @@
-<div class="row col-md-10">		
+<div class="text-primary pull-left">This result shows data for <strong>{{ Month }}</strong>.</div><br>
+<div class="text-primary"><strong>KPI Definition</strong> - {{ KPIData['SLA_DESC'] }}</div>
+<div class="text-primary">Target for this KPI <strong>( {{ KPIData['OPERATOR'] }}{{ KPIData['SLA_VALUE'] }}% )</strong></div><br>
+<div class="row col-md-6">		
 	<table class="table-bordered table-condensed" id="dataTable">
 		<thead>
 			<tr>					
 				<th>No.</th>
 				<th>Projectname</th>
-				<th>P3 & P4 Defects</th>				
+				<th>P3 & P4 Defects</th>
+				<th>Total Test Cases</th>
 			</tr>
 		</thead>
 		<tbody>
 			
 			{% if KPIResults|length > 0 %}
-				{% for month, resultArr in KPIResults %}
-					<tr><td class="text-primary" colspan="8"><strong>{{ month }}</strong></td></tr>
+				{% for month, resultArr in KPIResults %}				
 					{% if resultArr|length > 0 %}
 						{% for row in resultArr %}
-							<tr>
-							<td>{{ loop.index }}</td>	
-							<td>{{ row['PROJECTNAME'] }}</td>
-							<td>{{ row['P3_P4'] }}</td>
+							{% if row['RAG'] == 'N/A' %}
+								{% set naClass = 'bg_grey' %}
+							{% else %}
+								{% set naClass = '' %}
+							{% endif %}
+							
+							<tr class="{{ naClass }}">
+								<td>{{ loop.index }}</td>	
+								<td>{{ row['PROJECTNAME'] }}</td>
+								<td>{{ row['P3_P4'] }}</td>		
+								<td>{{ row['TESTCASES'] }}</td>
 							</tr>
 						{% endfor %}						
 					{% else %}

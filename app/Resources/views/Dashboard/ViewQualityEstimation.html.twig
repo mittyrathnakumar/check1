@@ -1,40 +1,71 @@
-<div class="text-primary pull-left">This result shows data for <strong>{{ Month }}</strong>.</div><br><br>
+<div class="text-primary pull-left">This result shows data for <strong>{{ Month }}</strong>.</div><br>
+<div class="text-primary"><strong>KPI Definition</strong> - {{ KPIData['SLA_DESC'] }}</div>
+<div class="text-primary">Target for this KPI <strong>( {{ KPIData['OPERATOR'] }}{{ KPIData['SLA_VALUE'] }}% )</strong></div><br>
 <div class="row col-md-12">		
-	<table class="table table-bordered table-hover" id="dataTable">
+	<table class="table-bordered table-condensed" id="dataTable">
 		<thead>
-			<tr class="bg_grey">					
+			<tr>					
 				<th>No.</th>
 				<th>Project Name</th>
 				<th>Engagement Date</th>
 				<th>Gate1 Estimation Delivery Date</th>
-				<th>Diff in Dates</th>
 				<th>Gate1 Estimation</th>
 				<th>Gate2 Estimation</th>
 				<th>Final Estimation</th>
 				<th>Gate1 Variance</th>
-				<th>Gate2 Variance</th>				
+				<th>Gate2 Variance</th>	
+				<th>RAG</th>				
+				<th>Cause</th>
+				<th>Action</th>				
 			</tr>
 		</thead>
-		<tbody>			
+		<tbody>
 	    	{% if KPIResults|length > 0 %}
 				{% for month, resultArr in KPIResults %}					
 					{% if resultArr|length > 0 %}
 						{% for row in resultArr %}
-							<tr>
+							{% set action = '' %}
+							{% if row['RAG'] == 'N/A' %}
+								{% set naClass = 'bg_grey' %}
+							{% else %}
+								{% set naClass = '' %}
+							{% endif %}
+							
+							<tr class="{{ naClass }}">
 							<td>{{ loop.index }}</td>							
 							<td>{{ row['PROJECTNAME'] }}</td>
 							<td>{{ row['ENGAGEMENT_DATE'] }}</td>
 							<td>{{ row['GATE1_ESTIMATION_DELIVERY_DATE'] }}</td>
-							<td>{{ row['DIFF_DATES'] }}</td>
 							<td>{{ row['GATE1_ESTIMATION'] }}</td>
 							<td>{{ row['GATE2_ESTIMATION'] }}</td>
 							<td>{{ row['FINAL_ESTIMATION'] }}</td>
 							<td>{{ row['GATE1_VARIANCE'] }}</td>
-							<td>{{ row['GATE2_VARIANCE'] }}</td>						
+							<td>{{ row['GATE2_VARIANCE'] }}</td>
+							<td>
+							{% if row['RAG'] is defined and row['RAG'] == 'green' %}
+								<img src="{{ asset("images/green_RAG.png") }}">
+							{% elseif row['RAG'] is defined and row['RAG'] == 'red' %}
+								{% set action = 1 %}
+								<img src="{{ asset("images/red_RAG.png") }}">
+							{% elseif row['RAG'] is defined and row['RAG'] == 'Unknown' %}
+								<img src="{{ asset("images/yellow_RAG.png") }}">
+							{% else %}
+								<img src="{{ asset("images/na_RAG.png") }}">
+							{% endif %}
+							</td>
+							
+							{% if action is defined and action == 1 %}							
+								<td><span class="cause" title="Click to enter Cause" column="CAUSE" style="cursor:pointer" data-type="textarea" id="cause_{{ loop.index }}">{{ row['CAUSE'] }}</span></td>
+								<td><span class="action" title="Click to enter action" column="ACTION" style="cursor:pointer" data-type="textarea" id="action_{{ loop.index }}">{{ row['ACTION'] }}</span></td>
+							{% else %}
+								<td>N/A</td>
+								<td>N/A</td>									
+							{% endif %}																				
 							</tr>	
+							<input type="hidden" name="ProjectIDHidden" id="ProjectIDHidden_{{ loop.index }}" value="{{ row['PROJECTNAME'] }}">
 						{% endfor %}						
 					{% else %}
-						<tr><td class="text-primary" style="align-center" colspan="8">No data available !!!</td></tr>
+						<tr><td class="text-primary" style="align-center" colspan="13">No data available !!!</td></tr>
 					{% endif %}
 		    	{% endfor %}
 		    {% else %}
