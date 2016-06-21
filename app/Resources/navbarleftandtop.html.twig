@@ -1,0 +1,78 @@
+{% set sessionUID = app.session.get('UserID') %}
+{% set username = app.session.get('UserName') %}	
+{% set sessionUserRole = app.session.get('UserRole') %}	
+{% if sessionUID is defined and sessionUID is not empty %}
+<div class="navbar navbar-default navbar-fixed-left">
+  <ul class="nav navbar-nav">
+  <br>
+  <br>
+  <li><a href="{{ path('ViewProjects') }}" class="link" >View Projects</a></li>
+  <li><a href="{{ path('DeliverySlippages') }}" class="link">Delivery Slippage</a></li>
+  <li><a href="{{ path('STAutomation') }}" class="link">ST Automation</a></li>
+  <li> <a href="{{ path('ITSMDefects') }}" class="link">ITSM Defects</a></li>
+  <li> <a href="{{ path('IntakeProcess') }}" class="link">Intake Process</a></li>
+  <li> <a href="{{ path('QualityEstimation') }}" class="link">Quality of Estimation</a></li>
+  <li> <a href="{{ path('Documentation') }}" class="link">Documentation</a></li>
+  <li> <a href="{{ path('Documentation') }}" class="link">Knowledge Management</a></li>
+  <li> <a href="{{ path('ViewProdTestAccounts') }}" class="link">Production Test Account</a></li>
+  </ul>
+</div>
+<div class="container">
+ <div class="row">
+ 	
+ </div>
+</div>
+{% endif %}   
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container-fluid">       
+        <div class="navbar-header">            
+            <a class="navbar-brand" href="{{ path('Homepage') }}">KPI Dashboard</a>
+        </div>          
+        {% if sessionUID is defined and sessionUID is not empty %}
+	        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+	            <ul class="nav navbar-nav navbar-right">	              
+					<li class="dropdown">
+	                	<a>Welcome {{ username }} !!</a>
+	                </li>
+	                
+	                <li class="dropdown">
+	                    <a href="{{ path('Home') }}" class="dropdown-toggle">Home</a>
+	                 </li>                                     
+	                <li class="dropdown">
+	                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dashboard <b class="caret"></b></a>
+	                    <ul class="dropdown-menu">
+	                        <li>
+	                            <a href="{{ path('Dashboard') }}">Dashboard</a>
+	                        </li>
+	                        <li>
+	                            <a href="{{ path('KPIList') }}">Data Inputs</a>
+	                        </li>
+	                        <li>
+	                            <a href="{{ asset('templates/KPI Dashboard 1.0.docx') }}">About Dashboard</a>
+	                        </li>	                        	                                               
+	                    </ul>
+	                </li>	               
+	                <li class="dropdown">
+	                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Admin <b class="caret"></b></a>
+	                    <ul class="dropdown-menu">
+	                        <li>
+	                            <a href="{{ path('Users') }}">User Management</a>
+	                        </li>                            
+	                    </ul>
+	                </li>    
+	                {% if sessionUID is defined and sessionUID is not empty %}
+	                	<li class="dropdown">
+	                		<a href="{{ path('Logout') }}">Logout</a>
+	                	</li>
+	                {% endif %}                      
+	            </ul>
+	        </div>
+	     {% endif %}       
+    </div>
+</nav>
+{% block javascripts %}
+	<script src="{{ asset('js/KPI/KPI_common.js') }}"></script>	
+{% endblock %}
+
+{% block documentready %}
+{% endblock %}
