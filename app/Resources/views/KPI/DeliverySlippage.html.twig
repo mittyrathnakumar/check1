@@ -1,13 +1,18 @@
 {% extends 'layout.html.twig' %}
 {% block content %}
-<h1 class="page-header">Delivery Slippage</h1>
+<ol class="breadcrumb">
+ <div class="row col-sm-1">	</div>
+    <li><h3><a href="">Delivery Slippage</a></h3></li>
+</ol>
 
 {% if status is defined %}
 		<p class="bg-info">{{ status }}</p>
 {% endif %}
 <div>
+<div class="row col-sm-1">	</div>
+ <div class="row col-md-8">
 	<form class="form-inline" role="form" id="frmSearch" method="Post" action="">
-	  <div class="form-group">
+	 <div class="col-md-4">
 	    <label for="Month">Month/Year : </label>	    
 	    <select name="Month" id="Month" class="form-control">
 	       	<option value="">--Select--</option>
@@ -20,13 +25,18 @@
 	       	{% endfor %}
 		  </select>
 	  </div>
+	  <div class="col-md-8">
 	  <button type="submit" name="Search" valuw="1" class="btn btn-primary">Search</button> 
 	  <button type="submit" name="ShowAll" value="1" class="btn btn-primary">Refresh</button>
+	  </div>
 	</form>
 </div>
-</br></br>
-<div class="row col-md-8">		
-	<table class="table-bordered table-condensed table-hover" id="dataTable">
+<br><br><br><br>
+<div class="row col-sm-1">	</div>
+<div class="text-primary">(Default list shows results from current month. Pls make a search to find out other projects.)</div><br>
+<div class="row col-sm-1">	</div>
+<div class="row col-md-11">		
+	<table class="table-condensed table-bordered table-hover" id="dataTable">
 		<thead>
 			<tr class="bg_grey">					
 				<th>No.</th>
