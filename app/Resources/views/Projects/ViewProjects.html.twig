@@ -1,62 +1,50 @@
 {% extends 'layout.html.twig' %}
 {% block content %}
-
-{% set sessionUID = app.session.get('UserID') %}
-{% set sessionUserRole = app.session.get('UserRole') %}
-{% set sessionUserModuleIDAccess = app.session.get('UserModuleIDAccess') %}
-{% set ADD_PROJECT_ACCESS_ID = 12 %}
-
-
-<h1 class="page-header">Project Details</h1>
  <ol class="breadcrumb">
-    <li><a href="">Projects</a></li>
-    <li class="active">Project Details</li>  
+ <div class="row col-sm-1">	</div>
+    <li><h3><a href="">View Projects</a></h3></li>
 </ol>
 
 {% if msg is defined and msg is not empty %}
 	<div class="bg-info">{{ msg }}</div>
 {% endif %}
-
-{# Only PMO and Admin can add the Projects #}
-
-{% if ADD_PROJECT_ACCESS_ID in (sessionUserModuleIDAccess) %}
-	<div class="row col-md-8 pull-left"><a href="{{ path('AddProject') }}"><strong>Add Project</strong></a></div></br></br>
-{% endif %}
-
-{# === #}
-
-<div class="row col-md-4">
-	<form class="form-inline" role="form" id="frmSearch" method="Post" action="">
-	  <div class="form-group">
-	  
-	  
-	  {% if postData.Month is defined %}
+ <div class="row col-sm-1">	</div>
+<div class="row col-md-8">
+<form class="form-inline" role="form" id="frmSearch" method="Post" action="">
+	 <div class="col-md-4">
+	   {% if postData.Month is defined %}
 	    {% set Month = postData.Month %}	  
 	  {% elseif Month is not defined %}
 	  	{% set Month = '' %}
 	  {% else %}
 	  	{% set Month = Month %}
-	  {% endif %}	 	       	
-	       	
-	    <label for="Month">Month/Year : </label>	    
+	  {% endif %}	 	       	     	
+	    <label for="Month">Month/Year : </label>
 	    <select name="Month" id="Month" class="form-control">
 	       	<option value="">--Select--</option>
-	       	
+	     
 	       	{% for row in monthYearArray %}
 	       		<option value="{{ row }}" {% if Month is defined and Month == row %} selected {% endif %}>{{ row }}</option>
 	       	{% endfor %}
 		  </select>
-	  </div>
+	</div>
+	<div class="col-md-8">	    
 	  <button type="submit" name="Search" valuw="1" class="btn btn-primary">Search</button> 
 	  <button type="submit" name="ShowAll" value="1" class="btn btn-primary">Refresh</button>
+	  </div>
 	</form>
 </div>
-</br></br>
+<br><br>
+<div class="row col-sm-1"></div>
+<div class="col-md-8 pull-left"><a href="{{ path('AddProject') }}"><strong>Add Project</strong></a></div></br>	
+</br>
+<div class="row col-sm-1">	</div>
 <div class="text-primary">(Default list shows results from last 2 months. Pls make a search to find out other projects.)</div><br>
-<div class="row col-md-10">		
+<div class="row col-sm-1">	</div>
+<div class="row col-md-11">		
 	<table class="table-condensed table-bordered table-hover" id="dataTable">
 		<thead>
-			<tr>					
+			<tr class="bg_grey">					
 				<th>No.</th>
 				<th>Projectname</th>
 				<th>QC Projectname</th>
@@ -72,45 +60,37 @@
 		<tbody>		
 		{# {{ dump(ProjectDetails) }} #}
 			{% for row in ProjectDetails %}
-			
-				{% if row.GetEstimatedProdLiveDate() == "" %}
-    				{% set bg_class = "bg_grey" %}
-    			{% else %}
-    				{% set bg_class = "" %}    				
+				<tr>
+				<td>{{ loop.index}}</td>				
+				<td>
+				{% if Month is defined and Month is not empty %}
+					<a href="{{ path('EditProjectMonth', {ProjectID : row.getProjectID(), Month : Month } )}}">{{ row.getProjectName()}}</a>
+				{% else %}
+					<a href="{{ path('EditProject', {ProjectID : row.getProjectID() } )}}">{{ row.getProjectName()}}</a>
 				{% endif %}
+				</td>	
+				<td>{{ row.getQCProjectName()}}</a></td>
+				<td>{{ row.getDomain()}}</a></td>
+				<td>{{ row.getScope()}}</a></td>
+				<td>{{ row.getPOC()}}</td>
 				
-				<tr class="{{ bg_class }}">
-					<td>{{ loop.index}}</td>				
-					<td>
-						{# {{ sessionUID }}=={{ row.getProjectAddedBy() }}=={{ row.getProjectEditedBy() }} #}
-						
-						{% if Month is defined and Month is not empty %}
-							{% set editUrl = path('EditProjectMonth', { ProjectID : row.getProjectID(), Month : Month } ) %}
-						{% else %}
-							{% set editUrl = path('EditProject', { ProjectID : row.getProjectID() } ) %}
-						{% endif %}
-											
-						{% if sessionUID == row.getProjectAddedBy() or sessionUID == row.getProjectEditedBy()
-						   or sessionUserRole == 1 or sessionUserRole == 4  %}
-							<a href="{{ editUrl }}">{{ row.getProjectName()}}</a>
-						{% else %}
-							{{ row.getProjectName() }}					
-						{% endif %}							
-				
-					</td>	
-					<td>{{ row.getQCProjectName()}}</a></td>
-					<td>{{ row.getDomain()}}</a></td>
-					<td>{{ row.getScope()}}</a></td>
-					<td>{{ row.getPOC()}}</td>								
-					<td>{{ row.GetEstimatedProdLiveDate()}}</td>				
-					<td>{% if row.getReusability() is not empty %}{{ row.getReusability()}}%{% endif %}</td>				
-					<td>{% if row.getSTAutomation() is defined and row.getSTAutomation() is not null %}{{ row.getSTAutomation() }}%{% endif %}</td>
-					<td>{{ row.getUatApplicable}}</td>
+				{% if "now"|date('Y-m-d') > row.GetEstimatedProdLiveDate()|date('Y-m-d') %}
+    				{% set text = "bg-danger" %}
+    			{% else %}
+    				{% set text = "bg-success" %}    				
+				{% endif %}
+							
+				<td class={{ text }}>{{ row.GetEstimatedProdLiveDate()}}</td>				
+				<td>{% if row.getReusability() is not empty %}{{ row.getReusability()}}%{% endif %}</td>				
+				<td>{% if row.getSTAutomation() is defined and row.getSTAutomation() is not null %}{{ row.getSTAutomation() }}%{% endif %}</td>
+				<td>{{ row.getUatApplicable}}</td>
 				</tr>
 	    	{% endfor %}
 		</tbody>
 	</table>			
 </div>
+<div class="row col-sm-4">	</div>
+<div id="dialog" title="Result Action" class="modal_dialog"></div>
 {% endblock %}
 
 {% block javascripts %}
