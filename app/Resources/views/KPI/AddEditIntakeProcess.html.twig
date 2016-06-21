@@ -1,26 +1,33 @@
 {% extends 'layout.html.twig' %}
 
 {% block content %}
-
-<h1 class="page-header">Intake Process</h1>
 <ol class="breadcrumb">
-    <li><a href="{{ path('IntakeProcess') }}">All Intake Process</a></li>    
+    <li><a href="{{ path('IntakeProcess') }}">Intake Process/</a></li>    
     {% if IntakeID is defined and IntakeID is not empty %}
-    	<li class="active">Edit Details</li>
+    	<div class="row col-sm-1">	</div><li class="active">Edit Details</li>
     {% else %}
-    	<li class="active">Add Details</li>
+    	<div class="row col-sm-1">	</div><li class="active">Add Details</li>
     {% endif %}
     
 </ol>
 	
 <form class="form-horizontal" role="form" id="frmAddEditProcess" method="post" action="{% if IntakeID is defined %} {{ path('EditIntakeProcess', { IntakeID : IntakeID } ) }} {% else %} {{ path('AddIntakeProcess') }} {% endif %}"> 
+  <div class="form-group">
+  <div class="row col-sm-1">	</div>
+   <label class="control-label col-sm-2" for="month">Month :</label> 
+    <div class="col-sm-2">  
+<input type="text" id="month" name="month" class="monthPicker" value="{% if ProcessDetails is defined %}{{ProcessDetails[0]['MONTH']|trim}}{% endif %}" readonly="readonly" required /> </div>
+  	</div>
+  
    <div class="form-group">
+   <div class="row col-sm-1">	</div>
     <label class="control-label col-sm-2" for="Programme">Programme :</label>
     <div class="col-sm-4">
     	<input type="text" name="Programme" id="Programme" placeholder="Programme" value="{% if ProcessDetails is defined %}{{ ProcessDetails[0]['PROGRAMME']|trim }}{% endif %}" class="form-control" required>       
     </div>
   </div>
    <div class="form-group">
+   <div class="row col-sm-1">	</div>
     <label class="control-label col-sm-2" for="ProjectName">Project :</label>
     <div class="col-sm-4">    
       {% if IntakeID is defined and IntakeID is not empty %}
@@ -35,6 +42,7 @@
     <div id="AutoPath" data-ajaxurl="{{ path('AddIntakeProcess') }}"></div>
   </div>		 
    <div class="form-group">
+   <div class="row col-sm-1">	</div>
     <label class="control-label col-sm-2" for="ProposalType">Proposal Type:</label>
     <div class="col-sm-3">       
     <select name="ProposalType" id="ProposalType" class="form-control" placeholder="ProposalType" required>
@@ -46,24 +54,28 @@
     </div>
   </div>
   <div class="form-group">
+  <div class="row col-sm-1">	</div>
     <label class="control-label col-sm-2" for="SolutionComponent">Solution Component:</label>
     <div class="col-sm-4">
       <input type="text" name="SolutionComponent" class="form-control" id="SolutionComponent" placeholder="Solution Component" value="{% if ProcessDetails is defined %}{{ ProcessDetails[0]['SOLUTION_COMPONENT']|trim }}{% endif %}" required>
     </div>
   </div>
   <div class="form-group">
+  <div class="row col-sm-1">	</div>
     <label class="control-label col-sm-2" for="ProjProgMgr">Project/Programme Manager:</label>
     <div class="col-sm-3">
       <input type="text" name="ProjProgMgr" class="form-control" id="ProjProgMgr" placeholder="Project/Programme Manager" value="{% if ProcessDetails is defined %}{{ ProcessDetails[0]['PROJ_PROG_MGR']|trim }}{% endif %}">
     </div>
   </div>
    <div class="form-group">
+   <div class="row col-sm-1">	</div>
     <label class="control-label col-sm-2" for="WpPoStatus">WP/PO Status:</label>
     <div class="col-sm-3">
       <input type="text" name="WpPoStatus" class="form-control" id="WpPoStatus" placeholder="WP/PO Status" value="{% if ProcessDetails is defined %}{{ ProcessDetails[0]['WP_PO_STATUS']|trim }}{% endif %}">
     </div>
   </div>  
    <div class="form-group">
+   <div class="row col-sm-1">	</div>
     <label class="control-label col-sm-2" for="Status">Status:</label>
     <div class="col-sm-3">
     	<input type="text" name="Status" class="form-control" id="Status" placeholder="Status" value="{% if ProcessDetails is defined %}{{ ProcessDetails[0]['STATUS']|trim }}{% endif %}" required>
@@ -71,6 +83,7 @@
   </div>  
   {#
    <div class="form-group">
+   <div class="row col-sm-1">	</div>
     <label class="control-label col-sm-2" for="Scope">Status:</label>
     <div class="col-sm-2">
       <select name="Status" id="Status" class="form-control" placeholder="Status" required>
@@ -87,6 +100,7 @@
   </div>
   #}  
   <div class="form-group">
+  <div class="row col-sm-1">	</div>
     <label class="control-label col-sm-2" for="RequestDate">Request Date:</label>
     <div class="col-sm-2">
       <input readonly type="text" name="RequestDate" class="form-control datepicker" id="RequestDate" placeholder="Request Date" value="{% if ProcessDetails is defined %}{{ ProcessDetails[0]['REQUEST_DATE']|trim }}{% endif %}" required>
@@ -94,6 +108,7 @@
     </div>
   </div>
   <div class="form-group">
+  <div class="row col-sm-1">	</div>
     <label class="control-label col-sm-2" for="SubmissionDate">Submission Date:</label>
     <div class="col-sm-2">
       <input readonly type="text" name="SubmissionDate" class="form-control datepicker" id="SubmissionDate" placeholder="Submission Date" value="{% if ProcessDetails is defined %}{{ ProcessDetails[0]['SUBMISSION_DATE']|trim }}{% endif %}" required>
@@ -110,6 +125,7 @@
  #}
    <div class="form-group">
 	   <div class="col-sm-offset-2 col-sm-10">
+	   <div class="row col-sm-2">	</div>
 	      <button type="submit" name="submit" id="submit" class="btn btn-primary">Submit</button>
 	      <button type="reset" name="reset" id="reset" class="btn btn-primary">Reset</button>
 	   </div>
@@ -123,6 +139,7 @@
 {% block javascripts %}
 	{{ parent() }}
 	<script src="{{ asset('js/KPI/KPI_common.js') }}"></script>
+	<script src="{{ asset('js/KPI/ProdTestAccounts.js') }}"></script>
 	<script>
 		IntakeProcessFunction();
 	</script>
