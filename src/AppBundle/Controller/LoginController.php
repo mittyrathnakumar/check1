@@ -39,9 +39,15 @@ class LoginController extends Controller
 			return $this->render('index.html.twig', [
 					"para" => $parameteres
 			]);			
+		} else {
+			if(isset($referrer)){
+				return $this->redirectToRoute($referrer);
+			} else
+				return $this->redirectToRoute('Home');				
+				
 		}
 		
-		return $this->redirectToRoute('Home');
+		
 		
 	}
 	

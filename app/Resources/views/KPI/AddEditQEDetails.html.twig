@@ -12,8 +12,14 @@
     {% endif %}
     
 </ol>
-	
-<form class="form-horizontal" role="form" id="frmAddEditRecord" method="post" action="{% if EstimationID is defined %} {{ path('EditEstimationData', { ID : EstimationID } ) }} {% else %} {{ path('AddEstimationData') }} {% endif %}"> 
+<form class="form-horizontal" role="form" id="frmAddEditRecord" method="post" action="{% if EstimationID is defined %} {{ path('EditMonthEstimationData', { ID : EstimationID, Month : Month } ) }} {% else %} {{ path('AddEstimationData') }} {% endif %}"> 
+
+  <div class="form-group">
+   <label class="control-label col-sm-2" for="month">Month :</label> 
+    <div class="col-sm-2">  
+	<input type="text" id="month" name="month" class="form-control monthPicker" value="{% if EstimationDetails is defined %}{{EstimationDetails[0]['MONTH']|trim}}{% endif %}" readonly="readonly" required />
+  	</div>
+  </div>
   <div class="form-group">
     <label class="control-label col-sm-2" for="ProjectName">Project :</label>  
 	  <div class="col-sm-4">    
@@ -68,6 +74,7 @@
    </div>	 
   <div id="dialog" title="Result Action" class="modal-dialog"></div>
    <input type="hidden" name="EstimationID" value="{% if EstimationID is defined %}{{ EstimationID }}{% endif %}" >
+   <input type="hidden" name="Month" value="{{ Month }}" >
 </form>
 
 {% endblock %}

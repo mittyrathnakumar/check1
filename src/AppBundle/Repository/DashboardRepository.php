@@ -160,7 +160,8 @@ class DashboardRepository
 		if(empty($KPIID)){			
 			
 			//echo 'in if===';exit;
-			$KPIs = $this->getSLAs($Weekly);
+			//$KPIs = $this->getSLAs($Weekly);
+			$KPIs = $this->getSLAs(1);
 			//echo "<pre>";print_r($KPIs);exit;
 			
 			foreach($KPIs as $KPI){
@@ -853,29 +854,30 @@ class DashboardRepository
 				$STAutoTemp = array();
 				
 				$STAutoTemp['PROJECTID'] =  $row ['PROJECTID'];
-				$STAutoTemp['PROJECTNAME'] =  $row ['PROJECTNAME'];
-				$STAutoTemp['NO_OF_ST_AUTOMATED_TEST_CASES'] = $row['NO_OF_ST_AUTOMATED_TEST_CASES'];
-				$STAutoTemp['TOTAL_NO_OF_ST_TEST_CASES'] = $row['TOTAL_NO_OF_ST_TEST_CASES'];				
-
-				/*  Get Cause/Action for KPI for this Project` for this Month */
-				
-				$query1 = "SELECT CAUSE, ACTION
+				$STAutoTemp['PROJECTNAME'] =  $row ['PROJECTNAME'];			
+								
+		
+				if($row['SCOPE'] == 'Dev' || $row['SCOPE'] == 'Both' ){
+					
+					$STAutoTemp['NO_OF_ST_AUTOMATED_TEST_CASES'] = $row['NO_OF_ST_AUTOMATED_TEST_CASES'];
+					$STAutoTemp['TOTAL_NO_OF_ST_TEST_CASES'] = $row['TOTAL_NO_OF_ST_TEST_CASES'];
+					
+					/*  Get Cause/Action for KPI for this Project` for this Month */
+					
+					$query1 = "SELECT CAUSE, ACTION
 					FROM KPI_CAUSE_ACTION
 					WHERE KPI_ID = ".$KPID."
 					AND PROJECT_NAME = '".$row ['PROJECTNAME']."'
 					AND MONTHLY IS NULL";
-				
-				$queryParse1 = oci_parse ( $conn, $query1 );
-				oci_execute ( $queryParse1 );
-				$resultCauseAction = oci_fetch_array($queryParse1);
-				
-				$STAutoTemp['CAUSE'] = $resultCauseAction['CAUSE'];
-				$STAutoTemp['ACTION'] = $resultCauseAction['ACTION'];
 					
-				/* */
-								
-		
-				if($row['SCOPE'] == 'Dev' || $row['SCOPE'] == 'Both' ){
+					$queryParse1 = oci_parse ( $conn, $query1 );
+					oci_execute ( $queryParse1 );
+					$resultCauseAction = oci_fetch_array($queryParse1);
+					
+					$STAutoTemp['CAUSE'] = $resultCauseAction['CAUSE'];
+					$STAutoTemp['ACTION'] = $resultCauseAction['ACTION'];
+						
+					/* */
 					
 					$STAutoTemp['ST_AUTOMATION'] = $row['ST_AUTOMATION'];
 					
@@ -909,6 +911,8 @@ class DashboardRepository
 					$dataCount++;
 					
 				} else {
+					$STAutoTemp['NO_OF_ST_AUTOMATED_TEST_CASES'] = 'N/A';
+					$STAutoTemp['TOTAL_NO_OF_ST_TEST_CASES'] = 'N/A';
 					$STAutoTemp['ST_AUTOMATION'] = 'N/A';
 					$STAutoTemp['RAG'] = 'n/a';
 				}
@@ -1202,6 +1206,7 @@ class DashboardRepository
 					FROM KPI_CAUSE_ACTION
 					WHERE KPI_ID = ".$KPID."
 					AND PROJECT_NAME = '".$row ['PROJECT_NAME']."'
+					AND QUALITYESTIMATION = 1
 					AND MONTHLY IS NULL";
 				
 				$queryParse1 = oci_parse ( $conn, $query1 );
@@ -1310,6 +1315,7 @@ class DashboardRepository
 					FROM KPI_CAUSE_ACTION
 					WHERE KPI_ID = ".$KPID."
 					AND PROJECT_NAME = '".$row ['PROJECT_NAME']."'
+					AND INTAKEPROCESS = 1
 					AND MONTHLY IS NULL";
 					
 				$queryParse1 = oci_parse ( $conn, $query1 );
@@ -1745,31 +1751,33 @@ class DashboardRepository
 			
 			/* */
 			
-			if(!empty($Projects['QC_TABLENAME']) && !empty($Projects['CYCLE_ID'])){					
-				
-				oci_close($conn);
-				//$this->oracle->closeConnection();
-				
-				$this->oracle->openConnection('QC');
-				$conn = $this->oracle->getConnection();
-				
-				$query2 = $this->constants->getKPIQuery("ETA", $Projects['QC_TABLENAME'], trim($Projects['CYCLE_ID']), 2);
-				$queryParse2 = oci_parse($conn, $query2);
-				oci_execute($queryParse2);
-				$count2Arr = oci_fetch_array($queryParse2);
-				
-				$numerator = $count2Arr[0];
-				$numeratorArr[] = $numerator;
-				
-				$denominator = $numerator + $Projects['P1_P2'] + $Projects['P3_P4'];	
-				$denominatorArr[] = $denominator;
-					
-				$ProjectsTemp['PREDEFECTS'] =  $numerator;
-				$ProjectsTemp['POSTDEFECTS'] =  $Projects['P1_P2'] + $Projects['P3_P4'];
-				
-			}
 			
 			if($Projects['SCOPE'] == 'Dev' || $Projects['SCOPE'] == 'Both' ){
+				
+				if(!empty($Projects['QC_TABLENAME']) && !empty($Projects['CYCLE_ID'])){
+				
+					oci_close($conn);
+					//$this->oracle->closeConnection();
+				
+					$this->oracle->openConnection('QC');
+					$conn = $this->oracle->getConnection();
+				
+					$query2 = $this->constants->getKPIQuery("ETA", $Projects['QC_TABLENAME'], trim($Projects['CYCLE_ID']), 2);
+					$queryParse2 = oci_parse($conn, $query2);
+					oci_execute($queryParse2);
+					$count2Arr = oci_fetch_array($queryParse2);
+				
+					$numerator = $count2Arr[0];
+					$numeratorArr[] = $numerator;
+				
+					$denominator = $numerator + $Projects['P1_P2'] + $Projects['P3_P4'];
+					$denominatorArr[] = $denominator;
+						
+					$ProjectsTemp['PREDEFECTS'] =  $numerator;
+					$ProjectsTemp['POSTDEFECTS'] =  $Projects['P1_P2'] + $Projects['P3_P4'];
+				
+				}
+					
 				
 				if($denominator != 0){
 					$actualTemp = ($numerator / $denominator) * 100;
@@ -1794,18 +1802,20 @@ class DashboardRepository
 						$ProjectsTemp['RAG'] = 'red';
 					}
 				}					
+				$dataCount++;
 				
 			} else {
 				$ProjNAApplicable = 1;				
 				$ProjectsTemp['ACTUAL'] = 'N/A';				
 				$ProjectsTemp['RAG'] = 'N/A';
+				$ProjectsTemp['PREDEFECTS'] =  'N/A';
+				$ProjectsTemp['POSTDEFECTS'] =  'N/A';
 				$ProjNAReason = 'Project Scope does not match to KPI Scope !!!';
-			}	
-			
+			}				
 			
 
 			$ProjectsResultTemp[] = $ProjectsTemp;
-			$dataCount++;
+			
 		}
 		
 		$ProjectsResult[$Month] = $ProjectsResultTemp;
@@ -2034,7 +2044,7 @@ class DashboardRepository
 					$ProjNAApplicable = 1;
 					$DefectsTemp['RAG'] = 'N/A';
 					$DefectsTemp['P3_P4'] = 'N/A';
-					$DefectsTemp['TESTCASES'] = '';
+					$DefectsTemp['TESTCASES'] = 'N/A';
 					$ProjNAReason = 'Project Scope does not match to KPI Scope !!!';
 				}
 						
@@ -2483,8 +2493,14 @@ class DashboardRepository
 		
 	}
 		
-	public function updateKPIAction($userID, $column, $newVal, $KPIID, $ProjectID){
+	public function updateKPIAction($userID, $postData){
 	//public function updateKPIAction($userID, $newVal, $KPIID, $month){
+		
+		$column = $postData['column'];
+		$newVal = $postData['newVal'];
+		$KPIID = $postData['KPIID'];
+		$ProjectID = $postData['ProjectID'];
+		$KPIType = $postData['kpi_type'];
 		
 		$this->oracle->openConnection('KPIDASHBOARD');
 		$conn = $this->oracle->getConnection();
@@ -2494,7 +2510,8 @@ class DashboardRepository
 		if(is_numeric($ProjectID)){
 		
 			$query = "SELECT COUNT(*) AS COUNT FROM KPI_CAUSE_ACTION
-					WHERE KPI_ID = ".$KPIID." AND PROJECT_ID = ".$ProjectID."";
+					WHERE KPI_ID = ".$KPIID." AND PROJECT_ID = ".$ProjectID."";			
+		
 			$queryParse = oci_parse($conn, $query);		
 			oci_execute($queryParse);
 			$row = oci_fetch_array($queryParse);
@@ -2510,7 +2527,9 @@ class DashboardRepository
 			}
 			else {
 				$query = "INSERT INTO KPI_CAUSE_ACTION (".$column.", PROJECT_ID, KPI_ID, ADDED_BY, ADDED_ON)
-						VALUES ('".trim(addslashes($newVal))."', ".$ProjectID.", ".$KPIID.", ".$userID.", '".strtoupper(date('d/M/y'))."')";			
+					VALUES ('".trim(addslashes($newVal))."', ".$ProjectID.", ".$KPIID.", ".$userID.",
+							'".strtoupper(date('d/M/y'))."')";	
+
 			}
 		} 
 		
@@ -2520,6 +2539,10 @@ class DashboardRepository
 			
 			$query = "SELECT COUNT(*) AS COUNT FROM KPI_CAUSE_ACTION
 					WHERE KPI_ID = ".$KPIID." AND PROJECT_NAME = '".$ProjectID."'";
+			
+			if(!empty($KPIType))
+				$query .= " AND ".$KPIType." = 1";
+					
 			$queryParse = oci_parse($conn, $query);
 			oci_execute($queryParse);
 			$row = oci_fetch_array($queryParse);
@@ -2534,8 +2557,15 @@ class DashboardRepository
 			
 			}
 			else {
-				$query = "INSERT INTO KPI_CAUSE_ACTION (".$column.", PROJECT_NAME, KPI_ID, ADDED_BY, ADDED_ON)
+				if(!empty($KPIType)){
+					$query = "INSERT INTO KPI_CAUSE_ACTION (".$column.", PROJECT_NAME, KPI_ID, ADDED_BY, ADDED_ON, ".$KPIType.")
+						VALUES ('".trim(addslashes($newVal))."', '".trim(addslashes($ProjectID))."', ".$KPIID.", ".$userID.",
+								'".strtoupper(date('d/M/y'))."', 1)";
+				}
+				else {
+					$query = "INSERT INTO KPI_CAUSE_ACTION (".$column.", PROJECT_NAME, KPI_ID, ADDED_BY, ADDED_ON)
 						VALUES ('".trim(addslashes($newVal))."', '".trim(addslashes($ProjectID))."', ".$KPIID.", ".$userID.", '".strtoupper(date('d/M/y'))."')";
+				}
 			}
 			
 		}

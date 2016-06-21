@@ -3,10 +3,10 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Repository\DashboardRepository;
-use AppBundle\Repository\ProjectRepository;
-use AppBundle\Service\Constants;
+//use AppBundle\Repository\ProjectRepository;
+//use AppBundle\Service\Constants;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -87,8 +87,7 @@ class DashboardController extends Controller
 	
 		if(!empty($postData['action']) && $postData['action'] == 'updateCauseAction'){
 			//$dashboardRepository->updateKPIAction($userID, $newVal, $KPIID, $month);
-			$dashboardRepository->updateKPIAction($userID, $postData['column'], $postData['newVal'], $postData['KPIID'],
-												  $postData['ProjectID']);		
+			$dashboardRepository->updateKPIAction($userID, $postData);		
 		}
 		
 		/* === */
@@ -234,8 +233,7 @@ class DashboardController extends Controller
 		/* Ajax Post request to update Cause & Action */
 		
 		if(!empty($postData['action']) && $postData['action'] == 'updateCauseAction'){
-			$dashboardRepository->updateKPIAction($userID, $postData['column'], $postData['newVal'], $postData['KPIID'],
-												  $postData['ProjectID']);
+			$dashboardRepository->updateKPIAction($userID, $postData);
 		}
 		
 		$KPIResults = $dashboardRepository->getKPIResults($Month, $KPIID);

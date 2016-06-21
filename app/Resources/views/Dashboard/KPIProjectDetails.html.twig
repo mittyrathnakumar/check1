@@ -9,6 +9,16 @@
         </ol>
     </div>
 </div>
+{% set sessionUserRole = app.session.get('UserRole') %}
+
+{% set ADMIN = 1 %}
+{% set MANAGER = 2 %}
+{% set DELIVERY_MANAGER = 3 %}
+{% set PMO = 4 %}
+{% set MANAGER_PROD_TEST_ACCOUNTS = 5 %}
+{% set STAKEHOLDER = 6 %}
+
+
 
 {% if KPIID == 5 %}	 
 	{{ include ('Dashboard/ViewDeliverySlippage.html.twig') }}

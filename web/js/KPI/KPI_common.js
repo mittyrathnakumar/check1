@@ -252,5 +252,39 @@ function QualityEstimationFunction(){
 				"Nothing selected, input was " + this.value );
 		}
 	});
+	
+	/* Datepicker for Month in Add/Edit field */
+	
+	$("#month").datepicker({
+		dateFormat: "M-y",
+		changeMonth: true,
+	    changeYear: true,
+	    showButtonPanel: true,	   
+	    onClose: function(dateText, inst) { 
+	       $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
+	    }
+		
+	});
+	
+	 $(".monthPicker").focus(function () {
+	      $(".ui-datepicker-calendar").hide();	        
+	 });
+	
+	/* === */
+	 
+	 /* Datepicker for Month in View Data */
+		
+	$("#Month").datepicker({
+		dateFormat: "M-y",
+		changeMonth: true,
+	    changeYear: true,
+	    showButtonPanel: true,	   
+	    onClose: function(dateText, inst) { 
+	       $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
+	    }
+		
+	});
+	
+	/* === */ 
 		
 }

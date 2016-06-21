@@ -58,25 +58,28 @@ class ProjectController extends Controller{
 				
 			if(!empty($request->query->all()['status']))
 				$msg = $request->query->all()['status'];
-				else
-					$msg = "";
-						
-			if(!empty($request->query->all()['Month']))
-				$Month = $request->query->all()['Month'];
 			else
-				$Month = "";
+				$msg = "";					
+		
 					
 			if(!empty($postData)){
 				if(!empty($postData['Month']))
 					$Month = $postData['Month'];
 				else
 					$Month = '';
+			} else {
+				if(!empty($request->query->all()['Month']))
+					$Month = $request->query->all()['Month'];
+				else
+					$Month = "";
 			}
 				
 
 			if(!empty($postData['ShowAll']) && $postData['ShowAll'] == 1){
 				return $this->redirectToRoute('ViewProjects');
 			}
+			
+			//echo $Month;exit;
 				
 			$ProjectDetails = $ProjectRepository->getProjectDetails("", $Month);
 			$monthYearArray = $dashboardRepository->getmonthYearArray();		
@@ -184,11 +187,13 @@ class ProjectController extends Controller{
 		}
 		
 		/**
-		 * @Route("/Projects/EditProject", name="EditProjectPost")
+		 * @Route("/Projects/EditProject/{ProjectID}", name="EditProjectPost")
 		 * @Method({"POST","HEAD"})
 		 */		
 		
-		public function renderEditProjectPostAction(Request $request) {
+		public function renderEditProjectPostAction(Request $request, $ProjectID) {
+			
+			//echo $ProjectID;exit;
 		
 			$postData = $request->request->all();
 				
@@ -207,10 +212,13 @@ class ProjectController extends Controller{
 			if($response == 0){
 				$status = "Invalid QC Project Name OR Domain !!!";
 				$ProjectDetails = $postData;
+				
+				//return $this->redirectToRoute(EditProject);
 
 				return $this->render('Projects/AddEditProject.html.twig', [
 						"msg" => $status,
-						"ProjectDetails" => $ProjectDetails						
+						"ProjectDetails" => $ProjectDetails,
+						"ProjectID" => $ProjectID
 				]);
 			}
 			else {
@@ -267,8 +275,8 @@ class ProjectController extends Controller{
 							"ProjectID" => $postData['ProjectID']
 					]);
 				} 
-				else {		
-					
+				else {				
+			
 					$status = $ProjectRepository->addEditProject($postData);					
 					$response = array("status" => $status, "Month" => $Month);				
 					return $this->redirectToRoute('ViewProjects', $response);
@@ -279,10 +287,11 @@ class ProjectController extends Controller{
 			
 			/* Edit Form Show */
 			
-			else {
+			else {				
 				
-				$ProjectDetails = $ProjectRepository->getProjectDetails($ProjectID);
-			
+				//echo $Month;exit;
+				$ProjectDetails = $ProjectRepository->getProjectDetails($ProjectID, $Month);
+				
 				return $this->render('Projects/AddEditProject.html.twig', [
 						"ProjectDetails" => $ProjectDetails,
 						"Month" => $Month,

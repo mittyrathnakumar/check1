@@ -74,17 +74,18 @@
 							{% endif %}
 						</td>		
 						
-						{% if action is defined and action == 1 %}
-							
-												
-							<td><span class="cause" title="Click to enter Cause" column="CAUSE" style="cursor:pointer" data-type="textarea" id="cause_{{ loop.index }}">{{ row['Cause'] }}</span></td>
-							<td><span class="action" title="Click to enter Action" column="ACTION" style="cursor:pointer" data-type="textarea" id="action_{{ loop.index }}">{{ row['Action'] }}</span></td>
-							
-						{% else %}						
+						{% if sessionUserRole == MANAGER or sessionUserRole == DELIVERY_MANAGER %}
+							{% if action is defined and action == 1 %}													
+								<td><span class="cause" title="Click to enter Cause" column="CAUSE" style="cursor:pointer" data-type="textarea" id="cause_{{ loop.index }}">{{ row['Cause'] }}</span></td>
+								<td><span class="action" title="Click to enter Action" column="ACTION" style="cursor:pointer" data-type="textarea" id="action_{{ loop.index }}">{{ row['Action'] }}</span></td>								
+							{% else %}						
+								<td>N/A</td>						
+								<td>N/A</td>			
+							{% endif %}
+						{% else %}
 							<td>N/A</td>						
-							<td>N/A</td>			
-						{% endif %}
-						
+							<td>N/A</td>						
+						{% endif %}						
 						
 						<input type="hidden" name="KPIHidden" id="KPIHidden" value="{{ KPIData['KPI_ID'] }}">
 						<input type="hidden" name="ProjectIDHidden" id="ProjectIDHidden_{{ loop.index }}" value="{{ row['ProjectID'] }}">					

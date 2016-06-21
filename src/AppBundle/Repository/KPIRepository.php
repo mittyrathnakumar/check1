@@ -148,6 +148,7 @@ class KPIRepository
 		
 	}
 	
+	/*
 	public function getmonthArray(){
 		$currentYear = date("y");
 
@@ -165,6 +166,26 @@ class KPIRepository
 		$months[11] = 'DEC/'.$currentYear;
 	
 		return $months;	
+	}
+	*/
+	
+	public function getmonthArray(){
+		$currentYear = date("y");
+	
+		$months[0] = 'JAN-'.$currentYear;
+		$months[1] = 'FEB-'.$currentYear;
+		$months[2] = 'MAR-'.$currentYear;
+		$months[3] = 'APR-'.$currentYear;
+		$months[4] = 'MAY-'.$currentYear;
+		$months[5] = 'JUN-'.$currentYear;
+		$months[6] = 'JUL-'.$currentYear;
+		$months[7] = 'AUG-'.$currentYear;
+		$months[8] = 'SEP-'.$currentYear;
+		$months[9] = 'OCT-'.$currentYear;
+		$months[10] = 'NOV-'.$currentYear;
+		$months[11] = 'DEC-'.$currentYear;
+	
+		return $months;
 	}
 	
 	public function getProcessDetails($IntakeID = ""){
@@ -472,23 +493,35 @@ class KPIRepository
 		return $response;
 	}	
 	
-	public function getEstimationDetails($ID = ""){
+	public function getEstimationDetails($Month = "", $postData, $ID = ""){
 	
 		$this->oracle->openConnection('KPIDASHBOARD');
 		$conn = $this->oracle->getConnection();
 		$ProjectDetails = array();
 	
-	
+		$currentMonth = date ( "M-y" );
+		$formattedcurrentMonth = strtoupper ( str_replace ( "-", "/", $currentMonth ) );
+		
+		if(!empty($Month))
+			$formattedcurrentMonth = str_replace ( "-", "/", $Month );
+		else if (! empty ( $postData ['Month'] )){
+			$currentMonth = $postData ['Month'];
+			$formattedcurrentMonth = strtoupper ( str_replace ( "-", "/", $currentMonth ) );
+		}
+		
 		$query = "SELECT *
-				 FROM KPI_QUALITY_ESITMATION 
+				 FROM KPI_QUALITY_ESITMATION
 				 WHERE ACTIVE = 1";
+	
+		//if(empty($ID))
+		$query .= " AND MONTH = '" . $formattedcurrentMonth."'";
 	
 		if(!empty($ID))
 			$query .= " AND ID = ".$ID;
-		
+
 		$query .= " ORDER BY ENGAGEMENT_DATE";
-	
-		//echo $query;
+
+		//echo $query;exit;
 	
 		$queryParse = oci_parse($conn, $query);
 		oci_execute($queryParse);
@@ -496,18 +529,20 @@ class KPIRepository
 
 		while ($row = oci_fetch_array($queryParse, OCI_ASSOC+OCI_RETURN_NULLS)) {
 			$ProjectDetail = array();
-				
+
 			$ProjectDetail['ID'] = $row['ID'];
 			$ProjectDetail['PROJECT_NAME'] = $row['PROJECT_NAME'];
-			$ProjectDetail['ENGAGEMENT_DATE'] = $row['ENGAGEMENT_DATE'];			
+			$formattedMonth = strtoupper ( str_replace ( "/", "-", $row['MONTH'] ) );
+			$ProjectDetail['MONTH'] = $formattedMonth;
+			$ProjectDetail['ENGAGEMENT_DATE'] = $row['ENGAGEMENT_DATE'];
 			$ProjectDetail['GATE1_ESTIMATION_DELIVERY_DATE'] = $row['GATE1_ESTIMATION_DELIVERY_DATE'];
 			$ProjectDetail['DIFF_DATES'] = $row['DIFF_DATES'];
 			$ProjectDetail['GATE1_ESTIMATION'] = $row['GATE1_ESTIMATION'];
 			$ProjectDetail['GATE2_ESTIMATION'] = $row['GATE2_ESTIMATION'];
 			$ProjectDetail['FINAL_ESTIMATION'] = $row['FINAL_ESTIMATION'];
 			$ProjectDetail['GATE1_VARIANCE'] = $row['GATE1_VARIANCE'];
-			$ProjectDetail['GATE2_VARIANCE'] = $row['GATE2_VARIANCE'];			
-			
+			$ProjectDetail['GATE2_VARIANCE'] = $row['GATE2_VARIANCE'];
+				
 			$ProjectDetails[$i] = $ProjectDetail;
 			$i++;
 		}
@@ -528,7 +563,8 @@ class KPIRepository
 		$dEnd  = new \DateTime($postData['Gate1EstimationDeliverydate']);
 		$dDiff = $dStart->diff($dEnd);
 		$DateDiff = $dDiff->days;
-		
+		$month=$postData['month'];
+		$formattedMonth = str_replace ( "-", "/", strtoupper ( trim ( $month ) ) );
 		if(!empty(trim($postData['Gate1Estimation'])) && !empty(trim($postData['FinalEstimation']))){
 			$gate1_variance = ((trim($postData['FinalEstimation']) - trim($postData['Gate1Estimation'])) / trim($postData['Gate1Estimation']))*100;
 			$gate1_variance = number_format($gate1_variance, 2);
@@ -550,10 +586,10 @@ class KPIRepository
 		
 			
 			$query = "INSERT INTO KPI_QUALITY_ESITMATION 
-					(ID, PROJECT_NAME, ENGAGEMENT_DATE, GATE1_ESTIMATION_DELIVERY_DATE, DIFF_DATES, 
+					(ID, PROJECT_NAME,MONTH, ENGAGEMENT_DATE, GATE1_ESTIMATION_DELIVERY_DATE, DIFF_DATES, 
 					GATE1_ESTIMATION, GATE2_ESTIMATION, FINAL_ESTIMATION, GATE1_VARIANCE, GATE2_VARIANCE, ADDED_BY,
 					ADDED_ON)
-					VALUES(QUALITYESTIMATION_ID.nextval, :project_name, :engagement_date, :gate1_estimation_delivery_date,
+					VALUES(QUALITYESTIMATION_ID.nextval, :project_name,'".$formattedMonth."', :engagement_date, :gate1_estimation_delivery_date,
 					'".$DateDiff."', :gate1_Estimation, :gate2_Estimation, :final_estimation, 
 					'".$gate1_variance."', '".$gate2_variance."', '".$userID."',
 					'".strtoupper(date('d/M/y'))."')";	
@@ -584,6 +620,7 @@ class KPIRepository
 		
 		else {
 			$query = "UPDATE KPI_QUALITY_ESITMATION SET
+					MONTH='".$formattedMonth."',
 					ENGAGEMENT_DATE = :engagement_date,
 					GATE1_ESTIMATION_DELIVERY_DATE = :gate1_estimation_delivery_date,
 					DIFF_DATES = '".$DateDiff."',
@@ -604,7 +641,6 @@ class KPIRepository
 			$Gate1Estimation = trim($postData['Gate1Estimation']);
 			$Gate2Estimation = trim($postData['Gate2Estimation']);
 			$FinalEstimation = trim($postData['FinalEstimation']);				
-			
 			oci_bind_by_name($queryParse, ':engagement_date', $EngagementDate);
 			oci_bind_by_name($queryParse, ':gate1_estimation_delivery_date', $Gate1EstimationDeliverydate);
 			oci_bind_by_name($queryParse, ':gate1_Estimation', $Gate1Estimation);
@@ -897,7 +933,7 @@ public function updateSTAutomation($newValue, $projectID, $action) {
 		$consolidatedorders = $totaldeviceorders;
 		$consolidatedtotal = $consolidatedcustaccounts+$consolidatedbillaccounts+$consolidatedorders;
 		$prodtestaccounts = $consolidatedtotal/$totalaccounts;
-		$formatedprodtestaccounts = round($prodtestaccounts,2);
+		$formatedprodtestaccounts = round($prodtestaccounts, 2);
 		$formatedprodtestaccounts1 = $formatedprodtestaccounts * 100;
 		$month = $postData['month'];
 		$formattedMonth = strtoupper ( str_replace ( "-", "/", $month ) );

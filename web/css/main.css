@@ -339,7 +339,6 @@ body.loading .modal {
 	width : 980px;
 }
 .bg_grey{
-	///background-color: #c9dae8;
 	background-color: #f5f5f5;
 	
 }
@@ -380,7 +379,7 @@ body.loading .modal {
 	margin-left: 10px;
 }
 .compact-table, tr, th, td {
-	padding : 2px;
+	padding : 4px;
 	font-size: 14px;
 }
 .compact-table > thead > tr > th {

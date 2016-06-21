@@ -63,7 +63,7 @@
 
 
 
-<form class="form-horizontal" role="form" id="frmAddEditProject" method="post" action="{% if ProjectID is defined and ProjectID is not empty %} {{ path('EditProjectPost') }} {% else %} {{ path('AddProjectPost') }} {% endif %}">
+<form class="form-horizontal" role="form" id="frmAddEditProject" method="post" action="{% if ProjectID is defined and ProjectID is not empty %} {{ path('EditProjectPost', { ProjectID : ProjectID }) }} {% else %} {{ path('AddProjectPost') }} {% endif %}">
  
   <div class="form-group">
     <label class="control-label col-sm-2" for="ProjectName">Project :</label>

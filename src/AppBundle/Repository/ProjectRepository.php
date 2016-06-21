@@ -72,8 +72,10 @@ class ProjectRepository
 		$query = "SELECT * FROM KPI_PROJECTS WHERE ACTIVE = 1";
 				
 		if(!empty($ProjectID))
-			$query .= " AND ProjectID = ".$ProjectID;
+			$query .= " AND PROJECTID = ".$ProjectID;
 	
+		//echo $Month;//exit;
+		
 		if(!empty($Month)){
 			$Month = strtoupper(str_replace("-", "/", $Month));
 			$query .= " AND TO_CHAR(ESTIMATED_PROD_LIVE_DATE, 'MON/YY') LIKE '%".$Month."%'";
@@ -93,7 +95,7 @@ class ProjectRepository
 					
 		$query .= " ORDER BY ESTIMATED_PROD_LIVE_DATE";		
 		
-		//echo $query;exit;
+		//echo $query;//exit;
 		$queryParse = oci_parse($conn, $query);
 		oci_execute($queryParse);		
 		
@@ -317,8 +319,8 @@ class ProjectRepository
               
               $query = "SELECT DB_NAME 
               		FROM QCSITEADMIN_DB.PROJECTS 
-              		WHERE PROJECT_NAME = '".$QcProjectName."'
-              		AND DOMAIN_NAME = '".$Domain."'";          
+              		WHERE UPPER(PROJECT_NAME) = '".strtoupper($QcProjectName)."'
+              		AND UPPER(DOMAIN_NAME) = '".strtoupper($Domain)."'";          
               
              //echo $query;exit;
               

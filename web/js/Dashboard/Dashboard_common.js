@@ -6,7 +6,12 @@ function DashboardGeneralFunctions(){
 		
 		var counterTemp = $(this).closest('td').children('span').attr('id');
 		var split = counterTemp.split("_");
-		var counter = split[1];		
+		var counter = split[1];
+		
+		if(split[2])
+			var kpi_type = split[2];
+		else
+			var kpi_type = '';
 		
 		var column = $(this).closest('td').children('span').attr('column');
 				
@@ -17,7 +22,7 @@ function DashboardGeneralFunctions(){
 		var ProjectID = $("#ProjectIDHidden_"+counter).val();
 		
 		if(value != ""){			
-			AjaxUpdatePlanActionDetails(column, value, KPIID, ProjectID);			
+			AjaxUpdateCauseActionDetails(column, value, KPIID, ProjectID, kpi_type);			
 		}
 	});	
 	
@@ -182,9 +187,9 @@ function submitKPICauseAction(){
 	
 	var Data = { newVal : Month, KPIID : KPIID, Month : Month, action : 'updateCauseAction' };
 	*/
-function AjaxUpdatePlanActionDetails(column, newVal, KPIID, ProjectID){
+function AjaxUpdateCauseActionDetails(column, newVal, KPIID, ProjectID, kpi_type){
 	
-	var Data = { column : column, newVal : newVal, KPIID : KPIID, ProjectID : ProjectID, action : 'updateCauseAction' };
+	var Data = { column : column, newVal : newVal, KPIID : KPIID, ProjectID : ProjectID, kpi_type : kpi_type, action : 'updateCauseAction' };
 	
 	
 	$.ajax({		

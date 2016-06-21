@@ -38,14 +38,19 @@
 							{% endif %}
 							</td>
 							
-							{% if action is defined and action == 1 %}
-								<td><span class="cause" title="Click to enter Cause" column="CAUSE" style="cursor:pointer" data-type="textarea" id="cause_{{ loop.index }}">{{ row['CAUSE'] }}</span></td>
-								<td><span class="action" title="Click to enter action" column="ACTION" style="cursor:pointer" data-type="textarea" id="action_{{ loop.index }}">{{ row['ACTION'] }}</span></td>
-							{% else %}						
+							{% if sessionUserRole == MANAGER or sessionUserRole == DELIVERY_MANAGER %}
+								{% if action is defined and action == 1 %}
+									<td><span class="cause" title="Click to enter Cause" column="CAUSE" style="cursor:pointer" data-type="textarea" id="cause_{{ loop.index }}">{{ row['CAUSE'] }}</span></td>
+									<td><span class="action" title="Click to enter action" column="ACTION" style="cursor:pointer" data-type="textarea" id="action_{{ loop.index }}">{{ row['ACTION'] }}</span></td>
+								{% else %}						
+									<td>N/A</td>						
+									<td>N/A</td>			
+								{% endif %}
+							{% else %}
 								<td>N/A</td>						
-								<td>N/A</td>			
-							{% endif %}
-								
+								<td>N/A</td>						
+							{% endif %}	
+							
 							</tr>
 							<input type="hidden" name="ProjectIDHidden" id="ProjectIDHidden_{{ loop.index }}" value="{{ row['PROJECTID'] }}">
 						{% endfor %}						

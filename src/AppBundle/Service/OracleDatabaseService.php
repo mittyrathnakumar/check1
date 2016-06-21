@@ -66,7 +66,8 @@ class OracleDatabaseService
 	public function openConnection($instance = '') {
 		switch ($instance) {
 			
-			case 'KPIDASHBOARD':				
+			case 'KPIDASHBOARD':
+				
 				
 				$HOSTNAME = 'localhost';
 				$PORT = '1521';
@@ -75,13 +76,14 @@ class OracleDatabaseService
 				$KPI_USERNAME = 'KPIDASHBOARD';
 				$KPI_PASSWORD = 'KPIDASHBOARD';
 				
+				
 				/*
 				$HOSTNAME = 'vvsl60034.vodafone.com.au';
 				$PORT = '2521';
 				$SERVICE_NAME = 'TAU1I.vodafone.com.au';
 				
-				$KPI_USERNAME = 'Siebeldata';
-				$KPI_PASSWORD = 'Siebeldata';
+				$KPI_USERNAME = 'KPIDASHBOARD';
+				$KPI_PASSWORD = 'KPIDASHBOARD';
 				*/
 				
 				$this->db = $HOSTNAME.':'.$PORT.'/'.$SERVICE_NAME;

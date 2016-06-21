@@ -1,35 +1,27 @@
 {% extends 'layout.html.twig' %}
 {% block content %}
 
-<h1 class="page-header">Quality of Estimation</h1> 
-{#
+<h1 class="page-header">Quality of Estimation</h1>
 <div class="row col-md-8">
-	<form class="form-inline" role="form" id="frmMonthSearch" method="Post" action="">
-    <div class="col-md-4">
+	<form class="form-inline" role="form" id="frmMonthSearch" method="Post" action="{{ path('QualityEstimation') }}">
+    <div class="row col-md-4">
      <label for="Month">Month/Year : </label>	    
 	    <select name="Month" id="Month" class="form-control">
-	       	<option value="">--Select--</option>
-	       	{% if postData.Month is defined %}
-	       		{% set Month = postData.Month %}
-	       	{% else %}
-	       		{% set Month = ("now"|date("F/y")| upper) %}
-	       	{% endif %}
-	       		       	
+	       	<option value="">--Select--</option>	       		       	
 	       	{% for row in monthYearArray %}
 	       		<option value="{{ row }}" {% if Month is defined and Month == row %} selected {% endif %}>{{ row }}</option>
 	       	{% endfor %}
 		 </select>
     </div>
-    <div class="col-md-6">
+    <div class="row col-md-6">
       <button type="submit" name="Search" valuw="1" class="btn btn-primary">Search</button> 
 	  <button type="submit" name="ShowAll" value="1" class="btn btn-primary">Refresh</button>
     </div>
     </form>
 </div>
 <br><br>
-#}
-<div class="col-md-8 pull-left"><a href="{{ path('AddEstimationData') }}"><strong>Add Data</strong></a></div></br>
-<br>
+<div class="text-primary">This result shows data from <strong>{{ Month }}</strong> month.</div>
+<div><a href="{{ path('AddEstimationData') }}"><strong>Add Data</strong></a></div></br>
 <div class="col-md-14">		
 	<table class="table-bordered compact-table" id="dataTable">
 		<thead>
@@ -43,7 +35,8 @@
 				<th>Gate2 Estimation</th>
 				<th>Final Estimation</th>
 				<th>Gate1 Variance</th>
-				<th>Gate2 Variance</th>				
+				<th>Gate2 Variance</th>	
+				<th>Delete</th>			
 			</tr>
 		</thead>
 		<tbody>
@@ -52,7 +45,7 @@
 				{% for row in EstimationDetails %}
 					<tr>
 					<td>{{ loop.index }}</td>	
-					<td><a title="Edit details" href="{{ path('EditEstimationData', { ID : row['ID'] } ) }}">{{ row['PROJECT_NAME'] }}</a></td>
+					<td><a title="Edit details" href="{{ path('EditMonthEstimationData', { ID : row['ID'], Month : Month } ) }}">{{ row['PROJECT_NAME'] }}</a></td>
 					<td>{{ row['ENGAGEMENT_DATE'] }}</td>
 					<td>{{ row['GATE1_ESTIMATION_DELIVERY_DATE'] }}</td>
 					<td>{{ row['DIFF_DATES'] }}</td>
@@ -61,6 +54,7 @@
 					<td>{{ row['FINAL_ESTIMATION'] }}</td>
 					<td>{% if row['GATE1_VARIANCE'] is not empty and row['GATE1_VARIANCE'] != 0 %} {{ row['GATE1_VARIANCE'] }}% {% else %} {% endif %}</td>
 					<td>{{ row['GATE2_VARIANCE'] }}</td>
+					<td align="center"><input type="image" onclick="deleteQOE(this.id);" class="delete" src="{{ asset('images/delete.png') }}" id="{{ row['ID'] }}" title="Delete these details" /></td>
 					</tr>
 		    	{% endfor %}
 		    {% else %}
@@ -73,10 +67,7 @@
 
 {% endblock %}
 
-{% block documentready %}
-	<script>			
-		$.fn.editable.defaults.mode = 'popup';
-	</script>	
+{% block documentready %}		
 {% endblock %}
 
 

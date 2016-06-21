@@ -25,8 +25,7 @@
 		 </select>		 
     &nbsp;<input type="checkbox" value="1" name="Weekly" {% if postData.Weekly is defined and postData.Weekly == 1%}checked{% endif %}><label for="Month">Weekly</label>
     </div>
-    #}
-    
+    #}    
     <div class="row col-sm-4">
 	    {% if postData.Month is defined and postData.Month is not empty %}
 			{% set Month = postData.Month|upper %}
@@ -35,8 +34,10 @@
 		{% endif %}
 				
 	    <label for="Month">Month-Year : </label>     
+	    {# monthPicker #}
 	    <input type="text" size="10" name="Month" class="form-control monthPicker" id="Month" placeholder="Month/Year" value="{% if Month is defined %}{{ Month|upper }}{% endif %}" >
-    	&nbsp;<input type="checkbox" value="1" name="Weekly" {% if postData.Weekly is defined and postData.Weekly == 1%}checked{% endif %}><label for="Month">Weekly</label>
+    	&nbsp;<input type="checkbox" value="1" name="Weekly" checked disabled><label for="Month">Weekly</label>
+    	{# <input type="checkbox" value="1" name="Weekly" {% if postData.Weekly is defined and postData.Weekly == 1%}checked{% endif %}><label for="Month">Weekly</label> #}
     </div>
     
     <div class="col-md-2 text-left">
@@ -86,10 +87,8 @@
 						<a target="_blank" style="cursor:pointer" href="{{ path('KPIProjectsSearch', { KPIID : row['KPIID'], Month : Month } ) }}" data-toggle="tooltip" data-html="true" title="{{ row['Caption']}}"  value="{{ row['KPI'] }}">{{ row['KPI'] }}</a>
 						{# onClick="window.open('{{ path('KPIProjectsSearch', { KPIID : row['KPIID'], Month : Month } ) }}','','width=1800');" #}
 						{# href="{{ path('KPIProjectsSearch', { KPIID : row['KPIID'], Month : Month } ) }}" #}			
-																
-					</td>						
-					
-					
+										
+					</td>					
 					
 					{# {{ row['KPI'] }}=={{ row['Actual'] }}<br> #} 
 					{% if row['Operator'] is not empty %}	
