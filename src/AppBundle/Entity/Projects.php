@@ -209,11 +209,11 @@ class Projects
 	public function getSTTotalTestCases(){
 		return $this->stTotalTestCases;
 	}
-	public function setSTAutomation($stAutomation){
+	public function setSTAutomationApplicable($stAutomation){
 		$this->stAutomation = $stAutomation;
 	}
 	
-	public function getSTAutomation(){
+	public function getSTAutomationApplicable(){
 		return $this->stAutomation;
 	}
 	

@@ -35,38 +35,39 @@
 				
 	    <label for="Month">Month-Year : </label>     
 	    {# monthPicker #}
-	    <input type="text" size="10" name="Month" class="form-control monthPicker" id="Month" placeholder="Month/Year" value="{% if Month is defined %}{{ Month|upper }}{% endif %}" >
+	    {# <input type="text" size="10" name="Month" class="form-control monthPicker" id="Month" placeholder="Month/Year" value="{% if Month is defined %}{{ Month|upper }}{% endif %}" > #}
+	    <input readonly type="text" size="10" name="Month" class="form-control" id="Month" placeholder="Month/Year" value="{% if Month is defined %}{{ Month|upper }}{% endif %}" >    	
     	&nbsp;<input type="checkbox" value="1" name="Weekly" checked disabled><label for="Month">Weekly</label>
     	{# <input type="checkbox" value="1" name="Weekly" {% if postData.Weekly is defined and postData.Weekly == 1%}checked{% endif %}><label for="Month">Weekly</label> #}
     </div>
-    
+    {#
     <div class="col-md-2 text-left">
       <button type="submit" name="Search" valuw="1" class="btn btn-primary">Search</button> 
 	  <button type="submit" name="ShowAll" value="1" class="btn btn-primary">Refresh</button>
     </div>
-     <div class="col-md-1 text-right">
+    #}
+     <div>
      	<button type="button" id="Export" class="btn btn-primary">Export</button>     	 
-    </div>    
-    <div class="col-md-1 text-left">     
-    	<button id="kpidata_inputs" type="button" class="btn btn-primary">KPI List</button>          	 
-    </div>
-    <div id="KPIListPath" data-path="{{ path('KPIList') }}"></div>
+    </div>   
+   
 </div>
 </form>
 <br><br>
 {% if Month is defined and Month is not empty %}
-	<div class="text-primary pull-left">This result shows data for <strong>{{ Month }}</strong>.</div><br>
+	<div class="text-primary pull-left">This result shows data till date for <strong>{{ Month }}</strong>.</div><br>
 {% endif %}
-
+<br>
+{#
 {% if Month is defined and Month == "now"|date("M-y") %}
 	<div class="text-primary">(Default list shows results from current month.)</div><br>
 {% else %}
 	<br>
 {% endif %}
+#}
 
 <div class="row">
 	<div class="col-xs-10">
-		<table id="dataTable" class="table-bordered compact-table">
+		<table id="dataTable" class="table-bordered table-condensed"> {# compact-table #}
 			<thead>
 				<tr>								
 					<th>KPI</th>
@@ -84,7 +85,7 @@
 				{% set RAG = '' %}
 				<tr>								
 					<td>									
-						<a target="_blank" style="cursor:pointer" href="{{ path('KPIProjectsSearch', { KPIID : row['KPIID'], Month : Month } ) }}" data-toggle="tooltip" data-html="true" title="{{ row['Caption']}}"  value="{{ row['KPI'] }}">{{ row['KPI'] }}</a>
+						<a target="_blank" style="cursor:pointer" onClick="window.open('{{ path('KPIProjectsSearch', { KPIID : row['KPIID'], Month : Month } ) }}','','width=1800');" data-toggle="tooltip" data-html="true" title="{{ row['Caption']}}"  value="{{ row['KPI'] }}">{{ row['KPI'] }}</a>
 						{# onClick="window.open('{{ path('KPIProjectsSearch', { KPIID : row['KPIID'], Month : Month } ) }}','','width=1800');" #}
 						{# href="{{ path('KPIProjectsSearch', { KPIID : row['KPIID'], Month : Month } ) }}" #}			
 										

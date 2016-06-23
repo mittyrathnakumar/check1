@@ -1,53 +1,23 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-	<div class="wrapper">
+	<div class="wrapper">	
+	{#
 	{% set currentPage = app.request.attributes.get('_route') %}
-	
 	{% if currentPage == 'KPIList' %}
-		{{ include('navbarleftandtop.html.twig') }}
-	{% elseif currentPage == 'DeliverySlippages' %}
-		{{ include('navbarleftandtop.html.twig') }}
-	{% elseif currentPage == 'STAutomation' %}
-		{{ include('navbarleftandtop.html.twig') }}
-	{% elseif currentPage == 'ITSMDefects' %}
-		{{ include('navbarleftandtop.html.twig') }}
-	{% elseif currentPage == 'ViewProjects' %}
-		{{ include('navbarleftandtop.html.twig') }}
-	{% elseif currentPage == 'AddProject' %}
-		{{ include('navbarleftandtop.html.twig') }}
-	{% elseif currentPage == 'EditProject' %}
-		{{ include('navbarleftandtop.html.twig') }}
-	{% elseif currentPage == 'QualityEstimation' %}
-		{{ include('navbarleftandtop.html.twig') }}
-	{% elseif currentPage == 'AddEstimationData' %}
-		{{ include('navbarleftandtop.html.twig') }}
-	{% elseif currentPage == 'EditEstimationData' %}
-		{{ include('navbarleftandtop.html.twig') }}
-	{% elseif currentPage == 'IntakeProcess' %}
-		{{ include('navbarleftandtop.html.twig') }}
-	{% elseif currentPage == 'AddIntakeProcess' %}
-		{{ include('navbarleftandtop.html.twig') }}
-	{% elseif currentPage == 'ViewProdTestAccounts' %}
-		{{ include('navbarleftandtop.html.twig') }}
-	{% elseif currentPage == 'ProdTestAccounts' %}
-		{{ include('navbarleftandtop.html.twig') }}
-	{% elseif currentPage == 'EditProdTestAccounts' %}
-		{{ include('navbarleftandtop.html.twig') }}
+		{{ include('navbar_side.html.twig') }}
 	{% else %}
 		{{ include('navbar.html.twig') }}
 	{% endif %}
-		
+	#}	
 				
-	{#{{ include('navbar.html.twig') }}#}
-		 <div class="container">
-		 		<div class="row">
-		 		  <!-- Page Content -->
-						<div class="content main">
-						{% block breadcrumb %}{% endblock %}
-						{% block content %}{% endblock %}
-						</div>				
-				  </div>
+	{{ include('navbar.html.twig') }}
+		 <div class="container-fluid">		
+			<!-- Page Content -->
+			<div class="content main">
+				{% block breadcrumb %}{% endblock %}
+				{% block content %}{% endblock %}
+			</div>
 		</div>
 	</div>
 {% endblock %}

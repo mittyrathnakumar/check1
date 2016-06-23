@@ -153,7 +153,7 @@ function DashboardGeneralFunctions(){
 	
 	/* Datepicker for Darshboard Search */
 	
-	$("#Month").datepicker({
+	$("#Month1").datepicker({
 		dateFormat: "M-y",
 		changeMonth: true,
 	    changeYear: true,

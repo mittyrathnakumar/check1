@@ -110,6 +110,25 @@ function IntakeProcessFunction(){
 		}
 	});
 	
+	/* Datepicker for Month in Add/Edit field */
+	
+	$("#month").datepicker({
+		dateFormat: "M-y",
+		changeMonth: true,
+	    changeYear: true,
+	    showButtonPanel: true,	   
+	    onClose: function(dateText, inst) { 
+	       $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
+	    }
+		
+	});
+	
+	 $(".monthPicker").focus(function () {
+	      $(".ui-datepicker-calendar").hide();	        
+	 });
+	
+	/* === */
+	
 }
 /* Function - Delete Intake Process */
 
@@ -130,17 +149,20 @@ function deleteIntakeProcess(ID){
 						data : Data, 
 						success: function(data) {
 							$.each(data, function(key, value){	 
-								
+								/*
 								$( "#dialog" ).dialog({
 									   modal : true,
 								       autoOpen: false,		
 								       height: 200,
 									   width: 400
-								});								
+								});
+																
 								
 								htmltext = "<div class='div-jquery-popup'>"+value+"</div>";								
 								$( "#dialog" ).html(htmltext);
 								$( "#dialog" ).dialog( "open" );
+								
+								*/
 								
 								location.reload();
 								
@@ -165,6 +187,178 @@ function deleteIntakeProcess(ID){
 	
 	
 }
+
+/* Function - Delete Quality of Estimation */
+
+function deleteQOE(ID){
+	$( "#dialog" ).dialog({
+		   modal : true,
+	       autoOpen: false,		
+	       height: 200,
+		   width: 400,
+	       buttons: {
+	    		Ok : function(){
+	    	   		$(this).dialog("close");
+	    	   		
+					var Data = { action : 'deleteQE', ID : ID }					
+					$.ajax({		
+						type : 'POST',
+						dataType: 'JSON',
+						data : Data, 
+						success: function(data) {
+							$.each(data, function(key, value){	 
+								/*
+								$( "#dialog" ).dialog({
+									   modal : true,
+								       autoOpen: false,		
+								       height: 200,
+									   width: 400
+								});								
+								
+								htmltext = "<div class='div-jquery-popup'>"+value+"</div>";								
+								$( "#dialog" ).html(htmltext);
+								$( "#dialog" ).dialog( "open" );
+								*/
+								
+								location.reload();
+								
+							});
+					    },
+					    error: function(jqXHR, textStatus, errorThrown) {
+					    	console.log(textStatus, errorThrown);
+					    }
+					});
+	          },
+	
+			  Cancel :function(){
+	        	  $(this).dialog("close");
+	          }
+	       } 						       
+	 });
+	
+	htmltext = "<div class='div-jquery-popup'>Confirm, to delete this record ?</div>";
+	
+	$( "#dialog" ).html(htmltext);
+	$( "#dialog" ).dialog( "open" );
+	
+	
+}
+
+
+/* Function - Delete Document */
+
+function deleteDocument(ID){
+	$( "#dialog" ).dialog({
+		   modal : true,
+	       autoOpen: false,		
+	       height: 200,
+		   width: 400,
+	       buttons: {
+	    		Ok : function(){
+	    	   		$(this).dialog("close");
+	    	   		
+					var Data = { action : 'deleteDocument', ID : ID }					
+					$.ajax({		
+						type : 'POST',
+						dataType: 'JSON',
+						data : Data, 
+						success: function(data) {
+							$.each(data, function(key, value){	 
+								
+								/*
+								$( "#dialog" ).dialog({
+									   modal : true,
+								       autoOpen: false,		
+								       height: 200,
+									   width: 400
+								});								
+								
+								htmltext = "<div class='div-jquery-popup'>"+value+"</div>";								
+								$( "#dialog" ).html(htmltext);
+								$( "#dialog" ).dialog( "open" );
+								*/
+								
+								location.reload();
+								
+							});
+					    },
+					    error: function(jqXHR, textStatus, errorThrown) {
+					    	console.log(textStatus, errorThrown);
+					    }
+					});
+	          },
+	
+			  Cancel :function(){
+	        	  $(this).dialog("close");
+	          }
+	       } 						       
+	 });
+	
+	htmltext = "<div class='div-jquery-popup'>Confirm, to delete this record ?</div>";
+	
+	$( "#dialog" ).html(htmltext);
+	$( "#dialog" ).dialog( "open" );
+	
+	
+}
+
+/* Function - Delete Prod Account Data */
+
+function deleteProdTestAccData(ID){
+	$( "#dialog" ).dialog({
+		   modal : true,
+	       autoOpen: false,		
+	       height: 200,
+		   width: 400,
+	       buttons: {
+	    		Ok : function(){
+	    	   		$(this).dialog("close");
+	    	   		
+					var Data = { action : 'deleteProdTestAccData', ID : ID }					
+					$.ajax({		
+						type : 'POST',
+						dataType: 'JSON',
+						data : Data, 
+						success: function(data) {
+							$.each(data, function(key, value){	 
+								
+								/*
+								$( "#dialog" ).dialog({
+									   modal : true,
+								       autoOpen: false,		
+								       height: 200,
+									   width: 400
+								});								
+								
+								htmltext = "<div class='div-jquery-popup'>"+value+"</div>";								
+								$( "#dialog" ).html(htmltext);
+								$( "#dialog" ).dialog( "open" );
+								*/
+								
+								location.reload();
+								
+							});
+					    },
+					    error: function(jqXHR, textStatus, errorThrown) {
+					    	console.log(textStatus, errorThrown);
+					    }
+					});
+	          },
+	
+			  Cancel :function(){
+	        	  $(this).dialog("close");
+	          }
+	       } 						       
+	 });
+	
+	htmltext = "<div class='div-jquery-popup'>Confirm, to delete this record ?</div>";
+	
+	$( "#dialog" ).html(htmltext);
+	$( "#dialog" ).dialog( "open" );
+	
+	
+}
+
 
 
 
@@ -200,6 +394,43 @@ function DocumentationFunction(){
 	 $('a.clearSignoffDate').on('click',function(){
 	    	$('#SignoffDate').datepicker('setDate', null);
 	 });
+	 
+	 function log( message ) {
+			$( "<div>" ).text( message ).prependTo( "#log" );
+			$( "#log" ).scrollTop( 0 );
+		}
+	    
+	 var autoPath =  $("#AutoPath").attr("data-ajaxurl");
+	    
+	$( "#ProjectName" ).autocomplete({
+		source: autoPath,
+		minLength: 2,
+		select: function( event, ui ) {
+			log( ui.item ?
+				"Selected: " + ui.item.value + " aka " + ui.item.id :
+				"Nothing selected, input was " + this.value );
+		}
+	});
+	
+	/* Datepicker for Month in Add/Edit field */
+	
+	$("#month").datepicker({
+		dateFormat: "M-y",
+		changeMonth: true,
+	    changeYear: true,
+	    showButtonPanel: true,	   
+	    onClose: function(dateText, inst) { 
+	       $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
+	    }
+		
+	});
+	
+	 $(".monthPicker").focus(function () {
+	      $(".ui-datepicker-calendar").hide();	        
+	 });
+	
+	/* === */
+		
 }
 
 function QualityEstimationFunction(){

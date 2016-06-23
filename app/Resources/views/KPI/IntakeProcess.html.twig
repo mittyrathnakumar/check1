@@ -2,43 +2,32 @@
 {% block content %}
 
 <h1 class="page-header">Intake Process</h1>
- <ol class="breadcrumb">
-    <li><a href="">KPI</a></li>
-    <li class="active">Intake Process</li>  
-</ol>
-{#
 <div class="row col-md-8">
-	<form class="form-inline" role="form" id="frmMonthSearch" method="Post" action="">
-    <div class="col-md-4">
+	<form class="form-inline" role="form" id="frmMonthSearch" method="Post" action="{{ path('IntakeProcess') }}">
+    <div class="row col-md-4">
      <label for="Month">Month/Year : </label>	    
 	    <select name="Month" id="Month" class="form-control">
-	       	<option value="">--Select--</option>
-	       	{% if postData.Month is defined %}
-	       		{% set Month = postData.Month %}
-	       	{% else %}
-	       		{% set Month = ("now"|date("F/y")| upper) %}
-	       	{% endif %}
-	       		       	
+	       	<option value="">--Select--</option>	       		       	
 	       	{% for row in monthYearArray %}
 	       		<option value="{{ row }}" {% if Month is defined and Month == row %} selected {% endif %}>{{ row }}</option>
 	       	{% endfor %}
 		 </select>
-    </div>
-    <div class="col-md-6">
+    </div>    
+    <div class="row col-md-6">
       <button type="submit" name="Search" valuw="1" class="btn btn-primary">Search</button> 
 	  <button type="submit" name="ShowAll" value="1" class="btn btn-primary">Refresh</button>
     </div>
     </form>
 </div>
-<br><br>
-#}
-<div class="col-md-8 pull-left"><a href="{{ path('AddIntakeProcess') }}"><strong>Add Data</strong></a></div></br>
-<br>
-<div class="col-md-12">		
+<br><br><br>
+<div class="text-primary">This result shows data for <strong>{{ Month }}</strong>.</div>
+<div><a href="{{ path('AddIntakeProcess') }}"><strong>Add Data</strong></a></div></br>
+<div class="row col-md-12">		
 	<table class="table-bordered compact-table" id="dataTable">
 		<thead>
 			<tr>					
 				<th>No.</th>
+				<th>Month</th>
 				<th>Programme</th>
 				<th>Projectname</th>
 				<th>Proposal Type</th>
@@ -58,7 +47,8 @@
 				{% for row in ProcessDetails %}
 					<tr>
 					<td>{{ loop.index }}</td>	
-					<td><a title="Edit details" href="{{ path('EditIntakeProcess', { IntakeID : row['INTAKEID'] } ) }}">{{ row['PROGRAMME'] }}</a></td>
+					<td>{{ row['MONTH'] }}</td>
+					<td><a title="Edit details" href="{{ path('EditMonthIntakeProcess', { IntakeID : row['INTAKEID'], Month : Month } ) }}">{{ row['PROGRAMME'] }}</a></td>
 					<td>{{ row['PROJECT_NAME'] }}</td>
 					<td>{{ row['PROPOSAL_TYPE'] }}</td>
 					<td>{{ row['SOLUTION_COMPONENT'] }}</td>
@@ -80,13 +70,6 @@
 <div id="dialog" title="Choose Action" class="modal_dialog"></div>
 
 {% endblock %}
-
-{% block documentready %}
-	<script>			
-		$.fn.editable.defaults.mode = 'popup';
-	</script>	
-{% endblock %}
-
 
 {% block javascripts %}
 	{{ parent() }}

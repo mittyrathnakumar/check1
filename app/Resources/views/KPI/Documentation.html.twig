@@ -2,34 +2,55 @@
 {% block content %}
 
 <h1 class="page-header">Documentation / Knowledge Management </h1>
- <div class="col-md-8 pull-left"><a href="{{ path('AddDocumentDetails') }}"><strong>Add Record</strong></a></div></br></br>
-<div class="col-md-10">		
+<div class="row col-md-8">
+	<form class="form-inline" role="form" id="frmMonthSearch" method="Post" action="{{ path('Documentation') }}">
+    <div class="row col-md-4">
+     <label for="Month">Month/Year : </label>	    
+	    <select name="Month" id="Month" class="form-control">
+	       	<option value="">--Select--</option>	       		       	
+	       	{% for row in monthYearArray %}
+	       		<option value="{{ row }}" {% if Month is defined and Month == row %} selected {% endif %}>{{ row }}</option>
+	       	{% endfor %}
+		 </select>
+    </div>
+    <div class="row col-md-6">
+      <button type="submit" name="Search" valuw="1" class="btn btn-primary">Search</button> 
+	  <button type="submit" name="ShowAll" value="1" class="btn btn-primary">Refresh</button>
+    </div>
+    </form>
+</div>
+<br><br><br>
+<div class="text-primary">This result shows data for <strong>{{ Month }}</strong>.</div>
+<div><a href="{{ path('AddDocumentDetails') }}"><strong>Add Record</strong></a></div></br>
+<div class="row col-md-10">		
 	<table class="table-condensed table-bordered table-hover" id="dataTable">
 		<thead>
 			<tr class="bg_grey">					
 				<th>No.</th>
+				<th>Month</th>
 				<th>Deliverable</th>
 				<th>Projectname</th>				
 				<th>Document Name</th>
 				<th>Testing</th>
 				<th>Document Type</th>
 				<th>Delivery Date</th>	
-				<th>Sign Off Date</th>		
-				<th>Repository Link</th>
+				<th>Sign Off Date</th>	
+				<th>Delete</th>
 			</tr>
 		</thead>
 		<tbody>
 			{% for row in DocumentDetails %}			
 				<tr>
-				<td>{{ loop.index}}</td>				
-				<td><a href="{{ path('EditDocumentDetails', { ID : row.getProjectID() }) }}" title="Edit Details">{{ row.getDeliverable() }}</a></td>	
+				<td>{{ loop.index}}</td>
+				<td>{{ row.getDocumentMonth() }}</a></td>
+				<td><a href="{{ path('EditMonthDocumentDetails', { DocumentID : row.getDocumentID(), Month : Month }) }}" title="Edit Details">{{ row.getDeliverable() }}</a></td>	
 				<td>{{ row.getProjectName() }}</a></td>
 				<td>{{ row.getDocumentName( )}}</a></td>
 				<td>{% if row.getTesting() == 1 %} Yes {% endif %}</a></td>
 				<td>{{ row.getDocumentType() }}</td>
 				<td>{{ row.getDeliveryDate() }}</td>
-				<td>{{ row.getSignOffDate() }}</td>
-				<td>{{ row.getRepositoryLink() }}</td>				
+				<td>{{ row.getSignOffDate() }}</td>		
+				<td align="center"><input type="image" onclick="deleteDocument(this.id);" class="delete" src="{{ asset('images/delete.png') }}" id="{{ row.getDocumentID() }}" title="Delete these details" /></td>		
 				</tr>
 	    	{% endfor %}
 		</tbody>
@@ -39,8 +60,10 @@
 {% endblock %}
 
 {% block javascripts %}
-	{{ parent() }}		
+	{{ parent() }}	
+	<script src="{{ asset('js/KPI/KPI_common.js') }}"></script>		
 	<script>
-		loadDataTable_Export('DocumentationDetails');						
+		loadDataTable_Export('DocumentationDetails');
+		DocumentationFunction();						
 	</script>
 {% endblock %}

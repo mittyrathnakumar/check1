@@ -13,7 +13,28 @@
     
 </ol>
 	
-<form class="form-horizontal" role="form" id="frmAddEditRecord" method="post" action="{% if ProjectID is defined %} {{ path('EditDocumentDetails', { ID : ProjectID } ) }} {% else %} {{ path('AddDocumentDetails') }} {% endif %}"> 
+<form class="form-horizontal" role="form" id="frmAddEditRecord" method="post" action="{% if DocumentID is defined %} {{ path('EditMonthDocumentDetails', { DocumentID : DocumentID, Month : Month } ) }} {% else %} {{ path('AddDocumentDetails') }} {% endif %}"> 
+  <div class="form-group">
+   <label class="control-label col-sm-2" for="month">Month :</label> 
+    <div class="col-sm-2">  
+	<input type="text" id="month" name="month" class="form-control monthPicker" value="{% if DocumentDetails is defined %}{{ DocumentDetails.getDocumentMonth() }}{% endif %}" required />
+  	</div>
+  </div>
+   <div class="form-group">
+    <label class="control-label col-sm-2" for="ProjectName">Project :</label>  
+	  <div class="col-sm-4">    
+	      {% if DocumentID is defined and DocumentID is not empty %}
+	      	{% set readonly = 'readonly' %}
+	      	{% set autocomplete = '' %}      	
+	      {% else %}
+	      	{% set readonly = '' %}
+	      	{% set autocomplete = 'autocomplete' %}
+	      {% endif %}  
+	  <input {{ readonly }} type="text" name="ProjectName" id="ProjectName" class="form-control {{ autocomplete }}" value="{% if DocumentDetails is defined %}{{ DocumentDetails.getProjectName() }}{% endif %}" required>   
+	  </div>
+  </div>  
+  <div id="AutoPath" data-ajaxurl="{{ path('AddDocumentDetails') }}"></div>
+  {#
   <div class="form-group">
     <label class="control-label col-sm-2" for="ProjectName">Project :</label>
     <div class="col-sm-4">  
@@ -25,6 +46,7 @@
        </select>   
     </div>
   </div>
+  #}
   <div class="form-group">
     <label class="control-label col-sm-2" for="Deliverable">Deliverable Name:</label>
     <div class="col-sm-3">       
@@ -76,7 +98,8 @@
 	   </div>
    </div>	 
   <div id="dialog" title="Result Action" class="modal-dialog"></div>
-   <input type="hidden" name="ProjectID" value="{% if ProjectID is defined %}{{ ProjectID }}{% endif %}" >
+   <input type="hidden" name="DocumentID" value="{% if DocumentID is defined %}{{ DocumentID }}{% endif %}" >
+   <input type="hidden" name="Month" value="{% if Month is defined %}{{ Month }}{% endif %}" >
 </form>
 
 {% endblock %}

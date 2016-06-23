@@ -41,7 +41,7 @@
 							<td>{{ row['FINAL_ESTIMATION'] }}</td>
 							<td>{{ row['GATE1_VARIANCE'] }}</td>
 							<td>{{ row['GATE2_VARIANCE'] }}</td>
-							<td>
+							<td {% if row['RedReason'] is defined and row['RedReason'] is not empty %}style="cursor:help" data-toggle="tooltip" data-html="true" title="{{ row['RedReason'] }}"{% endif %} >
 							{% if row['RAG'] is defined and row['RAG'] == 'green' %}
 								<img src="{{ asset("images/green_RAG.png") }}">
 							{% elseif row['RAG'] is defined and row['RAG'] == 'red' %}

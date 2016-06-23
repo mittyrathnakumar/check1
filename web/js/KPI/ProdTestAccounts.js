@@ -8,8 +8,7 @@ $(document).ready(function(){
         dateFormat: 'M-y',
         minDate: '-1M',
         maxDate: 0
-    });
-   
+    });  
   
    
 });

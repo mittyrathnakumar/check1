@@ -40,8 +40,8 @@
 				<tr>
 				<td>{{ loop.index}}</td>
 				<td>{{ row.getProjectName}}</td>
-				<td><span id="stAutomatedTestCases_{{ loop.index }}" data-type="textarea" class="stAutomatedTestCases">{{ row.getSTAutomatedTestCases|upper}}</span></td>
-				<td><span id="stTotalTestCases_{{ loop.index }}" data-type="textarea" data-pk="1" class="stTotalTestCases" style="text-transform: uppercase">{{ row.getSTTotalTestCases|upper}}</span></td>
+				<td><span id="stAutomatedTestCases_{{ loop.index }}" data-type="number" class="stAutomatedTestCases">{{ row.getSTAutomatedTestCases|upper}}</span></td>
+				<td><span id="stTotalTestCases_{{ loop.index }}" data-type="number" data-pk="1" class="stTotalTestCases" style="text-transform: uppercase">{{ row.getSTTotalTestCases|upper}}</span></td>
 				<td>
 				{% if row.getSTAutomation is not null and row.getSTAutomation != 'N/A'%}{{ row.getSTAutomation }}% {% else %}
 				{{ row.getSTAutomation() }}{% endif %}

@@ -65,7 +65,7 @@
 				<th>POC</th>
 				<th>Estimated Prod Live Date</th>	
 				<th>Reusability(%)</th>		
-				<th>ST Automation</th>
+				<th>ST Automation Applicable</th>
 				<th>UAT Applicable</th>
 			</tr>
 		</thead>
@@ -81,9 +81,7 @@
 				
 				<tr class="{{ bg_class }}">
 					<td>{{ loop.index}}</td>				
-					<td>
-						{# {{ sessionUID }}=={{ row.getProjectAddedBy() }}=={{ row.getProjectEditedBy() }} #}
-						
+					<td>					
 						{% if Month is defined and Month is not empty %}
 							{% set editUrl = path('EditProjectMonth', { ProjectID : row.getProjectID(), Month : Month } ) %}
 						{% else %}
@@ -104,8 +102,8 @@
 					<td>{{ row.getPOC()}}</td>								
 					<td>{{ row.GetEstimatedProdLiveDate()}}</td>				
 					<td>{% if row.getReusability() is not empty %}{{ row.getReusability()}}%{% endif %}</td>				
-					<td>{% if row.getSTAutomation() is defined and row.getSTAutomation() is not null %}{{ row.getSTAutomation() }}%{% endif %}</td>
-					<td>{{ row.getUatApplicable}}</td>
+					<td>{{ row.getSTAutomationApplicable() }}</td>
+					<td>{{ row.getUatApplicable() }}</td>
 				</tr>
 	    	{% endfor %}
 		</tbody>

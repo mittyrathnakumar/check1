@@ -6,7 +6,7 @@
     <div class="col-lg-12">
         <h1 class="page-header">Production Test Accounts</h1>
         <ol class="breadcrumb">
-            <li><a href="{{ path('ViewProdTestAccounts') }}">KPI</a></li>
+            <li><a href="{{ path('ViewProdTestAccounts') }}">All Data</a></li>
             <li class="active">Production Test Accounts</li>
         </ol>
     </div>
@@ -16,17 +16,18 @@
 {% endif %}
 <form class="form-horizontal" role="form" id="ProdTestAccounts" method="post" action="{% if rowId is defined %} {{ path('UpdateProdTestAccounts') }} {% else %} {{ path('AddProdTestAccounts') }} {% endif %}  ">
 <div class="container-fluid col-sm-10">
-<div class="panel panel-default">
+	<div class="panel panel-default">
   		<div class="panel-heading">
   			<div class="row">
-  			<div class="col-sm-8"><label for="month">Month: </label>
-			<input type="text" id="month" name="month" class="monthPicker" value="{% if ProdTestAccountsEntity is defined %}{{ProdTestAccountsEntity.getMonth|trim}}{% endif %}" required /> </div>
-  			<input type= "hidden" id="rowId" name="rowId" value="{% if ProdTestAccountsEntity is defined %}{{ProdTestAccountsEntity.getRowId|trim}}{% endif %}">
-  			 <div class="col-sm-2"><h3 class="panel-title"><center>TCS</center></h3></div>
-            <div class="col-sm-2"><h3 class="panel-title"><center>Online Store(TCS)</center></h3</div>
+	  			<div class="col-sm-1"><label for="month">Month: </label></div>
+				<div class="col-sm-2"><input readonly type="text" id="month" name="month" class="form-control monthPicker" value="{% if ProdTestAccountsEntity is defined %}{{ProdTestAccountsEntity.getMonth|trim}}{% endif %}" required /></div>
+	  			<div class="col-sm-5"></div>
+	  			<input type= "hidden" id="rowId" name="rowId" value="{% if ProdTestAccountsEntity is defined %}{{ProdTestAccountsEntity.getRowId|trim}}{% endif %}">
+	  			<div class="col-sm-2"><h3 class="panel-title"><center>TCS</center></h3></div>
+	            <div class="col-sm-2"><h3 class="panel-title"><center>Online Store(TCS)</center></h3</div>
   			</div>
 		</div>
-</div>
+	</div>
 	<div class="panel panel-default">
   		<div class="panel-heading">
   			<div class="row">

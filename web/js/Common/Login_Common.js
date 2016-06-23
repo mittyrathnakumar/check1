@@ -51,7 +51,12 @@ function checkUserLogin() {
 						var pathname = $(location).attr('pathname');						
 						
 						var foldername = pathname.substring(0, pathname.length-5); /* This removes login from the end */ 
-						var Path = 'http://' + hostname + foldername + value /* Combines all values along with new Home Page */				
+						
+						if(hostname == 'localhost')
+							var Path = 'http://' + hostname + foldername + value /* Combines all values along with new Home Page */				
+						else
+							var Path = 'https://' + hostname + foldername + value /* Combines all values along with new Home Page */		
+						
 						window.location.href = Path;
 					}
 				}

@@ -22,7 +22,6 @@ use AppBundle\Repository\DashboardRepository;
  */
 class KPIController extends Controller 
 {	
-	
 
 	
 	/**
@@ -46,14 +45,11 @@ class KPIController extends Controller
 		/* === */				
 	
 		$KPIRepository = new KPIRepository();		
-		$DefectDetails = $KPIRepository->getDefectDetails();
-		$monthYearArray = $KPIRepository->getmonthArray();
-		
-		//echo "<pre>";print_r($DefectDetails);exit;
+		$DefectDetails = $KPIRepository->getDefectDetails();		
+	
 		
 		return $this->render('KPI/ITSMDefects.html.twig', [
-				"DefectDetails" => $DefectDetails,
-				"monthYearArray" => $monthYearArray
+				"DefectDetails" => $DefectDetails
 		]);
 	
 	}
@@ -77,12 +73,10 @@ class KPIController extends Controller
 		}
 		
 		$KPIRepository = new KPIRepository();
-		$DefectDetails = $KPIRepository->getDefectDetails($postData);
-		$monthYearArray = $KPIRepository->getmonthArray();		
+		$DefectDetails = $KPIRepository->getDefectDetails();				
 		
 		return $this->render('KPI/ITSMDefects.html.twig', [
 				"DefectDetails" => $DefectDetails,
-				"monthYearArray" => $monthYearArray,
 				"postData" => $postData
 		]);		
 
@@ -108,33 +102,54 @@ class KPIController extends Controller
 		
 		/* === */
 		
-		$KPIRepository = new KPIRepository();
+		$KPIRepository = new KPIRepository();		
+		$postData = $request->request->all();
+		
+		
+		/* Refresh the page */
+		
+		if(!empty($postData['ShowAll']) && $postData['ShowAll'] == 1){					
+			return $this->redirectToRoute('IntakeProcess');
+		}
+		
+		/* === */
 		
 		/* Delete Intake Process */
 		
-		$postData = $request->request->all();
 		if(!empty($postData['action']) && $postData['action'] == 'deleteProcess'){
-			
+				
 			$response = $KPIRepository->deleteIntakeProcess($postData['ID']);
 			return new JsonResponse($response);
-			
+				
 		}
 		
 		/* Render Listing Page */
 		
-		else {	
+		else {			
 		
-			$ProcessDetails = $KPIRepository->getProcessDetails();
-			$monthYearArray = $KPIRepository->getmonthArray();
-		
-			//echo "<pre>";print_r($ProcessDetails);exit;
-		
+			if(!empty($postData)){
+				if(!empty($postData['Month']))
+					$Month = $postData['Month'];
+				else
+					$Month = '';
+			} else {
+				if(!empty($request->query->all()['Month']))
+					$Month = $request->query->all()['Month'];
+				else
+					$Month = strtoupper(date('M-y'));
+			}
+			
+			$ProcessDetails = $KPIRepository->getProcessDetails($Month, $postData, "");
+			$monthYearArray = $KPIRepository->getmonthArray();			
+
 			return $this->render('KPI/IntakeProcess.html.twig', [
 					"ProcessDetails" => $ProcessDetails,
-					"monthYearArray" => $monthYearArray
+					"monthYearArray" => $monthYearArray,
+					"Month" => $Month
 			]);
 		}
-	
+		
+		
 	}
 	
 	
@@ -159,10 +174,10 @@ class KPIController extends Controller
 		/* === */
 		
 		$postData = $request->request->all();		
-		
 		$KPIRepository = new KPIRepository();
 		
 		/* Project Autocomplete Request */		
+		
 		$keyword = $request->query->get('term');		
 		if(!empty($keyword)){
 			$result = $KPIRepository->getAutoCompleteData($keyword);
@@ -170,10 +185,10 @@ class KPIController extends Controller
 			exit;			
 		} 
 		
-		/* Submit Added Data */		
-		if(!empty($postData)){
-			
-			/* Submit Added Data */		
+		/* Submit Added Data */
+		
+		if(!empty($postData)){			
+					
 			$status = $KPIRepository->addEditIntakeProcessDetails($postData);
 			return $this->redirectToRoute('IntakeProcess');
 		}
@@ -186,61 +201,60 @@ class KPIController extends Controller
 	}
 	
 	/**
-	 * @Route("/KPI/EditIntakeProcess/{IntakeID}", name="EditIntakeProcess")
+	 * @Route("/KPI/EditIntakeProcess/{IntakeID}/{Month}", name="EditMonthIntakeProcess")
 	 * @Method({"GET", "POST"})
 	 */
-	public function renderEditIntakeProcessAction(Request $request, $IntakeID) {
+	public function renderEditMonthIntakeProcessAction(Request $request, $IntakeID, $Month) {
 	
 		/* USER AUTHENTICATION */
-		
+	
 		$session = new Session();
 		$userID = $session->get('UserID');
-		
+	
 		if(empty($userID)){
 			$referrer = $request->attributes->get('_route');
 			$parameters = array();
 			$parameters['referrer'] = $referrer;
 			return $this->redirectToRoute('Login', $parameters);
 		}
-		
+	
 		/* === */
+	
+		$postData = $request->request->all();	
+		$KPIRepository = new KPIRepository();		
+	
+		/* Submit Data */
 		
-		$postData = $request->request->all();		
-		
-		$KPIRepository = new KPIRepository();		 
-		
-		/* Submit Data */		
-		if(!empty($postData)){
-			
-			/* Submit Edited Data */
-			if(!empty($postData['IntakeID'])){				
-				$status = $KPIRepository->addEditIntakeProcessDetails($postData, $postData['IntakeID']);				
-				return $this->redirectToRoute('IntakeProcess');				
-			}			
-			
+		if(!empty($postData)){				
+
+			if(!empty($postData['IntakeID'])){
+				$status = $KPIRepository->addEditIntakeProcessDetails($postData, $postData['IntakeID']);
+				$response = array("Month" => $postData['Month']);
+				return $this->redirectToRoute('IntakeProcess', $response);
+			}
+				
 		}
-		
+	
 		/*  Show form to edit data */
+		
 		else {
 			if(!empty($IntakeID)){
 				$KPIRepository = new KPIRepository();
-				$ProcessDetails = $KPIRepository->getProcessDetails($IntakeID);
-				//$monthYearArray = $KPIRepository->getmonthArray();
-			
-				//echo "<pre>";print_r($ProcessDetails);exit;
-			
+				$ProcessDetails = $KPIRepository->getProcessDetails($Month, $postData, $IntakeID);
+					
 				return $this->render('KPI/AddEditIntakeProcess.html.twig', [
 						"ProcessDetails" => $ProcessDetails,
-						"IntakeID" => $IntakeID
-				]);	
+						"IntakeID" => $IntakeID,
+						"Month" => $Month
+				]);
 			}
-		}	
-		
+		}
+	
 	}
 	
 	/**
 	 * @Route("/KPI/Documentation", name="Documentation")
-	 * @Method({"GET","HEAD"})
+	 * @Method({"GET","POST"})
 	 */
 	public function renderDocumentationAction(Request $request) {
 	
@@ -258,15 +272,52 @@ class KPIController extends Controller
 		
 		/* === */	
 	
-		$KPIRepository = new KPIRepository();
-		$DocumentDetails = $KPIRepository->getDocumentDetails();
-		//$monthYearArray = $KPIRepository->getmonthArray();
+		$KPIRepository = new KPIRepository();		
+		$postData = $request->request->all();
+		
 	
-		//echo "<pre>";print_r($ProcessDetails);exit;
+		/* Refresh the page */
+		
+		if(!empty($postData['ShowAll']) && $postData['ShowAll'] == 1){			
+			return $this->redirectToRoute('Documentation');
+		}
+		
+		/* === */		
+
+		/* Delete Intake Process */
+		
+		if(!empty($postData['action']) && $postData['action'] == 'deleteDocument'){
+		
+			$response = $KPIRepository->deleteDocument($postData['ID']);
+			return new JsonResponse($response);
+		
+		}
+		
+		/* === */
+		
+		else {
+			
+			if(!empty($postData)){
+				if(!empty($postData['Month']))
+					$Month = $postData['Month'];
+				else
+					$Month = '';
+			} else {
+				if(!empty($request->query->all()['Month']))
+					$Month = $request->query->all()['Month'];
+				else
+					$Month = strtoupper(date('M-y'));
+			}
 	
-		return $this->render('KPI/Documentation.html.twig', [
-				"DocumentDetails" => $DocumentDetails
-		]);
+			$DocumentDetails = $KPIRepository->getDocumentDetails($Month, $postData, "");
+			$monthYearArray = $KPIRepository->getmonthArray();			
+			
+			return $this->render('KPI/Documentation.html.twig', [
+					"DocumentDetails" => $DocumentDetails,
+					"monthYearArray" => $monthYearArray,
+					"Month" => $Month
+			]);
+		}
 	
 	}
 	
@@ -290,37 +341,39 @@ class KPIController extends Controller
 		
 		/* === */
 	
-		$postData = $request->request->all();
-		//echo "<pre>";print_r($postData);exit;
-	
+		$postData = $request->request->all();	
 		$KPIRepository = new KPIRepository();	
 		
+		/* Project Autocomplete Request */
+		
+		$keyword = $request->query->get('term');
+		
+		if(!empty($keyword)){
+			$result = $KPIRepository->getAutoCompleteData($keyword, 1);
+			echo $result; /* Displays the fetched Projects as a Drop down for Auto Complete */
+			exit;
+		}
+		
 		/* Submit Added Data */
-		if(!empty($postData)){
-				
-			/* Submit Added Data */
+		if(!empty($postData)){				
+		
 			$status = $KPIRepository->addEditDocumentationDetails($postData);
 			return $this->redirectToRoute('Documentation');
 		}
 	
 		/*  Show form to add data */
+		
 		else {
-			$Project = new ProjectRepository(); 
-			$Projects = $Project->getProjectNames($postData);
-			//echo "<pre>";print_r($Projects);exit;
-			
-			return $this->render('KPI/AddEditDocumentDetails.html.twig', [
-					"Projects" => $Projects 
-			]);
+			return $this->render('KPI/AddEditDocumentDetails.html.twig');
 		}
 	
 	}
 	
 	/**
-	 * @Route("/KPI/EditDocumentDetails/{ID}", name="EditDocumentDetails")
+	 * @Route("/KPI/EditDocumentDetails/{DocumentID}/{Month}", name="EditMonthDocumentDetails")
 	 * @Method({"GET", "POST"})
 	 */
-	public function renderEditDocumentDetailsAction(Request $request, $ID) {
+	public function renderEditMonthDocumentDetailsAction(Request $request, $DocumentID, $Month) {
 	
 		/* USER AUTHENTICATION */
 		
@@ -336,38 +389,34 @@ class KPIController extends Controller
 		
 		/* === */
 	
-		$postData = $request->request->all();
-		//echo "<pre>";print_r($postData);exit;
-	
-		$KPIRepository = new KPIRepository();
-	
+		$postData = $request->request->all();		
+		$KPIRepository = new KPIRepository();		
+		
+		
 		/* Submit Data */
-		if(!empty($postData)){
-				
-			/* Submit Edited Data */
-			if(!empty($postData['ProjectID'])){
-				$status = $KPIRepository->addEditDocumentationDetails($postData, $postData['ProjectID']);
-				//echo $status;exit;
-				return $this->redirectToRoute('Documentation');
+		
+		if(!empty($postData)){		
+		
+			if(!empty($postData['DocumentID'])){
+
+				$status = $KPIRepository->addEditDocumentationDetails($postData, $postData['DocumentID']);
+				$response = array("Month" => $postData['Month']);
+				return $this->redirectToRoute('Documentation', $response);
 			}
 				
 		}
 	
 		/*  Show form to edit data */
+		
 		else {
-			if(!empty($ID)){
-				$KPIRepository = new KPIRepository();
-				$Project = new ProjectRepository();				
-				$Projects = $Project->getProjectNames($postData);
-				$DocumentDetails = $KPIRepository->getDocumentDetails($ID);
-				//$monthYearArray = $KPIRepository->getmonthArray();
-				$DocumentDetails = $DocumentDetails[0];
-				//echo "<pre>";print_r($DocumentDetails);exit;
+			if(!empty($DocumentID)){				
+				$DocumentDetails = $KPIRepository->getDocumentDetails($Month, $postData, $DocumentID);			
+				$DocumentDetails = $DocumentDetails[0];				
 					
 				return $this->render('KPI/AddEditDocumentDetails.html.twig', [
-						"DocumentDetails" => $DocumentDetails,
-						"Projects" => $Projects,
-						"ProjectID" => $ID
+						"DocumentDetails" => $DocumentDetails,						
+						"DocumentID" => $DocumentID,
+						"Month" => $Month
 				]);
 			}
 		}
@@ -394,24 +443,28 @@ class KPIController extends Controller
 		
 		/* === */
 		
-		$KPIRepository = new KPIRepository();
-		
-		/* Delete Intake Process */
-		
+		$KPIRepository = new KPIRepository();				
 		$postData = $request->request->all();
 		
+		/* Refresh the page */
 		
 		if(!empty($postData['ShowAll']) && $postData['ShowAll'] == 1){
 			$response = array("Month" => strtoupper(date('M-y')));
 			return $this->redirectToRoute('QualityEstimation', $response);
 		}
 		
-		if(!empty($postData['action']) && $postData['action'] == 'deleteProcess'){
+		/* === */
+		
+		/* Delete QE Record */
+		
+		if(!empty($postData['action']) && $postData['action'] == 'deleteQE'){
 		
 			$response = $KPIRepository->deleteQualityOfEstimation($postData['ID']);
 			return new JsonResponse($response);
 		
 		}
+		
+		/* === */
 		
 		/* Render Listing Page */
 		
@@ -429,8 +482,7 @@ class KPIController extends Controller
 					$Month = strtoupper(date('M-y'));
 			}
 			
-			$EstimationDetails = $KPIRepository->getEstimationDetails($Month, $postData, "");			
-
+			$EstimationDetails = $KPIRepository->getEstimationDetails($Month, $postData, "");
 			$monthYearArray = $KPIRepository->getmonthArray();								
 				
 			return $this->render('KPI/QualityEstimation.html.twig', [
@@ -465,12 +517,11 @@ class KPIController extends Controller
 		/* === */
 	
 		
-		$postData = $request->request->all();
-		//echo "<pre>";print_r($postData);exit;
-		
+		$postData = $request->request->all();		
 		$KPIRepository = new KPIRepository();
 		
 		/* Project Autocomplete Request */
+		
 		$keyword = $request->query->get('term');
 		
 		if(!empty($keyword)){
@@ -480,78 +531,21 @@ class KPIController extends Controller
 		}
 			
 		/* Submit Added Data */
-		if(!empty($postData)){
-	
-			/* Submit Added Data */
+		
+		if(!empty($postData)){	
+			
 			$status = $KPIRepository->addEditEstimationnDetails($postData, "", $userID);
 			return $this->redirectToRoute('QualityEstimation');
 		}
 	
 		/*  Show form to add data */
-		else {
-			$Project = new ProjectRepository();
-			$Projects = $Project->getProjectNames($postData);
-			//echo "<pre>";print_r($Projects);exit;
-				
-			return $this->render('KPI/AddEditQEDetails.html.twig', [
-					"Projects" => $Projects
-			]);
+		
+		else {		
+			return $this->render('KPI/AddEditQEDetails.html.twig');
 		}
 	
 	}
 	
-	/**
-	 * @Route("/KPI/EditQualityEstimationDetails/{ID}", name="EditEstimationData")
-	 * @Method({"GET", "POST"})
-	 */
-	
-// 	public function renderEditQualityEstimationDetailsAction(Request $request, $ID) {
-	
-// 		/* User Authentication */
-// 		$session = new Session();
-// 		$userID = $session->get('UserID');
-	
-// 		if(empty($userID)){
-// 			return $this->redirectToRoute('Login');
-// 		}
-	
-// 		$postData = $request->request->all();
-// 		//echo "<pre>";print_r($postData);exit;
-	
-// 		$KPIRepository = new KPIRepository();
-	
-// 		/* Submit Data */
-// 		if(!empty($postData)){
-	
-// 			/* Submit Edited Data */
-// 			if(!empty($ID)){
-// 				$status = $KPIRepository->addEditEstimationnDetails($postData, $ID, $userID);
-// 				//echo $status;exit;
-// 				return $this->redirectToRoute('QualityEstimation');
-// 			}
-	
-// 		}
-	
-// 		/*  Show form to edit data */
-// 		else {
-// 			if(!empty($ID)){
-// 				$KPIRepository = new KPIRepository();
-// 				$Project = new ProjectRepository();
-// 				$Projects = $Project->getProjectNames($postData);
-// 				$EstimationDetails = $KPIRepository->getEstimationDetails($postData,$ID);
-// 				//$monthYearArray = $KPIRepository->getmonthArray();
-
-// 				//echo "<pre>";print_r($EstimationDetails);exit;
-					
-// 				return $this->render('KPI/AddEditQEDetails.html.twig', [
-// 						"EstimationDetails" => $EstimationDetails,
-// 						"Projects" => $Projects,
-// 						"EstimationID" => $ID
-// 				]);
-// 			}
-// 		}
-	
-// 	}
 	
 	/**
 	 * @Route("/KPI/EditQualityEstimationDetails/{ID}/{Month}", name="EditMonthEstimationData")
@@ -573,16 +567,13 @@ class KPIController extends Controller
 		
 		/* === */
 	
-		$postData = $request->request->all();
-		//echo "<pre>";print_r($postData);exit;
-	
-		$KPIRepository = new KPIRepository();
-		$Project = new ProjectRepository();
+		$postData = $request->request->all();	
+		$KPIRepository = new KPIRepository();	
 	
 		/* Submit Data */
+		
 		if(!empty($postData)){
 	
-			/* Submit Edited Data */
 			if(!empty($ID)){
 				$status = $KPIRepository->addEditEstimationnDetails($postData, $ID, $userID);
 				$response = array("Month" => $postData['Month']);
@@ -592,18 +583,13 @@ class KPIController extends Controller
 		}
 	
 		/*  Show form to edit data */
+		
 		else {
-			if(!empty($ID)){				
-				//echo $Month;exit;
-				$Projects = $Project->getProjectNames($postData);
+			if(!empty($ID)){								
 				$EstimationDetails = $KPIRepository->getEstimationDetails($Month, $postData, $ID);
-				//$monthYearArray = $KPIRepository->getmonthArray();
-	
-				//echo "<pre>";print_r($EstimationDetails);exit;
-					
+				
 				return $this->render('KPI/AddEditQEDetails.html.twig', [
 						"EstimationDetails" => $EstimationDetails,
-						"Projects" => $Projects,
 						"EstimationID" => $ID,
 						"Month" => $Month
 				]);
@@ -618,6 +604,7 @@ class KPIController extends Controller
 	 */
 	
 	public function renderDeliverySlippagesAction(Request $request) {
+		
 		/* USER AUTHENTICATION */
 		
 		$session = new Session();
@@ -632,24 +619,21 @@ class KPIController extends Controller
 		
 		/* === */
 		
-		$check = "in";
-		//$obj1 = new KPIRepository ();
-		if(empty($userID)){
-			return $this->redirectToRoute('Login');
-		}
-	
 		$KPIRepository = new KPIRepository();
 		$DashRepository = new DashboardRepository();
 		
 		$postData = $request->request->all();
-		if(!empty($postData['action'])){
-			//echo $postData['projectID'];exit;
-			$response = $KPIRepository->updateDate($postData['newDate'], $postData['projectID'],$postData['action']);
-			//echo "<pre>";print_r("lalal");exit;
+		
+		/* Update Dates */
+		
+		if(!empty($postData['action'])){		
+			$response = $KPIRepository->updateDate($postData['newDate'], $postData['projectID'],$postData['action']);		
 			return new JsonResponse($response);
 	
 		}
-		//echo "<pre>";print_r($postData);exit;
+		
+		/* === */
+
 		else{
 			if(!empty($postData['Month']))
 				$Month = $postData['Month'];
@@ -662,8 +646,6 @@ class KPIController extends Controller
 
 			$deliverySlippages = $KPIRepository->getDeliverySlippages ($Month);
 			$monthYearArray = $DashRepository->getmonthYearArray ();
-
-			//echo "<pre>";print_r($KPIResults);exit;
 
 			return $this->render ( 'KPI/DeliverySlippage.html.twig', [
 					"DeliverySlippages" => $deliverySlippages,
@@ -679,6 +661,7 @@ class KPIController extends Controller
 	 */
 	
 	public function renderSTAutomationAction(Request $request) {
+		
 		/* USER AUTHENTICATION */
 		
 		$session = new Session();
@@ -691,107 +674,78 @@ class KPIController extends Controller
 			return $this->redirectToRoute('Login', $parameters);
 		}
 		
-		/* === */
+		/* === */		
 		
-		$check = "in";
-		if(empty($userID)){
-			return $this->redirectToRoute('Login');
-		}
-	
 		$KPIRepository = new KPIRepository();
-		$DashRepository = new DashboardRepository();
-		
+		$DashRepository = new DashboardRepository();		
 		$postData = $request->request->all();
 		
 		
 		if(!empty($postData['action'])){
-			//echo $postData['projectID'];exit;
-			$response = $KPIRepository->updateSTAutomation($postData['newValue'], $postData['projectID'],$postData['action']);
-			//echo "<pre>";print_r("lalal");exit;
+			
+			$response = $KPIRepository->updateSTAutomation($postData['newValue'], $postData['projectID'],$postData['action']);			
 			return new JsonResponse($response);
 	
 		}
-		//echo "<pre>";print_r($postData);exit;
+
 		else{
 			if(!empty($postData['Month']))
 				$Month = $postData['Month'];
-				else
-					$Month = '';
+			else
+				$Month = '';
 	
-					if(!empty($postData['ShowAll']) && $postData['ShowAll'] == 1){
-						return $this->redirectToRoute('STAutomation');
-					}
+			if(!empty($postData['ShowAll']) && $postData['ShowAll'] == 1){
+				return $this->redirectToRoute('STAutomation');
+			}
+
+			$STAutomation = $KPIRepository->getSTAutomation ($Month);
+			$monthYearArray = $DashRepository->getmonthYearArray ();
 	
-					$STAutomation = $KPIRepository->getSTAutomation ($Month);
-					$monthYearArray = $DashRepository->getmonthYearArray ();
-	
-					//echo "<pre>";print_r($KPIResults);exit;
-	
-					return $this->render ( 'KPI/STAutomation.html.twig', [
-							"STAutomation" => $STAutomation,
-							"monthYearArray" => $monthYearArray,
-							"Month" => $Month
-					]);
+
+			return $this->render ( 'KPI/STAutomation.html.twig', [
+					"STAutomation" => $STAutomation,
+					"monthYearArray" => $monthYearArray,
+					"Month" => $Month
+			]);
 		}
-	}
-	/**
-	 * @Route("/KPI/ProdTestAccounts", name="ProdTestAccounts")
-	 * @Method({"GET","HEAD"})
-	 */
-	
-	public function renderProdTestAccounts(Request $request) {
-		/* USER AUTHENTICATION */
-		
-		$session = new Session();
-		$userID = $session->get('UserID');
-		
-		if(empty($userID)){
-			$referrer = $request->attributes->get('_route');
-			$parameters = array();
-			$parameters['referrer'] = $referrer;
-			return $this->redirectToRoute('Login', $parameters);
-		}
-		
-		/* === */
-		
-		$check = "in";
-		if(empty($userID)){
-			return $this->redirectToRoute('Login');
-		}
-		
-		$postData = $request->request->all();
-		return $this->render ( 'KPI/ProductionTestAccounts.html.twig', [
-		]);
-		
 	}
 	
 	/**
 	 * @Route("/KPI/ViewProdTestAccounts", name="ViewProdTestAccounts")
-	 * @Method({"GET","HEAD"})
+	 * @Method({"GET","POST"})
 	 */
 	
-	public function renderViewProdTestAccounts(Request $request) {		
-		
+	public function renderViewProdTestAccounts(Request $request) {
+	
 		/* USER AUTHENTICATION */
-		
+	
 		$session = new Session();
 		$userID = $session->get('UserID');
-		
+	
 		if(empty($userID)){
 			$referrer = $request->attributes->get('_route');
 			$parameters = array();
 			$parameters['referrer'] = $referrer;
 			return $this->redirectToRoute('Login', $parameters);
 		}
-		
-		/* === */	
+	
+		/* === */
+	
 		$KPIRepository = new KPIRepository();
+		$postData = $request->request->all();		
 		
-		$prodTestAccountsEntitys = array ();		
-		$prodTestAccountsEntitys = $KPIRepository->viewProdTestAccounts();
+		/* Delete Record */
 		
-		//echo "<pre>";print_r($prodTestAccountsEntitys);exit;
+		if(!empty($postData['action']) && $postData['action'] == 'deleteProdTestAccData'){
 		
+			$response = $KPIRepository->deleteProdTestAccData($postData['ID']);
+			return new JsonResponse($response);
+		
+		}
+	
+		$prodTestAccountsEntitys = array ();
+		$prodTestAccountsEntitys = $KPIRepository->viewProdTestAccounts();	
+	
 		return $this->render ( 'KPI/ViewProductionTestAccounts.html.twig', [
 				"ProdTestAccountsEntitys" => $prodTestAccountsEntitys
 		]);
@@ -799,18 +753,43 @@ class KPIController extends Controller
 	}
 	
 	/**
+	 * @Route("/KPI/ProdTestAccounts", name="ProdTestAccounts")
+	 * @Method({"GET","HEAD"})
+	 */
+	
+	public function renderProdTestAccounts(Request $request) {
+		
+		/* USER AUTHENTICATION */
+		
+		$session = new Session();
+		$userID = $session->get('UserID');
+		
+		if(empty($userID)){
+			$referrer = $request->attributes->get('_route');
+			$parameters = array();
+			$parameters['referrer'] = $referrer;
+			return $this->redirectToRoute('Login', $parameters);
+		}
+		
+		/* === */
+		
+	
+		$postData = $request->request->all();
+		
+		return $this->render ( 'KPI/ProductionTestAccounts.html.twig', [
+				]);
+		
+	}
+	
+	
+	
+	/**
 	 * @Route("/KPI/ProdTestAccounts", name="AddProdTestAccounts")
 	 * @Method({"POST","HEAD"})
 	 */
 	
 	public function renderAddProdTestAccounts(Request $request) {
-		$check = "in";
-		$session = new Session();
-		$userID = $session->get('UserID');
-		if(empty($userID)){
-			return $this->redirectToRoute('Login');
-		}
-	
+		
 		$postData = $request->request->all();
 		$KPIRepository = new KPIRepository();
 	
@@ -831,6 +810,7 @@ class KPIController extends Controller
 	 */
 	
 	public function renderEditProdTestAccounts(Request $request,$rowId) {
+		
 		/* USER AUTHENTICATION */
 		
 		$session = new Session();
@@ -862,13 +842,7 @@ class KPIController extends Controller
 	 */
 	
 	public function renderUpdateProdTestAccounts(Request $request) {
-		$session = new Session();
-		$userID = $session->get('UserID');
 		
-		if(empty($userID)){
-			return $this->redirectToRoute('Login');
-		}
-	
 		$postData = $request->request->all();
 		$KPIRepository = new KPIRepository();
 		

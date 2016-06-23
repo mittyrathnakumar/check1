@@ -1,8 +1,7 @@
 <div class="text-primary pull-left">This result shows data for <strong>{{ Month }}</strong>.</div><br>
 <div class="text-primary"><strong>KPI Definition</strong> - {{ KPIData['SLA_DESC'] }}</div>
-<div class="text-primary">Target for this KPI <strong>( {{ KPIData['OPERATOR'] }}{{ KPIData['SLA_VALUE'] }}% )</strong>
-</br>(<strong>Note : </strong>The details on final result obtained for each Project for this KPI can be viewed when mouse hover on KPI result.)
-</div></br>
+<div class="text-primary">Target for this KPI <strong>( {{ KPIData['OPERATOR'] }}{{ KPIData['SLA_VALUE'] }}% )</strong></div>
+</br>
 
 <div class="row col-sm-10">
 	<table id="dataTable" class="table-bordered table-condensed">
@@ -64,7 +63,7 @@
 							{% endif %}
 						{% endif %}
 						
-						<td align="center">
+						<td align="center" {% if row['Reason'] is defined and row['Reason'] is not empty %}style="cursor:help" data-toggle="tooltip" data-html="true" title="{{ row['Reason'] }}"{% endif %} >
 							{% if RAG is defined and RAG == 'green' %}
 								<img src="{{ asset("images/green_RAG.png") }}">
 							{% elseif RAG is defined and RAG == 'red' %}

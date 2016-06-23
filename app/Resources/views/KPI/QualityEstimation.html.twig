@@ -19,14 +19,15 @@
     </div>
     </form>
 </div>
-<br><br>
-<div class="text-primary">This result shows data from <strong>{{ Month }}</strong> month.</div>
+<br><br><br>
+<div class="text-primary">This result shows data for <strong>{{ Month }}</strong>.</div>
 <div><a href="{{ path('AddEstimationData') }}"><strong>Add Data</strong></a></div></br>
 <div class="col-md-14">		
 	<table class="table-bordered compact-table" id="dataTable">
 		<thead>
 			<tr>					
-				<th>No.</th>				
+				<th>No.</th>
+				<th>Month</th>
 				<th>Projectname</th>
 				<th>Engagement Date</th>
 				<th>Gate1 Estimation</th>
@@ -45,6 +46,7 @@
 				{% for row in EstimationDetails %}
 					<tr>
 					<td>{{ loop.index }}</td>	
+					<td>{{ row['MONTH'] }}</td>
 					<td><a title="Edit details" href="{{ path('EditMonthEstimationData', { ID : row['ID'], Month : Month } ) }}">{{ row['PROJECT_NAME'] }}</a></td>
 					<td>{{ row['ENGAGEMENT_DATE'] }}</td>
 					<td>{{ row['GATE1_ESTIMATION_DELIVERY_DATE'] }}</td>

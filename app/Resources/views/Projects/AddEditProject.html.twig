@@ -151,8 +151,21 @@
 	      <option value="No" {% if ProjectDetails is defined and ProjectDetails['uatApplicable'] == 'No' %} selected {% endif %}>No</option>
 	     </select>
     </div>
-  </div> 
-    
+  </div>
+      
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="stAutomationApplicable">STAutomation Applicable:</label>
+    <div class="col-sm-2">
+      <select {{ disabledforPMO }}  name="stAutomationApplicable" id="stAutomationApplicable" class="form-control" placeholder="stAutomationApplicable" {{ requiredforMgr }}>
+	      <option value="">--Select--</option>
+	      <option value="Yes" {% if ProjectDetails is defined and ProjectDetails['STAutomationApplicable'] == 'Yes' %} selected {% endif %}>Yes</option>
+	      <option value="No" {% if ProjectDetails is defined and ProjectDetails['STAutomationApplicable'] == 'No' %} selected {% endif %}>No</option>
+	  </select>
+     {# <input {{ readonlyforPMO }} type="checkbox" name="stAutomationApplicable" id="stAutomationApplicable" value="1"  {% if ProjectDetails is defined and ProjectDetails['STAutomationApplicable'] == 1 %} checked {% endif %}"> #}
+    </div>
+  </div>
+  
+  {#
   <div class="form-group">
     <label class="control-label col-sm-2" for="stAutomatedTestCases">No of Automated Test cases in ST :</label>
     <div class="col-sm-3">
@@ -164,7 +177,8 @@
     <div class="col-sm-3">
       <input {{ readonlyforPMO }}  type="text" name="stTotalTestCases" class="form-control" id="stTotalTestCases" placeholder="Total No. of Test Cases in ST" value="{% if ProjectDetails is defined %}{{ ProjectDetails['stTotalTestCases']|trim }}{% endif %}">
     </div>
-  </div>  
+  </div>
+  #}  
    <div class="form-group">
 	    <div class="col-sm-offset-2 col-sm-10">
 	      <button type="submit" name="submit" id="submit" class="btn btn-primary">Submit</button>

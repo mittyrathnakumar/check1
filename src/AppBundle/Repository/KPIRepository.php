@@ -37,49 +37,12 @@ class KPIRepository
 	 * @param string $env
 	 * @return array
 	 */
-	public function getDefectDetails($postData = "") {
-		
-		/*
-		if(!empty($postData['Month']))
-			$month = $postData['Month'];
-		
-		$this->oracle->openConnection('KPIDASHBOARD');
-		$conn = $this->oracle->getConnection();				
-		
-		if(empty($month))
-			$month = strtoupper(date('M/y'));		 
-			
-		$query = "SELECT PROJECTID, QC_PROJECTNAME, P1_P2, P3_P4 
-				FROM KPI_PROJECTS 
-				WHERE TO_CHAR(ESTIMATED_PROD_LIVE_DATE, 'MON/YY') LIKE '%".$month."%'
-				AND ACTIVE = 1		
-				ORDER BY ESTIMATED_PROD_LIVE_DATE";
-		
-		//echo $query;exit;
-		$queryParse = oci_parse($conn, $query);
-		oci_execute($queryParse);	
-		
-		$KPIDetails = array();
-		while ($row = oci_fetch_array($queryParse, OCI_ASSOC+OCI_RETURN_NULLS)) {
-			$KPIDetail = new KPI();
-			
-			$KPIDetail->setProjectID($row['PROJECTID']);
-			$KPIDetail->setProjectName($row['QC_PROJECTNAME']);
-			$KPIDetail->setP1P2($row['P1_P2']);
-			$KPIDetail->setP3P4($row['P3_P4']);			
-		
-			$KPIDetails[] = $KPIDetail;
-			
-		}
-		
-		//echo "<pre>";print_r($KPIDetails);exit;
-		oci_free_statement($queryParse);
-		$this->oracle->closeConnection();
-		return $KPIDetails;
-		*/	
+	public function getDefectDetails() {		
 	
 		$this->oracle->openConnection('KPIDASHBOARD');
 		$conn = $this->oracle->getConnection();
+		
+		/* List last one year Project defects */
 		
 		for ($i = 0; $i <= 12; $i++) {
 			$month = date("Y-m", strtotime( date( 'Y-m-01' )." -$i months"));
@@ -95,7 +58,7 @@ class KPIRepository
 					TO_CHAR(ESTIMATED_PROD_LIVE_DATE, 'MON/YY') LIKE '%".$month."%'
 					AND ACTIVE = 1";
 			
-			//echo $query;
+			
 			$queryParse = oci_parse($conn, $query);
 			oci_execute($queryParse);			
 			$DefectsResultTemp = array();
@@ -113,7 +76,6 @@ class KPIRepository
 			$DefectsResult[$month] = $DefectsResultTemp;
 		}
 		
-		//echo "<pre>";print_r($DefectsResult);exit;
 		oci_free_statement($queryParse);
 		$this->oracle->closeConnection();
 		return $DefectsResult;
@@ -131,9 +93,12 @@ class KPIRepository
 		$conn = $this->oracle->getConnection();
 		
 		$query = "UPDATE KPI_PROJECTS SET
-				".$column." = '".$value."'
+				".$column." = :value
 				WHERE PROJECTID = ".$ProjectID;
 		$queryParse = oci_parse($conn, $query);
+		
+		$value = trim($value);
+		oci_bind_by_name($queryParse, ':value', $value);
 		$row = oci_execute($queryParse);
 		
 		if($row == 1)
@@ -188,23 +153,35 @@ class KPIRepository
 		return $months;
 	}
 	
-	public function getProcessDetails($IntakeID = ""){
+	public function getProcessDetails($Month, $postData, $IntakeID = ""){
 		$this->oracle->openConnection('KPIDASHBOARD');
 		$conn = $this->oracle->getConnection();
 		$ProcessDetails = array();
-		$i = 0;
+		$formattedcurrentMonth = '';
+		$i = 0;	
+	
+		if(!empty($Month))
+			$formattedcurrentMonth = str_replace ( "-", "/", $Month );
+		else if (! empty ( $postData ['Month'] )){
+			$currentMonth = $postData ['Month'];
+			$formattedcurrentMonth = strtoupper ( str_replace ( "-", "/", $currentMonth ) );
+		}
 		
-		$query = "SELECT * FROM KPI_INTAKE_PROCESS WHERE ACTIVE = 1";
+		$query = "SELECT * FROM KPI_INTAKE_PROCESS WHERE ACTIVE = 1 AND MONTH = '" . $formattedcurrentMonth."'";
 		
 		if(!empty($IntakeID))
-			$query .= " AND INTAKEID = ".$IntakeID;
+			$query .= " AND INTAKEID = ".$IntakeID;		
+
 		
 		$queryParse = oci_parse($conn, $query);
 		oci_execute($queryParse);
 		
 		while ($row = oci_fetch_array($queryParse, OCI_ASSOC+OCI_RETURN_NULLS)) {
 			$ProcessDetail = array();
+			
 			$ProcessDetail['INTAKEID'] = $row['INTAKEID'];
+			$formattedMonth = $row['MONTH'];
+			$ProcessDetail['MONTH'] = $formattedMonth;
 			$ProcessDetail['PROGRAMME'] = $row['PROGRAMME'];
 			$ProcessDetail['PROJECT_NAME'] = $row['PROJECT_NAME'];
 			$ProcessDetail['PROPOSAL_TYPE'] = $row['PROPOSAL_TYPE'];
@@ -216,13 +193,13 @@ class KPIRepository
 			$ProcessDetail['SUBMISSION_DATE'] = $row['SUBMISSION_DATE'];			
 			$ProcessDetail['DIFF_DATES'] = $row['DIFF_DATES'];
 			
-			$ProcessDetails[$i] = $ProcessDetail;
+			$ProcessDetails[$i] = $ProcessDetail;	
 			$i++;
 		}		
 		
 		oci_free_statement($queryParse);
-		$this->oracle->closeConnection();
-		
+		$this->oracle->closeConnection();		
+
 		return $ProcessDetails;
 	}
 	
@@ -230,6 +207,9 @@ class KPIRepository
 	public function addEditIntakeProcessDetails($postData, $IntakeID = ""){
 		$this->oracle->openConnection('KPIDASHBOARD');
 		$conn = $this->oracle->getConnection();		
+		
+		$session = new Session();
+		$userID = $session->get('UserID');
 		
 		$dStart = new \DateTime($postData['RequestDate']);
 		$dEnd  = new \DateTime($postData['SubmissionDate']);
@@ -248,69 +228,96 @@ class KPIRepository
 		
 		if(empty($IntakeID)){
 		
+			/*
 			$query = "INSERT INTO KPI_INTAKE_PROCESS 
 					(INTAKEID, PROGRAMME, PROJECT_NAME, PROPOSAL_TYPE, SOLUTION_COMPONENT, PROJ_PROG_MGR, WP_PO_STATUS, 
 					STATUS, REQUEST_DATE, SUBMISSION_DATE, DIFF_DATES)
 					VALUES(INTAKEPROCESS_ID.nextval, :programme, :project_name, :proposal_type,
 					:solution_component, :proj_prog_mgr, :wp_po_status, 
 					'".$postData['Status']."', '".$postData['RequestDate']."', '".$postData['SubmissionDate']."', '".$DateDiff."')";					
-		
+			*/
+			
+			$query = "INSERT INTO KPI_INTAKE_PROCESS
+					(INTAKEID, PROGRAMME, PROJECT_NAME, PROPOSAL_TYPE, SOLUTION_COMPONENT, PROJ_PROG_MGR, WP_PO_STATUS,
+					STATUS, REQUEST_DATE, SUBMISSION_DATE, DIFF_DATES, MONTH, ADDED_BY, ADDED_ON)
+					VALUES(INTAKEPROCESS_ID.nextval, :programme, :project_name, :proposal_type,
+					:solution_component, :proj_prog_mgr, :wp_po_status, :status, :request_date, :submission_date, 
+					'".$DateDiff."', :month, '".$userID."', '".strtoupper(date('d/M/y'))."')";
+			
 			
 			$queryParse = oci_parse($conn, $query);
 			
+			$Month = trim(str_replace("-", "/", strtoupper(trim($postData['month']))));
 			$Programme = trim($postData['Programme']);
 			$ProjectName = trim($postData['ProjectName']);
 			$ProposalType = trim($postData['ProposalType']);
 			$SolutionComponent = trim($postData['SolutionComponent']);
 			$ProjProgMgr = trim($postData['ProjProgMgr']);
-			$WpPoStatus = trim($postData['WpPoStatus']);
-				
+			$WpPoStatus = trim($postData['WpPoStatus']);			
+			$Status = trim($postData['Status']);
+			$RequestDate = trim($postData['RequestDate']);
+			$SubmissionDate = trim($postData['SubmissionDate']);
+			
+			oci_bind_by_name($queryParse, ':month', $Month);
 			oci_bind_by_name($queryParse, ':programme', $Programme);
 			oci_bind_by_name($queryParse, ':project_name', $ProjectName);
 			oci_bind_by_name($queryParse, ":proposal_type", $ProposalType);
 			oci_bind_by_name($queryParse, ":solution_component", $SolutionComponent);
 			oci_bind_by_name($queryParse, ":proj_prog_mgr", $ProjProgMgr);
-			oci_bind_by_name($queryParse, ":wp_po_status", $WpPoStatus);
+			oci_bind_by_name($queryParse, ":wp_po_status", $WpPoStatus);			
+			oci_bind_by_name($queryParse, ":status", $Status);
+			oci_bind_by_name($queryParse, ":request_date", $RequestDate);
+			oci_bind_by_name($queryParse, ":submission_date", $SubmissionDate);			
 			
-			$row = oci_execute($queryParse);
 		} 
 		
 		/* Update Data */
 		
 		else {
-			$query = "UPDATE KPI_INTAKE_PROCESS SET					
+			$query = "UPDATE KPI_INTAKE_PROCESS SET	
+					MONTH = :month,
 					PROGRAMME = :programme,		
 					PROJECT_NAME  =:project_name,
 					PROPOSAL_TYPE = :proposal_type,
 					SOLUTION_COMPONENT = :solution_component,
 					PROJ_PROG_MGR = :proj_prog_mgr,
 					WP_PO_STATUS = :wp_po_status,
-					STATUS = '".$postData['Status']."',
-					REQUEST_DATE = '".$postData['RequestDate']."',
-					SUBMISSION_DATE = '".$postData['SubmissionDate']."',
-					DIFF_DATES = '".$DateDiff."'
+					STATUS = :status,
+					REQUEST_DATE = :request_date,
+					SUBMISSION_DATE = :submission_date,
+					DIFF_DATES = '".$DateDiff."',
+					EDITED_BY = '".$userID."',
+					EDITED_ON = '".strtoupper(date('d/M/y'))."'
 					WHERE INTAKEID = ".$IntakeID;		
 			
 			
 			$queryParse = oci_parse($conn, $query);
 			
+			$Month = trim(str_replace("-", "/", strtoupper(trim($postData['month']))));
 			$Programme = trim($postData['Programme']);
 			$ProjectName = trim($postData['ProjectName']);
 			$ProposalType = trim($postData['ProposalType']);
 			$SolutionComponent = trim($postData['SolutionComponent']);
 			$ProjProgMgr = trim($postData['ProjProgMgr']);
 			$WpPoStatus = trim($postData['WpPoStatus']);
+			$Status = trim($postData['Status']);
+			$RequestDate = trim($postData['RequestDate']);
+			$SubmissionDate = trim($postData['SubmissionDate']);
 			
+			oci_bind_by_name($queryParse, ':month', $Month);
 			oci_bind_by_name($queryParse, ':programme', $Programme);
 			oci_bind_by_name($queryParse, ':project_name', $ProjectName);
 			oci_bind_by_name($queryParse, ":proposal_type", $ProposalType);
 			oci_bind_by_name($queryParse, ":solution_component", $SolutionComponent);
 			oci_bind_by_name($queryParse, ":proj_prog_mgr", $ProjProgMgr);
 			oci_bind_by_name($queryParse, ":wp_po_status", $WpPoStatus);
-			
-			$row = oci_execute($queryParse);
+			oci_bind_by_name($queryParse, ":status", $Status);
+			oci_bind_by_name($queryParse, ":request_date", $RequestDate);
+			oci_bind_by_name($queryParse, ":submission_date", $SubmissionDate);		
 			
 		}
+		
+		$row = oci_execute($queryParse);
 			
 		if($row == 1)
 			$response = 'Details Saved !!!';
@@ -325,7 +332,7 @@ class KPIRepository
 	
 	
 	
-	public function getAutoCompleteData($keyword){
+	public function getAutoCompleteData($keyword, $doc = ""){
 		
 		$this->oracle->openConnection('KPIDASHBOARD');
 		$conn = $this->oracle->getConnection();
@@ -333,17 +340,35 @@ class KPIRepository
 		$query = "SELECT PROJECTNAME FROM KPI_PROJECTS WHERE ACTIVE = 1";
 		$queryParse = oci_parse($conn, $query);
 		oci_execute($queryParse);
-		//$i = 0;
+		
 		$Projects = array();
 		
 		while ($row = oci_fetch_array($queryParse, OCI_ASSOC+OCI_RETURN_NULLS)) {
 			$Projects[] = $row['PROJECTNAME'];
-		}		
+		}
 		
+		/* For Documents merge Document related Projects */
+		
+		if($doc == 1){
+		
+			$query1 = "SELECT PROJECTNAME FROM KPI_DOCUMENT_PROJECTS WHERE ACTIVE = 1";
+			$query1Parse = oci_parse($conn, $query1);
+			oci_execute($query1Parse);
+			
+			$DocProjects = array();
+			
+			while ($result = oci_fetch_array($query1Parse, OCI_ASSOC+OCI_RETURN_NULLS)) {
+				$DocProjects[] = $result['PROJECTNAME'];
+			}
+			
+			$Projects = array_merge($Projects, $DocProjects);
+			
+		}
+		
+		/* === */	
 		
 		$q = strtolower($keyword);
-		if (get_magic_quotes_gpc()) $q = stripslashes($q);	
-		
+		if (get_magic_quotes_gpc()) $q = stripslashes($q);			
 		
 		$result = array();
 		foreach ($Projects as $key=>$value) {
@@ -352,36 +377,51 @@ class KPIRepository
 			}
 			if (count($result) > 11)
 				break;
-		}		
+		}	
+		
 		
 		$result = json_encode($result);
 		return $result;
 	}
 	
-	public function getDocumentDetails($ID = ""){
+	public function getDocumentDetails($Month, $postData = "", $ID = ""){
 		
 		$this->oracle->openConnection('KPIDASHBOARD');
 		$conn = $this->oracle->getConnection();
 		$DocumentDetails = array();
 		
 		
-		$query = "SELECT PROJECTID, PROJECTNAME, DELIVERABLE, DOCUMENT_NAME, DOCUMENT_TYPE, IS_TESTING, 
+		/*$query = "SELECT PROJECTID, PROJECTNAME, DELIVERABLE, DOCUMENT_NAME, DOCUMENT_TYPE, IS_TESTING, 
 				 DELIVERY_DATE, SIGN_OFF_DATE, REPOSITORY_LINK 
 				 FROM KPI_PROJECTS WHERE ACTIVE = 1 AND DELIVERABLE IS NOT NULL";
 		
 		if(!empty($ID))
 			$query .= " AND PROJECTID = ".$ID;
+		*/
 		
-		//echo $query;
+		if(!empty($Month))
+			$Month = str_replace ( "-", "/", $Month );
+		else if (! empty ( $postData ['Month'] )){
+			$currentMonth = $postData ['Month'];
+			$Month = strtoupper ( str_replace ( "-", "/", $currentMonth ) );
+		}		
+		$query = "SELECT DP.PROJECTID, DP.PROJECTNAME, D.* FROM
+				KPI_DOCUMENT_PROJECTS DP, KPI_DOCUMENTS D 
+				WHERE DP.PROJECTID = D.PROJECTID AND D.ACTIVE = 1 AND DP.ACTIVE = 1
+				AND MONTH = '".$Month."'";
 		
+		if(!empty($ID))
+			$query .= " AND DOCUMENT_ID = ".$ID;
+		
+		//echo $query;exit;		
 		$queryParse = oci_parse($conn, $query);
 		oci_execute($queryParse);
 		
 		
 		while ($row = oci_fetch_array($queryParse, OCI_ASSOC+OCI_RETURN_NULLS)) {
-			$Document = new Documents(); 
+			$Document = new Documents();			
 			
-			$Document->setProjectID($row['PROJECTID']);
+			$Document->setDocumentID($row['DOCUMENT_ID']);
 			$Document->setDeliverable($row['DELIVERABLE']);
 			$Document->setProjectName($row['PROJECTNAME']);
 			$Document->setDocumentName($row['DOCUMENT_NAME']);
@@ -390,69 +430,112 @@ class KPIRepository
 			$Document->setDeliveryDate($row['DELIVERY_DATE']);
 			$Document->setSignOffDate($row['SIGN_OFF_DATE']);
 			$Document->setRepositoryLink($row['REPOSITORY_LINK']);
+			$Document->setDocumentMonth($row['MONTH']);
 			
 			$DocumentDetails[] = $Document;
 		
 		}
 		
-		//echo "<pre>";print_r($ProjectDetails);exit;
+		//echo "<pre>";print_r($DocumentDetails);exit;
 		oci_free_statement($queryParse);
 		$this->oracle->closeConnection();
 		return $DocumentDetails;
 		
 	}
 	
-	public function addEditDocumentationDetails($postData, $ProjectID = ""){
+	public function addEditDocumentationDetails($postData, $DocumentID = ""){
 		$this->oracle->openConnection('KPIDASHBOARD');
 		$conn = $this->oracle->getConnection();
 		
-		//echo $IntakeID;exit;		
+		$session = new Session();
+		$userID = $session->get('UserID');
 		
-		//echo "<pre>";print_r($postData);exit;	
 		if(!empty($postData['ForTesting']) && $postData['ForTesting'] == 1)
 			$ForTesting = 1;
 		else 
 			$ForTesting = '';
 	
-	
-		/* Update(Add) New Data */
+		$Month = strtoupper(str_replace("-", "/", $postData['month']));
 		
-		if(empty($ProjectID)){
+		/* Add New Document Data */
 		
-			$query = "UPDATE KPI_PROJECTS SET
-					DELIVERABLE = '".$postData['Deliverable']."',				
-					DOCUMENT_NAME = '".$postData['DocumentName']."',
-					IS_TESTING = '".$ForTesting."',
-					DOCUMENT_TYPE = '".$postData['DocumentType']."',
-					DELIVERY_DATE = '".$postData['DeliveryDate']."',
-					SIGN_OFF_DATE = '".$postData['SignoffDate']."',
-					REPOSITORY_LINK = '".$postData['RepositoryLink']."'
-					WHERE PROJECTID = ".$postData['Project'];
+		if(empty($DocumentID)){
+			
+			$query = "SELECT PROJECTID FROM KPI_DOCUMENT_PROJECTS WHERE PROJECTNAME = :project_name";
+			$queryParse = oci_parse($conn, $query);		
 		
-			//echo $query;exit;
-		
+			$ProjectName = trim($postData['ProjectName']);
+			oci_bind_by_name($queryParse, ':project_name', $ProjectName);
+			oci_execute($queryParse);
+			
+			$row = oci_fetch_array($queryParse);
+			
+			if($row['PROJECTID'] == 0){
+				$query = "INSERT INTO KPI_DOCUMENT_PROJECTS (PROJECTID, PROJECTNAME) VALUES
+						(DOCUMENT_PROJECTID_SEQ.nextval, :project_name )";
+				$queryParse = oci_parse($conn, $query);
+				
+				$ProjectName = trim($postData['ProjectName']);
+				oci_bind_by_name($queryParse, ':project_name', $ProjectName);
+				oci_execute($queryParse);
+				
+				$query = "SELECT MAX(PROJECTID) AS PROJECTID FROM KPI_DOCUMENT_PROJECTS";
+				$queryParse = oci_parse($conn, $query);
+				oci_execute($queryParse);
+				$row = oci_fetch_array($queryParse);				
+				
+				$ProjectID = $row['PROJECTID'];
+				
+			} else {
+				$ProjectID = $row['PROJECTID'];
+			}			
+			
+				
+			$query = "INSERT INTO KPI_DOCUMENTS (DOCUMENT_ID, PROJECTID, DELIVERABLE, DOCUMENT_NAME, DOCUMENT_TYPE,
+					IS_TESTING, DELIVERY_DATE, SIGN_OFF_DATE, REPOSITORY_LINK, MONTH, ADDED_BY, ADDED_ON) VALUES
+					(DOCUMENTID_SEQ.nextval, ".$ProjectID.", :deliverable, :document_name, :document_type,
+					'".$ForTesting."', :delivery_date, :sign_off_date, :repo_link, '".$Month."',
+					'".$userID."', '".strtoupper(date('d/M/y'))."')";
 			
 		} 
 		
 		/* Update Existing Data */
 		
 		else {
-			$query = "UPDATE KPI_PROJECTS SET
-					DELIVERABLE = '".$postData['Deliverable']."',
-					DOCUMENT_NAME = '".$postData['DocumentName']."',
+			$query = "UPDATE KPI_DOCUMENTS SET
+					DELIVERABLE = :deliverable,
+					DOCUMENT_NAME = :document_name,
 					IS_TESTING = '".$ForTesting."',
-					DOCUMENT_TYPE = '".$postData['DocumentType']."',
-					DELIVERY_DATE = '".$postData['DeliveryDate']."',
-					SIGN_OFF_DATE = '".$postData['SignoffDate']."',
-					REPOSITORY_LINK = '".$postData['RepositoryLink']."'
-					WHERE PROJECTID = ".$ProjectID;			
-			
-			//echo $query;exit;
+					DOCUMENT_TYPE = :document_type,
+					DELIVERY_DATE = :delivery_date,
+					SIGN_OFF_DATE = :sign_off_date,
+					REPOSITORY_LINK = :repo_link,
+					MONTH = '".$Month."',
+					EDITED_ON = '".strtoupper(date('d/M/y'))."',
+					EDITED_BY = '".$userID."'
+					WHERE DOCUMENT_ID = ".$DocumentID;
 			
 		}
 		
-		
+		//echo $query;exit;		
 		$queryParse = oci_parse($conn, $query);
+		
+		//echo "<pre>";print_r($postData);exit;
+		
+		$Deliverable = trim($postData['Deliverable']);
+		$DocumentName = trim($postData['DocumentName']);
+		$DocumentType = trim($postData['DocumentType']);
+		$DeliveryDate = trim($postData['DeliveryDate']);
+		$SignoffDate = trim($postData['SignoffDate']);
+		$RepositoryLink = trim($postData['RepositoryLink']);
+		
+		oci_bind_by_name($queryParse, ':deliverable', $Deliverable);
+		oci_bind_by_name($queryParse, ':document_name', $DocumentName);
+		oci_bind_by_name($queryParse, ':document_type', $DocumentType);
+		oci_bind_by_name($queryParse, ':delivery_date', $DeliveryDate);
+		oci_bind_by_name($queryParse, ':sign_off_date', $SignoffDate);
+		oci_bind_by_name($queryParse, ':repo_link', $RepositoryLink);		
+		
 		$row = oci_execute($queryParse);
 	
 		if($row == 1)
@@ -511,17 +594,13 @@ class KPIRepository
 		
 		$query = "SELECT *
 				 FROM KPI_QUALITY_ESITMATION
-				 WHERE ACTIVE = 1";
-	
-		//if(empty($ID))
-		$query .= " AND MONTH = '" . $formattedcurrentMonth."'";
+				 WHERE ACTIVE = 1 AND MONTH = '" . $formattedcurrentMonth."'";
 	
 		if(!empty($ID))
 			$query .= " AND ID = ".$ID;
 
 		$query .= " ORDER BY ENGAGEMENT_DATE";
 
-		//echo $query;exit;
 	
 		$queryParse = oci_parse($conn, $query);
 		oci_execute($queryParse);
@@ -547,7 +626,6 @@ class KPIRepository
 			$i++;
 		}
 
-		//echo "<pre>";print_r($ProjectDetails);exit;
 		oci_free_statement($queryParse);
 		$this->oracle->closeConnection();
 		return $ProjectDetails;
@@ -558,13 +636,15 @@ class KPIRepository
 		$this->oracle->openConnection('KPIDASHBOARD');
 		$conn = $this->oracle->getConnection();
 				
-		//echo "<pre>";print_r($postData);
+		
 		$dStart = new \DateTime($postData['EngagementDate']);
 		$dEnd  = new \DateTime($postData['Gate1EstimationDeliverydate']);
 		$dDiff = $dStart->diff($dEnd);
 		$DateDiff = $dDiff->days;
-		$month=$postData['month'];
+		
+		$month = $postData['month'];
 		$formattedMonth = str_replace ( "-", "/", strtoupper ( trim ( $month ) ) );
+		
 		if(!empty(trim($postData['Gate1Estimation'])) && !empty(trim($postData['FinalEstimation']))){
 			$gate1_variance = ((trim($postData['FinalEstimation']) - trim($postData['Gate1Estimation'])) / trim($postData['Gate1Estimation']))*100;
 			$gate1_variance = number_format($gate1_variance, 2);
@@ -586,13 +666,13 @@ class KPIRepository
 		
 			
 			$query = "INSERT INTO KPI_QUALITY_ESITMATION 
-					(ID, PROJECT_NAME,MONTH, ENGAGEMENT_DATE, GATE1_ESTIMATION_DELIVERY_DATE, DIFF_DATES, 
-					GATE1_ESTIMATION, GATE2_ESTIMATION, FINAL_ESTIMATION, GATE1_VARIANCE, GATE2_VARIANCE, ADDED_BY,
-					ADDED_ON)
-					VALUES(QUALITYESTIMATION_ID.nextval, :project_name,'".$formattedMonth."', :engagement_date, :gate1_estimation_delivery_date,
-					'".$DateDiff."', :gate1_Estimation, :gate2_Estimation, :final_estimation, 
-					'".$gate1_variance."', '".$gate2_variance."', '".$userID."',
-					'".strtoupper(date('d/M/y'))."')";	
+						(ID, PROJECT_NAME,MONTH, ENGAGEMENT_DATE, GATE1_ESTIMATION_DELIVERY_DATE, DIFF_DATES, 
+						GATE1_ESTIMATION, GATE2_ESTIMATION, FINAL_ESTIMATION, GATE1_VARIANCE, GATE2_VARIANCE, ADDED_BY,
+						ADDED_ON)
+					VALUES(QUALITYESTIMATION_ID.nextval, :project_name,'".$formattedMonth."', :engagement_date,
+						  :gate1_estimation_delivery_date,
+						  '".$DateDiff."', :gate1_Estimation, :gate2_Estimation, :final_estimation, 
+					      :gate1_variance, :gate2_variance, '".$userID."', '".strtoupper(date('d/M/y'))."')";	
 			
 			//echo $query;exit;
 			
@@ -610,9 +690,10 @@ class KPIRepository
 			oci_bind_by_name($queryParse, ":gate1_estimation_delivery_date", $Gate1EstimationDeliverydate);
 			oci_bind_by_name($queryParse, ":gate1_Estimation", $Gate1Estimation);
 			oci_bind_by_name($queryParse, ":gate2_Estimation", $Gate2Estimation);
-			oci_bind_by_name($queryParse, ":final_estimation", $FinalEstimation);		
-			
-			$row = oci_execute($queryParse);
+			oci_bind_by_name($queryParse, ":final_estimation", $FinalEstimation);	
+			oci_bind_by_name($queryParse, ":gate1_variance", $gate1_variance);
+			oci_bind_by_name($queryParse, ":gate2_variance", $gate2_variance);				
+	
 				
 		}
 		
@@ -627,13 +708,12 @@ class KPIRepository
 					GATE1_ESTIMATION = :gate1_Estimation,
 					GATE2_ESTIMATION = :gate2_Estimation,
 					FINAL_ESTIMATION = :final_estimation,
-					GATE1_VARIANCE = '".$gate1_variance."',
-					GATE2_VARIANCE = '".$gate2_variance."',
+					GATE1_VARIANCE = :gate1_variance,
+					GATE2_VARIANCE = :gate2_variance,
 					EDITED_BY = '".$userID."',
 					EDITED_ON = '".strtoupper(date('d/M/y'))."'							
-					WHERE ID = ".$ID;
-				
-			//echo $query;exit;
+					WHERE ID = ".$ID;				
+		
 			$queryParse = oci_parse($conn, $query);			
 			
 			$EngagementDate = trim($postData['EngagementDate']);
@@ -646,11 +726,12 @@ class KPIRepository
 			oci_bind_by_name($queryParse, ':gate1_Estimation', $Gate1Estimation);
 			oci_bind_by_name($queryParse, ':gate2_Estimation', $Gate2Estimation);
 			oci_bind_by_name($queryParse, ':final_estimation', $FinalEstimation);
-			$row = oci_execute($queryParse);
+			oci_bind_by_name($queryParse, ":gate1_variance", $gate1_variance);
+			oci_bind_by_name($queryParse, ":gate2_variance", $gate2_variance);		
 				
 		}	
 		
-		//echo $row;exit;
+		$row = oci_execute($queryParse);
 		
 		if($row == 1)
 			$response = 'Details Saved !!!';
@@ -728,6 +809,7 @@ class KPIRepository
 				ST_AUTOMATION 
 				FROM KPI_PROJECTS 
 				WHERE ACTIVE = 1 
+				AND ST_AUTOMATION_APPLICABLE = 'Yes'
 				AND TO_CHAR(ESTIMATED_PROD_LIVE_DATE, 'MON/YY') LIKE '%" . $currentMonth . "%'";	
 
 		
@@ -742,7 +824,6 @@ class KPIRepository
 			$stAutomationEntity->setSTAutomatedTestCases ( $row ['NO_OF_ST_AUTOMATED_TEST_CASES'] );
 			$stAutomationEntity->setSTTotalTestCases ( $row ['TOTAL_NO_OF_ST_TEST_CASES'] );			
 			$stAutomationEntity->setSTAutomation( $row ['ST_AUTOMATION'] );
-
 				
 			$STAutomation [] = $stAutomationEntity;
 		}
@@ -772,8 +853,8 @@ class KPIRepository
 							ACTUAL_PROD_LIVE_DATE = '" . $formattedDate . "'
 							WHERE PROJECTID = " . $projectID;
 				}
-			}
-				
+			}			
+			
 			$queryParse = oci_parse ( $conn, $query );
 			$row = oci_execute ( $queryParse );
 			if ($row == 1) {
@@ -836,45 +917,79 @@ public function updateSTAutomation($newValue, $projectID, $action) {
 			oci_execute ( $queryParse );
 			$row = oci_fetch_array ( $queryParse );
 			
-			if ($action == 'stAutomatedTestCases') {
+			$totalSTTestCases = '';
+			$automatedSTTestCases = '';
+			$formattedValue = trim($formattedValue);
+			
+			if ($action == 'stAutomatedTestCases') {				
 				
-				if($row ['TOTAL_NO_OF_ST_TEST_CASES'] != "" && $row ['TOTAL_NO_OF_ST_TEST_CASES'] != 0){					
-					$stAutomation = round((($formattedValue / $row ['TOTAL_NO_OF_ST_TEST_CASES'] ) * 100), 2);
-				}
-				elseif($row ['TOTAL_NO_OF_ST_TEST_CASES'] == 0){
-					$stAutomation = 0;
+				if($formattedValue == 'na' || $formattedValue == 'n/a' ||
+				   $formattedValue == 'NA' || $formattedValue == 'N/A' ) {
+					
+					$stAutomation = 'N/A';
+					$formattedValue = 'N/A';
+					$totalSTTestCases = 'N/A';
 				}
 				else {					
-					$stAutomation = '';
-				}
-								
+					if($formattedValue == ''){
+						$stAutomation = '';
+					} else {
+						if($row ['TOTAL_NO_OF_ST_TEST_CASES'] != "" && $row ['TOTAL_NO_OF_ST_TEST_CASES'] != 0){					
+							$stAutomation = round((($formattedValue / $row ['TOTAL_NO_OF_ST_TEST_CASES'] ) * 100), 2);
+						}
+						else if($row ['TOTAL_NO_OF_ST_TEST_CASES'] == 0){
+							$stAutomation = 0;
+						}
+						else {					
+							$stAutomation = '';
+						}
+					}
+				}								
 				
 				$query = "UPDATE KPI_PROJECTS SET 
 						NO_OF_ST_AUTOMATED_TEST_CASES = '" . $formattedValue . "', 
-						ST_AUTOMATION = '" . $stAutomation . "'  
-						WHERE PROJECTID = ".$projectID;
+						ST_AUTOMATION = '" . $stAutomation . "'";
+				
+				if(!empty($totalSTTestCases))
+					$query .= ", TOTAL_NO_OF_ST_TEST_CASES = '".$totalSTTestCases."'";
+				
+				$query .= " WHERE PROJECTID = ".$projectID;
 				
 			} else if ($action == 'stTotalTestCases') {
 				
-				if($formattedValue != "" && $formattedValue != 0){					
-					$stAutomation = round((($row ['NO_OF_ST_AUTOMATED_TEST_CASES'] / $formattedValue ) * 100), 2);					
+				if($formattedValue == 'na' || $formattedValue == 'n/a' ||
+				   $formattedValue == 'NA' || $formattedValue == 'N/A' ) {
+				   	$stAutomation = 'N/A';
+					$formattedValue = 'N/A';
+					$automatedSTTestCases = 'N/A';
 				}
-				elseif($formattedValue == 0){
-					$stAutomation = 0;
-				}
-				else {					
-					$stAutomation = '';
-				}	
-				
+				else {
+					if($formattedValue == ''){
+						$stAutomation = '';
+					} else {
+						if($formattedValue != "" && $formattedValue != 0){					
+							$stAutomation = round((($row ['NO_OF_ST_AUTOMATED_TEST_CASES'] / $formattedValue ) * 100), 2);					
+						}
+						elseif($formattedValue == 0){
+							$stAutomation = 0;
+						}
+						else {					
+							$stAutomation = '';
+						}
+					}
+				}				
 				
 				$query = "UPDATE KPI_PROJECTS SET 
 						TOTAL_NO_OF_ST_TEST_CASES = '" . $formattedValue . "',
-						ST_AUTOMATION = '" . $stAutomation . "' 
-						WHERE PROJECTID = " . $projectID;
-			}
+						ST_AUTOMATION = '" . $stAutomation . "'";
+				
+				if(!empty($automatedSTTestCases))
+					$query .= ", NO_OF_ST_AUTOMATED_TEST_CASES = '".$automatedSTTestCases."'";
+				
+				$query .= "	WHERE PROJECTID = " . $projectID;
+			}			
 			
-			
-			//echo $query;exit;
+		
 			$queryParse = oci_parse ( $conn, $query );
 			$row = oci_execute ( $queryParse );
 			if ($row == 1) {
@@ -994,7 +1109,7 @@ public function updateSTAutomation($newValue, $projectID, $action) {
 		
 		$prodTestAccountsEntitys = array ();
 		$query = "SELECT ROW_ID, MONTH_PROD_TEST_ACCOUNTS,TOTAL_ACCOUNTS,CONSOLIDATED_TOTAL,PRODUCTION_TEST_ACCOUNTS 
-				FROM KPI_PROD_TEST_ACCOUNTS";
+				FROM KPI_PROD_TEST_ACCOUNTS WHERE ACTIVE = 1";
 
 		$queryParse = oci_parse ( $conn, $query );
 		oci_execute ( $queryParse );
@@ -1014,6 +1129,38 @@ public function updateSTAutomation($newValue, $projectID, $action) {
 		return $prodTestAccountsEntitys;
 	
 	}
+	
+	public  function deleteProdTestAccData($ID){
+		$this->oracle->openConnection('KPIDASHBOARD');
+		$conn = $this->oracle->getConnection();
+		$response = array();
+		if(!empty($ID)){
+				
+			$query = "UPDATE KPI_PROD_TEST_ACCOUNTS SET ACTIVE = 0 WHERE ID = ".$ID;
+			$queryParse = oci_parse($conn, $query);
+				
+			//echo $query;exit;
+			$row = oci_execute($queryParse);
+	
+			if($row == 1)
+				$response['status'] = 'Record Deleted !!!';
+				else
+					$response['status'] = 'Some problem occurred, pls try again !!!';
+	
+					oci_free_statement($queryParse);
+					$this->oracle->closeConnection();
+						
+		}
+		else {
+			$response['status'] = 'Some problem, Please select the process again and click on delete !!!';
+		}
+	
+		return $response;
+	}
+	
+	
+	
+	
 	public function viewProdTestAccountsForEdit($month) {
 		
 		$this->oracle->openConnection ( 'KPIDASHBOARD' );	
@@ -1172,7 +1319,65 @@ public function updateSTAutomation($newValue, $projectID, $action) {
 		}
 	}
 	
+	public  function deleteQualityOfEstimation($ID){
+		$this->oracle->openConnection('KPIDASHBOARD');
+		$conn = $this->oracle->getConnection();
+		$response = array();
+		if(!empty($ID)){
+			
+			$query = "UPDATE KPI_QUALITY_ESITMATION SET ACTIVE = 0 WHERE ID = ".$ID;
+			$queryParse = oci_parse($conn, $query);
+			
+			//echo $query;exit;
+			$row = oci_execute($queryParse);
 	
+			if($row == 1)
+				$response['status'] = 'Record Deleted !!!';
+				else
+			$response['status'] = 'Some problem occurred, pls try again !!!';
+	
+			oci_free_statement($queryParse);
+			$this->oracle->closeConnection();
+			
+		}
+		else {
+			$response['status'] = 'Some problem, Please select the process again and click on delete !!!';
+		}
+	
+		return $response;
+	}
+	
+	public function deleteDocument($ID){
+
+		$this->oracle->openConnection('KPIDASHBOARD');
+		$conn = $this->oracle->getConnection();
+		$response = array();
+		
+		if(!empty($ID)){
+			//$query = "UPDATE KPI_DOCUMENTS SET ACTIVE = 0 WHERE DOCUMENT_ID = ".$ID;
+			
+			$query = "DELETE FROM KPI_DOCUMENTS WHERE DOCUMENT_ID = ".$ID;
+			$queryParse = oci_parse($conn, $query);
+			
+			//echo $query;exit;
+			$row = oci_execute($queryParse);
+				
+			if($row == 1)
+				$response['status'] = 'Record Deleted !!!';
+			else
+				$response['status'] = 'Some problem occurred, pls try again !!!';
+		
+			oci_free_statement($queryParse);
+			$this->oracle->closeConnection();
+			
+		}
+		else {
+			$response['status'] = 'Some problem, Please select the process again and click on delete !!!';
+		}
+		
+		return $response;
+				
+	}
 	
 	
 }

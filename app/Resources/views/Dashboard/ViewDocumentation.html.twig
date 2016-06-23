@@ -1,12 +1,12 @@
 <div class="text-primary pull-left">This result shows data for <strong>{{ Month }}</strong>.</div><br>
 <div class="text-primary"><strong>KPI Definition</strong> - {{ KPIData['SLA_DESC'] }}</div>
-<div class="text-primary">Target for this KPI <strong>( {{ KPIData['OPERATOR'] }}{{ KPIData['SLA_VALUE'] }}% )</strong></div><br>
+<div class="text-primary">Target for this KPI <strong>( {{ KPIData['OPERATOR'] }}{{ KPIData['SLA_VALUE'] }}% )</strong></div>
+<div class="text-primary">(Note : Mouse over on red RAG can show the reason.)</div><br>
 <div class="row col-md-10">		
 	<table class="table-bordered table-condensed" id="dataTable">
 		<thead>
 			<tr>					
-				<th>No.</th>
-				<th>Deliverable</th>
+				<th>No.</th>			
 				<th>Projectname</th>				
 				<th>Document Name</th>
 				<th>For Testing</th>
@@ -25,8 +25,7 @@
 					{% if resultArr|length > 0 %}
 						{% for row in resultArr %}
 							<tr>
-							<td>{{ loop.index }}</td>	
-							<td>{{ row['DELIVERABLE'] }}</td>
+							<td>{{ loop.index }}</td>
 							<td>{{ row['PROJECTNAME'] }}</td>							
 							<td>{{ row['DOCUMENT_NAME'] }}</td>
 							<td>{% if row['IS_TESTING'] == 1 %}Yes{% endif %}</td>
@@ -34,7 +33,7 @@
 							<td>{{ row['DELIVERY_DATE'] }}</td>
 							<td>{{ row['SIGN_OFF_DATE'] }}</td>
 							<td>{{ row['REPOSITORY_LINK'] }}</td>
-							<td>
+							<td {% if row['RedReason'] is defined and row['RedReason'] is not empty %}style="cursor:help" data-toggle="tooltip" data-html="true" title="{{ row['RedReason'] }}"{% endif %} >
 							{% if row['RAG'] is defined and row['RAG'] == 'green' %}
 								<img src="{{ asset("images/green_RAG.png") }}">
 							{% elseif row['RAG'] is defined and row['RAG'] == 'red' %}

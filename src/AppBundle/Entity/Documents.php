@@ -14,6 +14,11 @@ class Documents
 	private $projectid;
 	
 	/**
+	 * @var int
+	 */
+	private $documentid;
+	
+	/**
 	 * @var string
 	 */
 	private $projectname;
@@ -53,6 +58,11 @@ class Documents
 	 */
 	private $repository_link;	
 	
+	/**
+	 * @var string
+	 */
+	private $document_month;
+	
 	
 
 	public function setProjectID($projectid){
@@ -61,6 +71,15 @@ class Documents
 	
 	public function getProjectID(){
 		return $this->projectid;
+	}
+	
+
+	public function setDocumentID($documentid){
+		$this->documentid = $documentid;
+	}
+	
+	public function getDocumentID(){
+		return $this->documentid;
 	}
 	
 	public function setProjectName($projectname){
@@ -126,5 +145,15 @@ class Documents
 	public function getDeliverable(){
 		return $this->deliverable;
 	}
+	
+	public function setDocumentMonth($docmonth){
+		$this->document_month = $docmonth;
+	}
+	
+	public function getDocumentMonth(){
+		return $this->document_month;
+	}
+	
+	
 	
 }

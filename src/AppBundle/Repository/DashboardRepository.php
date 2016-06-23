@@ -674,6 +674,7 @@ class DashboardRepository
 						 			}
 						 			
 							// } 
+						 	$KPITotals['Reason'] = '';
 						} else {
 							
 							$KPITotals['Project'] = $ProjectResult[$i]['PROJECTNAME'];
@@ -685,8 +686,9 @@ class DashboardRepository
 						 	$KPITotals['NumeratorValue'] = 'N/A';
 						 	$KPITotals['DenominatorValue'] = 'N/A';
 						 	$KPITotals['Cause'] = 'N/A';
-						 	$KPITotals['Action'] = 'N/A';	
+						 	$KPITotals['Action'] = 'N/A';
 						 	$KPITotals['Formula'] = 'N/A';
+						 	$KPITotals['Reason'] = 'Project is not within this KPI Scope.';
 						}
 
 						 		
@@ -842,7 +844,7 @@ class DashboardRepository
 			$KPISLA = $KPIData['SLA_VALUE'];			
 			
 			$query = "SELECT PROJECTID, PROJECTNAME, NO_OF_ST_AUTOMATED_TEST_CASES, TOTAL_NO_OF_ST_TEST_CASES, 
-					ST_AUTOMATION, SCOPE 
+					ST_AUTOMATION, SCOPE, ST_AUTOMATION_APPLICABLE 
 					FROM KPI_PROJECTS 
 					WHERE ACTIVE = 1 AND TO_CHAR(ESTIMATED_PROD_LIVE_DATE, 'MON/YY') LIKE '%".$Month."%' ";
 		
@@ -859,58 +861,127 @@ class DashboardRepository
 		
 				if($row['SCOPE'] == 'Dev' || $row['SCOPE'] == 'Both' ){
 					
-					$STAutoTemp['NO_OF_ST_AUTOMATED_TEST_CASES'] = $row['NO_OF_ST_AUTOMATED_TEST_CASES'];
-					$STAutoTemp['TOTAL_NO_OF_ST_TEST_CASES'] = $row['TOTAL_NO_OF_ST_TEST_CASES'];
-					
-					/*  Get Cause/Action for KPI for this Project` for this Month */
-					
-					$query1 = "SELECT CAUSE, ACTION
-					FROM KPI_CAUSE_ACTION
-					WHERE KPI_ID = ".$KPID."
-					AND PROJECT_NAME = '".$row ['PROJECTNAME']."'
-					AND MONTHLY IS NULL";
-					
-					$queryParse1 = oci_parse ( $conn, $query1 );
-					oci_execute ( $queryParse1 );
-					$resultCauseAction = oci_fetch_array($queryParse1);
-					
-					$STAutoTemp['CAUSE'] = $resultCauseAction['CAUSE'];
-					$STAutoTemp['ACTION'] = $resultCauseAction['ACTION'];
+					if($row['ST_AUTOMATION_APPLICABLE'] == 'Yes'){
+						$STAutoTemp['NO_OF_ST_AUTOMATED_TEST_CASES'] = $row['NO_OF_ST_AUTOMATED_TEST_CASES'];
+						$STAutoTemp['TOTAL_NO_OF_ST_TEST_CASES'] = $row['TOTAL_NO_OF_ST_TEST_CASES'];
+							
+						/*  Get Cause/Action for KPI for this Project` for this Month */
+							
+						$query1 = "SELECT CAUSE, ACTION
+							FROM KPI_CAUSE_ACTION
+							WHERE KPI_ID = ".$KPID."
+							AND PROJECT_NAME = '".$row ['PROJECTNAME']."'
+							AND MONTHLY IS NULL";
+							
+						$queryParse1 = oci_parse ( $conn, $query1 );
+						oci_execute ( $queryParse1 );
+						$resultCauseAction = oci_fetch_array($queryParse1);
+							
+						$STAutoTemp['CAUSE'] = $resultCauseAction['CAUSE'];
+						$STAutoTemp['ACTION'] = $resultCauseAction['ACTION'];
 						
-					/* */
-					
-					$STAutoTemp['ST_AUTOMATION'] = $row['ST_AUTOMATION'];
-					
-					
-					
-					if(!empty($STAutoTemp['TOTAL_NO_OF_ST_TEST_CASES'])){
+						/* */
+							
+						$STAutoTemp['ST_AUTOMATION'] = $row['ST_AUTOMATION'];
 						
-						$NoofAutomatedTCArr[] = $STAutoTemp['NO_OF_ST_AUTOMATED_TEST_CASES'];
-						$TotalAutomatecTCArr[] = $STAutoTemp['TOTAL_NO_OF_ST_TEST_CASES'];
+						if(!empty($STAutoTemp['TOTAL_NO_OF_ST_TEST_CASES'])){
+								
+							$NoofAutomatedTCArr[] = $STAutoTemp['NO_OF_ST_AUTOMATED_TEST_CASES'];
+							$TotalAutomatecTCArr[] = $STAutoTemp['TOTAL_NO_OF_ST_TEST_CASES'];
+								
+							if($KPIOperator == '>='){
+								if($STAutoTemp['ST_AUTOMATION'] >= $KPISLA){
+									$STAutoTemp['RAG'] = 'green';
+								}
+								else {
+									$STAutoTemp['RAG'] = 'red';
+								}
+							}
+							else if($KPIOperator == '<='){
+								if($STAutoTemp['ST_AUTOMATION'] <= $KPISLA){
+									$STAutoTemp['RAG'] = 'green';
+								}
+								else {
+									$STAutoTemp['RAG'] = 'red';
+								}
+							}
+								
+						} else
+							$STAutoTemp['RAG'] = 'yellow';
 						
-						if($KPIOperator == '>='){
-							if($STAutoTemp['ST_AUTOMATION'] >= $KPISLA){
-								$STAutoTemp['RAG'] = 'green';
-							}
-							else { 
-								$STAutoTemp['RAG'] = 'red';
-							}
-						}
-						else if($KPIOperator == '<='){
-							if($STAutoTemp['ST_AUTOMATION'] <= $KPISLA){
-								$STAutoTemp['RAG'] = 'green';
-							}
-							else {
-								$STAutoTemp['RAG'] = 'red';
-							}
-						}
+					} elseif ($row['ST_AUTOMATION_APPLICABLE'] == 'No') {						
+
+						$STAutoTemp['NO_OF_ST_AUTOMATED_TEST_CASES'] = 'N/A';
+						$STAutoTemp['TOTAL_NO_OF_ST_TEST_CASES'] = 'N/A';
+						$STAutoTemp['ST_AUTOMATION'] = 'N/A';
+						$STAutoTemp['RAG'] = 'n/a';
 						
-					} else
+					} else {
 						$STAutoTemp['RAG'] = 'yellow';
+						$STAutoTemp['ST_AUTOMATION'] = '';
+						$STAutoTemp['NO_OF_ST_AUTOMATED_TEST_CASES'] = '';
+						$STAutoTemp['TOTAL_NO_OF_ST_TEST_CASES'] = '';
+					}
+					
+					
+					
+					
+// 					$STAutoTemp['NO_OF_ST_AUTOMATED_TEST_CASES'] = $row['NO_OF_ST_AUTOMATED_TEST_CASES'];
+// 					$STAutoTemp['TOTAL_NO_OF_ST_TEST_CASES'] = $row['TOTAL_NO_OF_ST_TEST_CASES'];
+					
+// 					/*  Get Cause/Action for KPI for this Project` for this Month */
+					
+// 					$query1 = "SELECT CAUSE, ACTION
+// 					FROM KPI_CAUSE_ACTION
+// 					WHERE KPI_ID = ".$KPID."
+// 					AND PROJECT_NAME = '".$row ['PROJECTNAME']."'
+// 					AND MONTHLY IS NULL";
+					
+// 					$queryParse1 = oci_parse ( $conn, $query1 );
+// 					oci_execute ( $queryParse1 );
+// 					$resultCauseAction = oci_fetch_array($queryParse1);
+					
+// 					$STAutoTemp['CAUSE'] = $resultCauseAction['CAUSE'];
+// 					$STAutoTemp['ACTION'] = $resultCauseAction['ACTION'];
+						
+// 					/* */
+					
+// 					$STAutoTemp['ST_AUTOMATION'] = $row['ST_AUTOMATION'];
+					
+// 					if($STAutoTemp['ST_AUTOMATION'] == 'N/A')
+// 						$STAutoTemp['RAG'] = 'N/A';
+// 					else {
+					
+// 						if(!empty($STAutoTemp['TOTAL_NO_OF_ST_TEST_CASES'])){
+							
+// 							$NoofAutomatedTCArr[] = $STAutoTemp['NO_OF_ST_AUTOMATED_TEST_CASES'];
+// 							$TotalAutomatecTCArr[] = $STAutoTemp['TOTAL_NO_OF_ST_TEST_CASES'];
+							
+// 							if($KPIOperator == '>='){
+// 								if($STAutoTemp['ST_AUTOMATION'] >= $KPISLA){
+// 									$STAutoTemp['RAG'] = 'green';
+// 								}
+// 								else { 
+// 									$STAutoTemp['RAG'] = 'red';
+// 								}
+// 							}
+// 							else if($KPIOperator == '<='){
+// 								if($STAutoTemp['ST_AUTOMATION'] <= $KPISLA){
+// 									$STAutoTemp['RAG'] = 'green';
+// 								}
+// 								else {
+// 									$STAutoTemp['RAG'] = 'red';
+// 								}
+// 							}
+							
+// 						} else
+// 							$STAutoTemp['RAG'] = 'yellow';
+// 					}
 					
 					$dataCount++;
 					
-				} else {
+				}				
+				else {
 					$STAutoTemp['NO_OF_ST_AUTOMATED_TEST_CASES'] = 'N/A';
 					$STAutoTemp['TOTAL_NO_OF_ST_TEST_CASES'] = 'N/A';
 					$STAutoTemp['ST_AUTOMATION'] = 'N/A';
@@ -1034,12 +1105,19 @@ class DashboardRepository
 			$anytestingdoc = 0;
 			$dataCount = 0;
 		
+			/*
 			$query = "SELECT PROJECTID, PROJECTNAME, SCOPE, DELIVERABLE, DOCUMENT_NAME, DOCUMENT_TYPE, IS_TESTING, 
 				 DELIVERY_DATE, SIGN_OFF_DATE, REPOSITORY_LINK 
 				 FROM KPI_PROJECTS 
 				 WHERE (TO_CHAR(DELIVERY_DATE, 'MON/YY') LIKE '%".$Month."%'
 				 OR TO_CHAR(SIGN_OFF_DATE, 'MON/YY') LIKE '%".$Month."%')
 				 AND ACTIVE = 1 AND DELIVERABLE IS NOT NULL";
+			*/
+			
+			$query = "SELECT DP.PROJECTID, DP.PROJECTNAME, D.* FROM
+				KPI_DOCUMENT_PROJECTS DP, KPI_DOCUMENTS D 
+				WHERE MONTH = '".$Month."' 
+				AND DP.PROJECTID = D.PROJECTID AND D.ACTIVE = 1 AND DP.ACTIVE = 1";
 		
 			//echo $query;exit;
 			$queryParse = oci_parse($conn, $query);
@@ -1080,16 +1158,20 @@ class DashboardRepository
 				/* Knowledge Management KPI */
 				
 				if($k == 1){
-					$nominator++;
+					//$nominator++;
+					$denominator++;
 						
 					if($DocumentTemp['REPOSITORY_LINK'] != ""){
-						$denominator++;
+						//$denominator++;
+						$nominator++;
 						$DocumentTemp['RAG'] = 'green';
+						$DocumentTemp['RedReason'] = '';
 					} else {
-							$DocumentTemp['RAG'] = 'red';
+						$DocumentTemp['RAG'] = 'red';
+						$DocumentTemp['RedReason'] = 'Repository Link has not been provided !!!';
 					}
 					
-					$DocumentTemp['SCOPE'] = $row['SCOPE'];
+					//$DocumentTemp['SCOPE'] = $row['SCOPE'];
 				} 
 				
 				/* Documentation KPI */
@@ -1100,20 +1182,26 @@ class DashboardRepository
 						
 						if($DocumentTemp['SIGN_OFF_DATE'] != ""){
 							$nominator++;
+							$DocumentTemp['RAG'] = 'green';
+							$DocumentTemp['RedReason'] = '';
+						} else {
+							$DocumentTemp['RAG'] = 'red';
+							$DocumentTemp['RedReason'] = 'Sign off date has not been provided !!!';
 						}
 					
 						if($DocumentTemp['REPOSITORY_LINK'] != ""){
 							$denominator++;
-							$DocumentTemp['RAG'] = 'green';
-						} else {
-							$DocumentTemp['RAG'] = 'red';
+							
 						}
 					
 						$anytestingdoc++;
 						
 					} else {
 						$DocumentTemp['RAG'] = 'green';
+						$DocumentTemp['RedReason'] = '';
 					}
+					
+					/*
 					
 					if($row['SCOPE'] == 'Testing' || $row['SCOPE'] == 'Both' ){						
 						$DocumentTemp['SCOPE'] = $row['SCOPE'];
@@ -1121,6 +1209,8 @@ class DashboardRepository
 					} else {
 						$DocumentTemp['SCOPE'] = 'N/A ('.$row['SCOPE'].') '; 
 					}
+					
+					*/
 				}
 					
 				/* */		
@@ -1141,15 +1231,25 @@ class DashboardRepository
 		//echo "final==".$nominator."==".$denominator;
 		//echo "<pre>";print_r($DocumentResult);//exit;
 		
+		//echo $nominator."=".$denominator;
 		if($Monthly == 1){
 			if($dataCount > 0){
-				if($anytestingdoc != 0){					
+				/* Knowledge Management */
+				if($k == 1){
+					if($denominator != 0){
+						$MonthlyResult = number_format((($nominator / $denominator) * 100), 2)."%";
+					} else
+						$MonthlyResult = '0%';
+				}
+				else {
+					if($anytestingdoc != 0){					
 						if($denominator != 0){
 							$MonthlyResult = number_format((($nominator / $denominator) * 100), 2)."%";
 						} else
 							$MonthlyResult = '0%';
-				} else 
-					$MonthlyResult = '100.00%';
+					} else 
+						$MonthlyResult = '100.00%';
+				}
 			} else
 				$MonthlyResult = '100.00%';
 				
@@ -1180,8 +1280,10 @@ class DashboardRepository
 		
 			$query = "SELECT * FROM KPI_QUALITY_ESITMATION
 					WHERE ACTIVE = 1
-					AND (TO_CHAR(ENGAGEMENT_DATE, 'MON/YY') LIKE '%".$Month."%'
-					OR TO_CHAR(GATE1_ESTIMATION_DELIVERY_DATE, 'MON/YY') LIKE '%".$Month."%') ORDER BY ENGAGEMENT_DATE";		
+					AND MONTH = '".$Month."'
+					ORDER BY ENGAGEMENT_DATE";	
+		
+			//echo $query;exit;
 			
 			$queryParse = oci_parse($conn, $query);
 			oci_execute($queryParse);		
@@ -1229,13 +1331,19 @@ class DashboardRepository
 						$GateVariance = '0';
 					}
 					
-					if($GateVariance == 1)
+					if($GateVariance == 1) {
 						$EstimationTemp['RAG'] = 'green';
-					else
-						$EstimationTemp['RAG'] = 'red';					
+						$EstimationTemp['RedReason'] = '';
+					}
+					else {
+						$EstimationTemp['RAG'] = 'red';
+						$EstimationTemp['RedReason'] = 'Either Gate1Variance or Gate2Variance does not meet SLA !!!';
+					}
+					
 				} else {
 					$EstimationTemp['RAG'] = 'green';
 					$EstimationTemp['Actual'] = 'green';
+					$EstimationTemp['RedReason'] = '';
 				}								
 				
 				$EstimationResultTemp[] = $EstimationTemp;
@@ -1282,14 +1390,21 @@ class DashboardRepository
 			
 			$nominator = 0;
 			$denominator = 0;
-			$dataCount = 0;
+			//$dataCount = 0;
 			
+			/*
 			$query = "SELECT * FROM KPI_INTAKE_PROCESS 
 					WHERE ACTIVE = 1 
 					AND (TO_CHAR(REQUEST_DATE, 'MON/YY') LIKE '%".$Month."%'
 					OR TO_CHAR(SUBMISSION_DATE, 'MON/YY') LIKE '%".$Month."%')
 					ORDER BY PROJECT_NAME, PROGRAMME";
-		
+			*/
+			
+			$query = "SELECT * FROM KPI_INTAKE_PROCESS
+					WHERE ACTIVE = 1
+					AND MONTH = '".$Month."'					
+					ORDER BY PROJECT_NAME, PROGRAMME";
+			
 			$queryParse = oci_parse($conn, $query);
 			oci_execute($queryParse);
 	
@@ -1340,7 +1455,7 @@ class DashboardRepository
 					
 				$ProcessResultTemp[] = $ProcessTemp;				
 				$denominator++;
-				$dataCount++;
+				//$dataCount++;
 			}
 			
 			$ProcessResult[$Month] = $ProcessResultTemp;			
@@ -1350,8 +1465,9 @@ class DashboardRepository
 			$ProcessResult[] = array();
 		
 		//echo "<pre>";print_r($ProcessResult);exit;
+		//echo $nominator."==".$denominator;//exit;
 		if($Monthly == 1){
-				if($dataCount > 0){
+				if($denominator > 0){
 					if($denominator != 0){
 						$MonthlyResult = ($nominator/$denominator) * 100;
 						$MonthlyResult = number_format($MonthlyResult, 2)."%";
